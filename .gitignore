@@ -17,3 +17,4 @@ openoliver/openoliver/Debug/openoliver.tlog/cl.command.1.tlog
 *.idb
 *.filters
 *.vcxproj
+*.obj
