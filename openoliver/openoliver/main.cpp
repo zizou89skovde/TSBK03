@@ -5,7 +5,7 @@
 #include <windows.h>
 #include <GL/glew.h>
 #include <GL/glut.h>
-#include "freeglut_ext.h"
+#include <GL/freeglut_ext.h>
 #include "common/GL_utilities.h"
 #include <direct.h>
 #define GetCurrentDir _getcwd

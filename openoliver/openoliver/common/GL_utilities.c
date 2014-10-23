@@ -26,9 +26,10 @@ char* readFile(char *file)
 	FILE *fptr = NULL;
 	long length;
 	char *buf;
-	int errNum;
-	//fptr = fopen(file, "rb"); /* Open file for reading */
-	errNum = fopen_s(&fptr, file, "rb"); /* Open file for reading */
+
+	fptr = fopen(file, "rb"); /* Open file for reading */
+    //int errNum;
+	//errNum = fopen_s(&fptr, file, "rb"); /* Open file for reading */
 	if (!fptr) /* Return NULL on failure */
 		return NULL;
 	fseek(fptr, 0, SEEK_END); /* Seek to the end of the file */
@@ -38,7 +39,7 @@ char* readFile(char *file)
 	fread(buf, length, 1, fptr); /* Read the contents of the file in to the buffer */
 	fclose(fptr); /* Close the file */
 	buf[length] = 0; /* Null terminator */
-	
+
 	return buf; /* Return the buffer */
 }
 
@@ -91,7 +92,7 @@ GLuint compileShaders(const char *vs, const char *fs, const char *gs, const char
 								const char *vfn, const char *ffn, const char *gfn, const char *tcfn, const char *tefn)
 {
 	GLuint v,f,g,tc,te,p;
-	
+
 	v = glCreateShader(GL_VERTEX_SHADER);
 	f = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(v, 1, &vs, NULL);
@@ -117,7 +118,7 @@ GLuint compileShaders(const char *vs, const char *fs, const char *gs, const char
 		glShaderSource(te, 1, &tes, NULL);
 		glCompileShader(te);
 	}
-#endif	
+#endif
 	p = glCreateProgram();
 	glAttachShader(p,v);
 	glAttachShader(p,f);
@@ -129,15 +130,15 @@ GLuint compileShaders(const char *vs, const char *fs, const char *gs, const char
 		glAttachShader(p,te);
 	glLinkProgram(p);
 	glUseProgram(p);
-	
+
 	printShaderInfoLog(v, vfn);
 	printShaderInfoLog(f, ffn);
 	if (gs != NULL)	printShaderInfoLog(g, gfn);
 	if (tcs != NULL)	printShaderInfoLog(tc, tcfn);
 	if (tes != NULL)	printShaderInfoLog(te, tefn);
-	
+
 	printProgramInfoLog(p, vfn, ffn, gfn, tcfn, tefn);
-	
+
 	return p;
 }
 
@@ -158,7 +159,7 @@ GLuint loadShadersGT(const char *vertFileName, const char *fragFileName, const c
 {
 	char *vs, *fs, *gs, *tcs, *tes;
 	GLuint p = 0;
-	
+
 	vs = readFile((char *)vertFileName);
 	fs = readFile((char *)fragFileName);
 	if (geomFileName != NULL) {
@@ -350,7 +351,7 @@ FBOstruct *initFBO2(int width, int height, int int_method, int create_depthimage
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
       glBindTexture(GL_TEXTURE_2D, 0);
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, fbo->depth, 0);	
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, fbo->depth, 0);
       fprintf(stderr, "depthtexture: %i\n",fbo->depth);
     }
 
@@ -396,7 +397,7 @@ void useFBO(FBOstruct *out, FBOstruct *in1, FBOstruct *in2)
 			lasth = viewport[3] - viewport[1];
 		}
 	}
-	
+
 	if (out != 0L)
 		glViewport(0, 0, out->width, out->height);
 	else

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Debug" />
+	<File name="..\openoliver\openoliver\common\GL_utilities.c" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="786" topLine="27" />
+		</Cursor>
+		<Folding>
+			<Collapse line="66" />
+		</Folding>
+	</File>
+	<File name="..\openoliver\openoliver\common\LoadTGA.h" open="1" top="1" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="624" topLine="9" />
+		</Cursor>
+	</File>
+	<File name="..\openoliver\openoliver\common\LoadTGA.c" open="1" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="7862" topLine="178" />
+		</Cursor>
+	</File>
+	<File name="..\openoliver\openoliver\main.cpp" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="360" topLine="6" />
+		</Cursor>
+	</File>
+	<File name="..\openoliver\openoliver\common\GL_utilities.h" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="276" topLine="0" />
+		</Cursor>
+	</File>
+</CodeBlocks_layout_file>

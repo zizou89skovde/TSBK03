@@ -34,7 +34,9 @@
 #include "VectorUtils3.h"
 #include "GL_utilities.h"
 #include "loadobj.h"
-#include "zpr.h"
+
+// DONT NID THAT SHIET
+//#include "zpr.h"
 
 // initial width and heights
 #define W 512
@@ -116,7 +118,7 @@ void OnTimer(int value)
 void display(void)
 {
 	mat4 vm2;
-	
+
 	// This function is called whenever it is time to render
 	//  a new frame; due to the idle()-function below, this
 	//  function will get called several times per second
