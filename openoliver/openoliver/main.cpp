@@ -8,6 +8,8 @@
 #include <GL/freeglut_ext.h>
 #include "common/GL_utilities.h"
 #include <direct.h>
+#include "ModelObject.h"
+#include "LoadTGA.h"
 #define GetCurrentDir _getcwd
 // initial width and heights
 #define W 512
@@ -17,7 +19,12 @@ void OnTimer(int value);
 
 //----------------------Globals-------------------------------------------------
 GLuint phongshader = 0;
+mat4 projectionMatrix;
+mat4 viewMatrix;
 //-------------------------------------------------------------------------------------
+// Our pinefresh superimba class
+ModelObject * modelObject;
+
 
 void init(void)
 {
@@ -28,17 +35,28 @@ void init(void)
 	glClearDepth(1.0);
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
-	//printError("GL inits");
-	char DIR[100];
-	GetCurrentDir(DIR, 100);
-	GLuint v = glCreateShader(GL_VERTEX_SHADER);
-	printf("Current directory %s\n", DIR);
-	// Load and compile shaders
-	//phongshader = loadShaders("../openoliver/shaders/phong.vert", "../openoliver/shaders/phong.frag");  // renders with light (used for initial renderin of teapot)
-	//phongshader = loadShaders("C:\\Users\Jonsson\Documents\Visual Studio 2013\Projects\openoliver\openoliver\phong.vert", "C:\\Users\Jonsson\Documents\Visual Studio 2013\Projects\openoliver\openoliver\phong.frag");  // renders with light (used for initial renderin of teapot)
-	phongshader = loadShaders("phong.vert", "phong.frag");
+	printError("GL inits");
 
-	//printError("init shader");
+	viewMatrix =  lookAt(0, 4, 0,
+			0, -1, 0,
+			0, 0, 1);
+
+	modelObject = new ModelObject();
+
+    GLuint shader = loadShaders("phong.vert", "phong.frag");
+	modelObject->setShader(shader,0);
+
+	GLuint texture = 0;
+	LoadTGATextureSimple("test.tga",&texture);
+	modelObject->setTexture(texture,0);
+
+    Model* myModel = LoadModelPlus("stanford-bunny.obj");
+    modelObject->setModel(myModel);
+
+    mat4 transform1 = IdentityMatrix();
+    modelObject->setTransform(transform1);
+
+	printError("init shader");
 
 	glutTimerFunc(5, &OnTimer, 0);
 }
@@ -56,18 +74,6 @@ void display(void)
 	//  a new frame; due to the idle()-function below, this
 	//  function will get called several times per second
 
-	// Clear framebuffer & zbuffer
-	glClearColor(0.1, 0.1, 0.3, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	// Activate shader program
-	glUseProgram(phongshader);
-
-	//glUniformMatrix4fv(glGetUniformLocation(phongshader, "projectionMatrix"), 1, GL_TRUE, projectionMatrix.m);
-	//glUniformMatrix4fv(glGetUniformLocation(phongshader, "modelviewMatrix"), 1, GL_TRUE, vm2.m);
-	//glUniform3fv(glGetUniformLocation(phongshader, "camPos"), 1, &cam.x);
-	//glUniform1i(glGetUniformLocation(phongshader, "texUnit"), 0);
-
 	// Enable Z-buffering
 	glEnable(GL_DEPTH_TEST);
 	// Enable backface culling
@@ -78,6 +84,8 @@ void display(void)
 	glClearColor(0.0, 1.0, 0.0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	modelObject->draw(projectionMatrix, viewMatrix);
+
 	glutSwapBuffers();
 }
 
@@ -85,6 +93,7 @@ void reshape(GLsizei w, GLsizei h)
 {
 	glViewport(0, 0, w, h);
 	GLfloat ratio = (GLfloat)w / (GLfloat)h;
+	projectionMatrix = perspective(90, ratio, 1.0, 80);
 }
 
 
@@ -110,10 +119,19 @@ int main(int argc, char *argv[])
 	glutReshapeFunc(reshape);
 	glutIdleFunc(idle);
 	GLenum err = glewInit();
-	if (GLEW_OK != err)	{
-		printf("Error in the face!\n");
-	}
+    if (GLEW_OK != err)
+    {
+      fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+    }
+    if (glewIsSupported("GL_VERSION_1_4  GL_ARB_point_sprite"))
+    {
+        fprintf(stdout, "Status: GL_VERSION 1_4");
+    }
+     fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+    printError ("pre init");
+
 	init();
 	glutMainLoop();
 	exit(0);
 }
+

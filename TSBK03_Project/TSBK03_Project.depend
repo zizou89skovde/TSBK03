@@ -297,7 +297,7 @@
 	<GL/gl.h>
 	<math.h>
 
-1414064234 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\main.cpp
+1414082466 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\main.cpp
 	<stdio.h>
 	<math.h>
 	<stdlib.h>
@@ -307,6 +307,8 @@
 	<GL/freeglut_ext.h>
 	"common/GL_utilities.h"
 	<direct.h>
+	"ModelObject.h"
+	"LoadTGA.h"
 
 1341010372 c:\program files (x86)\codeblocks\mingw\include\direct.h
 	<_mingw.h>
@@ -316,4 +318,30 @@
 1341010374 c:\program files (x86)\codeblocks\mingw\include\io.h
 	<_mingw.h>
 	<sys/types.h>
+
+1414077549 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\src\lab1-1.c
+	<stdio.h>
+	<math.h>
+	<stdlib.h>
+	<OpenGL/gl3.h>
+	"MicroGlut.h"
+	<windows.h>
+	<stdio.h>
+	<GL/glew.h>
+	<GL/glut.h>
+	<stdio.h>
+	<GL/gl.h>
+	"MicroGlut.h"
+	"VectorUtils3.h"
+	"GL_utilities.h"
+	"loadobj.h"
+
+1414083158 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\src\modelobject.cpp
+	"ModelObject.h"
+
+1414082705 c:\users\datorn\desktop\tsbk03\openoliver\openoliver\src\modelobject.h
+	<vector>
+	"loadobj.h"
+	"VectorUtils3.h"
+	<stdio.h>
 

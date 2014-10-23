@@ -70,6 +70,8 @@ Model *model1;
 FBOstruct *fbo1, *fbo2;
 GLuint phongshader = 0, plaintextureshader = 0;
 
+
+
 //-------------------------------------------------------------------------------------
 
 void init(void)
@@ -105,7 +107,6 @@ void init(void)
 
 	glutTimerFunc(5, &OnTimer, 0);
 
-	zprInit(&viewMatrix, cam, point);
 }
 
 void OnTimer(int value)
@@ -132,7 +133,9 @@ void display(void)
 
 	// Activate shader program
 	glUseProgram(phongshader);
-
+    viewMatrix =  lookAt(0, 4, 0,
+			0, -1, 0,
+			0, 0, 1);
 	vm2 = viewMatrix;
 	// Scale and place bunny since it is too small
 	vm2 = Mult(vm2, T(0, -8.5, 0));
@@ -142,6 +145,7 @@ void display(void)
 	glUniformMatrix4fv(glGetUniformLocation(phongshader, "modelviewMatrix"), 1, GL_TRUE, vm2.m);
 	glUniform3fv(glGetUniformLocation(phongshader, "camPos"), 1, &cam.x);
 	glUniform1i(glGetUniformLocation(phongshader, "texUnit"), 0);
+
 
 	// Enable Z-buffering
 	glEnable(GL_DEPTH_TEST);
@@ -197,6 +201,18 @@ int main(int argc, char *argv[])
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
 	glutIdleFunc(idle);
+
+	GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+      fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+    }
+    if (glewIsSupported("GL_VERSION_1_4  GL_ARB_point_sprite"))
+    {
+        fprintf(stdout, "Status: GL_VERSION 1_4");
+    }
+     fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+    printError ("pre init");
 
 	init();
 	glutMainLoop();

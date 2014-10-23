@@ -1,32 +1,49 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="..\openoliver\openoliver\common\GL_utilities.c" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="..\openoliver\openoliver\common\VectorUtils3.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="786" topLine="27" />
-		</Cursor>
-		<Folding>
-			<Collapse line="66" />
-		</Folding>
-	</File>
-	<File name="..\openoliver\openoliver\common\LoadTGA.h" open="1" top="1" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="624" topLine="9" />
+			<Cursor1 position="6010" topLine="182" />
 		</Cursor>
 	</File>
 	<File name="..\openoliver\openoliver\common\LoadTGA.c" open="1" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="7862" topLine="178" />
+			<Cursor1 position="2226" topLine="140" />
 		</Cursor>
 	</File>
-	<File name="..\openoliver\openoliver\main.cpp" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="..\openoliver\openoliver\src\ModelObject.h" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="360" topLine="6" />
+			<Cursor1 position="152" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="..\openoliver\openoliver\common\GL_utilities.h" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="..\openoliver\openoliver\src\lab1-1.c" open="0" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="276" topLine="0" />
+			<Cursor1 position="5147" topLine="193" />
+		</Cursor>
+	</File>
+	<File name="..\openoliver\openoliver\common\loadobj.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="16275" topLine="676" />
+		</Cursor>
+	</File>
+	<File name="..\openoliver\openoliver\common\loadobj.h" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="486" topLine="6" />
+		</Cursor>
+	</File>
+	<File name="..\openoliver\openoliver\src\ModelObject.cpp" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="330" topLine="12" />
+		</Cursor>
+	</File>
+	<File name="..\openoliver\openoliver\common\GL_utilities.c" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="12602" topLine="395" />
+		</Cursor>
+	</File>
+	<File name="..\openoliver\openoliver\main.cpp" open="1" top="1" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="934" topLine="28" />
 		</Cursor>
 	</File>
 </CodeBlocks_layout_file>
