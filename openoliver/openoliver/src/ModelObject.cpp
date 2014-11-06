@@ -28,13 +28,10 @@ void ModelObject::draw(mat4 projectionMatrix, mat4 viewMatrix){
         glUniformMatrix4fv(glGetUniformLocation(program, "MV_Matrix"), 1, GL_TRUE, mvMatrix.m);
         glUniformMatrix4fv(glGetUniformLocation(program, "MVP_Matrix"), 1, GL_TRUE, mvpMatrix.m);
 
-//LBM2887M
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textureHandle[0][0]);
         glUniform1i(glGetUniformLocation(program, "texUnit"), 0);
-        int size = modelVec.size();
-        printf("Model vector size: %d \n",size);
-        DrawModel(modelVec.at(0), program, "in_Position", "in_Normal", NULL);
+        DrawModel(modelVec.at(0), program, (char *)"in_Position", (char *)"in_Normal", NULL);
  //   }
 
 }
@@ -54,7 +51,7 @@ void ModelObject::setModel(Model * m){
 }
 
 GLuint ModelObject::getTexture(GLuint id){
-    for(int i = 0; i < numberOfTextures; i++){
+    for(GLuint i = 0; i < numberOfTextures; i++){
         if(textureHandle[i][1] == id)
             return textureHandle[i][0];
     }
@@ -62,13 +59,13 @@ GLuint ModelObject::getTexture(GLuint id){
 }
 
 GLuint ModelObject::getShader(GLuint id){
-    for(int i = 0; i < numberOfShaders; i++){
+    for(GLuint i = 0; i < numberOfShaders; i++){
         if(shaderHandle[i][1] == id)
             return shaderHandle[i][0];
     }
     return 0;
 }
 void ModelObject::setTransform(mat4 transf){
-
+ modelTransformVec.push_back(transf);
 }
 

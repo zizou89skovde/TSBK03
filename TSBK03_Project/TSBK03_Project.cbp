@@ -5,6 +5,7 @@
 		<Option title="TSBK03_Project" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
+		<Option virtualFolders="openoliver\openoliver\common\;" />
 		<Build>
 			<Target title="Debug">
 				<Option output="bin/Debug/TSBK03_Project" prefix_auto="1" extension_auto="1" />
@@ -17,6 +18,7 @@
 					<Add directory="../openoliver/openoliver/common" />
 					<Add directory="include" />
 					<Add directory="../openoliver/openoliver/src" />
+					<Add directory="../include" />
 				</Compiler>
 				<Linker>
 					<Add option="-glew32  -lglew32mx" />
@@ -51,6 +53,10 @@
 			<Add library="gdi32" />
 			<Add directory="C:/Program Files (x86)/CodeBlocks/MinGW/lib" />
 		</Linker>
+		<Unit filename="../include/ClothSimulation.h" />
+		<Unit filename="../include/GrassSimulation.h" />
+		<Unit filename="../include/KeyMouseHandler.h" />
+		<Unit filename="../include/Terrain.h" />
 		<Unit filename="../openoliver/openoliver/common/GL_utilities.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -62,7 +68,9 @@
 		<Unit filename="../openoliver/openoliver/common/VectorUtils3.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="../openoliver/openoliver/common/VectorUtils3.h" />
+		<Unit filename="../openoliver/openoliver/common/VectorUtils3.h">
+			<Option virtualFolder="openoliver/openoliver/common/" />
+		</Unit>
 		<Unit filename="../openoliver/openoliver/common/loadobj.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -74,6 +82,10 @@
 			<Option compilerVar="CC" />
 			<Option target="Release" />
 		</Unit>
+		<Unit filename="../src/ClothSimulation.cpp" />
+		<Unit filename="../src/GrassSimulation.cpp" />
+		<Unit filename="../src/KeyMouseHandler.cpp" />
+		<Unit filename="../src/Terrain.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

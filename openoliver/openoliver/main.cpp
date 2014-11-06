@@ -10,22 +10,27 @@
 #include <direct.h>
 #include "ModelObject.h"
 #include "LoadTGA.h"
+#include "ClothSimulation.h"
+#include "GrassSimulation.h"
+#include "Terrain.h"
+#include "KeyMouseHandler.h"
 #define GetCurrentDir _getcwd
 // initial width and heights
 #define W 512
 #define H 512
 
 void OnTimer(int value);
-
+KeyMouseHandler mKeyMouseHandler;
 //----------------------Globals-------------------------------------------------
 GLuint phongshader = 0;
 mat4 projectionMatrix;
 mat4 viewMatrix;
 //-------------------------------------------------------------------------------------
-// Our pinefresh superimba class
-ModelObject * modelObject;
 
-
+// Cloth simulation
+ClothSimulation *mClothSimulation;
+GrassSimulation *mGrassSimulation;
+Terrain *mTerrain;
 void init(void)
 {
 	//dumpInfo();  // shader info
@@ -37,26 +42,23 @@ void init(void)
 	glDisable(GL_CULL_FACE);
 	printError("GL inits");
 
-	viewMatrix =  lookAt(0, 4, 0,
+	/*viewMatrix =  lookAt(
+            5, 20, 5,
 			0, -1, 0,
-			0, 0, 1);
+			0, 0, 1
+			);*/
 
-	modelObject = new ModelObject();
+    mTerrain = new Terrain();
+    printError("init terrain");
+/*
+    mClothSimulation = new ClothSimulation();
+	printError("init cloth simulation");
 
-    GLuint shader = loadShaders("phong.vert", "phong.frag");
-	modelObject->setShader(shader,0);
-
-	GLuint texture = 0;
-	LoadTGATextureSimple("test.tga",&texture);
-	modelObject->setTexture(texture,0);
-
-    Model* myModel = LoadModelPlus("stanford-bunny.obj");
-    modelObject->setModel(myModel);
-
-    mat4 transform1 = IdentityMatrix();
-    modelObject->setTransform(transform1);
-
-	printError("init shader");
+	mGrassSimulation = new GrassSimulation();
+	printError("init cloth simulation");
+*/
+    // Create key/mouse handler
+    //mKeyMouseHandler = KeyMouseHandler();
 
 	glutTimerFunc(5, &OnTimer, 0);
 }
@@ -84,7 +86,10 @@ void display(void)
 	glClearColor(0.0, 1.0, 0.0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	modelObject->draw(projectionMatrix, viewMatrix);
+
+//    mClothSimulation->draw(projectionMatrix,viewMatrix);
+    viewMatrix = mKeyMouseHandler.getViewMatrix();
+    mTerrain->draw(projectionMatrix,viewMatrix);
 
 	glutSwapBuffers();
 }
@@ -93,7 +98,7 @@ void reshape(GLsizei w, GLsizei h)
 {
 	glViewport(0, 0, w, h);
 	GLfloat ratio = (GLfloat)w / (GLfloat)h;
-	projectionMatrix = perspective(90, ratio, 1.0, 80);
+	projectionMatrix = perspective(90, ratio, 1.0, 800);
 }
 
 
@@ -103,6 +108,22 @@ void reshape(GLsizei w, GLsizei h)
 void idle()
 {
 	glutPostRedisplay();
+}
+
+void keyboard (unsigned char key, int x, int y)
+{
+    mKeyMouseHandler.keyPress(key, 0, 0);
+}
+
+void mouseClick (int button, int state, int x, int y)
+{
+    if (state == GLUT_UP)
+        mKeyMouseHandler.mouseUp();
+}
+
+void mouse (int x, int y)
+{
+    mKeyMouseHandler.mouseHandle(x, y);
 }
 
 //-----------------------------main-----------------------------------------------
@@ -127,10 +148,13 @@ int main(int argc, char *argv[])
     {
         fprintf(stdout, "Status: GL_VERSION 1_4");
     }
-     fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+    fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
     printError ("pre init");
 
 	init();
+	glutKeyboardFunc(keyboard);
+	glutMouseFunc(mouseClick);
+	glutMotionFunc(mouse);
 	glutMainLoop();
 	exit(0);
 }
