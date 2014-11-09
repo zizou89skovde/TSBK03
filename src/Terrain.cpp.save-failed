@@ -7,24 +7,21 @@ Terrain::Terrain()
 
     // Load model
     TextureData ttex;
-    //LoadTGATextureData((char*)"terrain.tga", &ttex);
-    //Model* model = GenerateTerrain(&ttex);
+    LoadTGATextureData((char*)"terrain.tga", &ttex);
     Model* model = LoadModelPlus((char *)"stanford-bunny.obj");
-
+    //Model* model = GenerateTerrain(&ttex);
     mTerrainModel->setModel(model);
 
     //Load texture
-    /*
-    GLuint texture = 0;
+    /*GLuint texture = 0;
 	LoadTGATextureSimple((char *)"test.tga",&texture);
-	mTerrainModel->setTexture(texture,0);
-	*/
+	mTerrainModel->setTexture(texture,0);*/
 
 	//Load shader-kun
     GLuint shader = loadShaders("phong.vert", "phong.frag");
 	mTerrainModel->setShader(shader,0);
 
-    mat4 transformMatrix =  S(20,20,20);//IdentityMatrix();
+    mat4 transformMatrix = IdentityMatrix();
     mTerrainModel->setTransform(transformMatrix);
 
 
