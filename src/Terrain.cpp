@@ -13,13 +13,14 @@ Terrain::Terrain()
 
     //Load texture
     GLuint texture = 0;
-	LoadTGATextureSimple((char *)"test.tga",&texture);
+	LoadTGATextureSimple((char *)"terrain_texture.tga",&texture);
 	mTerrainModel->setTexture(texture,0);
 
 	//Load shader-kun
     GLuint shader = loadShaders("phong.vert", "phong.frag");
 	mTerrainModel->setShader(shader,0);
 
+    //Set initial transform matrix
     mat4 transformMatrix = IdentityMatrix();
     mTerrainModel->setTransform(transformMatrix);
 

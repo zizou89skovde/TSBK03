@@ -3,9 +3,8 @@
 
 KeyMouseHandler::KeyMouseHandler()
 {
-    cameraEye = new vec3(5.0f, 20.0f, 5.0f);
-    cameraCenter = new vec3(1.0f, 0.0f, 0.0f);
-    *cameraCenter += *cameraEye;
+    cameraEye = new vec3(0.0f, 0.0f, 5.0f);
+    cameraCenter = new vec3(0.0f, 0.0f, 6.0f);
     cameraUp = new vec3(0.0f, 1.0f, 0.0f);
 
     xPrev = -1;
@@ -46,7 +45,9 @@ void KeyMouseHandler::keyPress(unsigned char key, int x, int y)
     }
 
 }
-
+void print2Vec3(char* head,vec3 v){
+    printf("%s x: %f  y: %f z: %f \n",head, v.x , v.y ,v.z);
+}
 void KeyMouseHandler::mouseHandle(int x, int y)
 {
     if (xPrev > 0 && yPrev > 0) {
@@ -58,7 +59,11 @@ void KeyMouseHandler::mouseHandle(int x, int y)
     }
     xPrev = x;
     yPrev = y;
+    print2Vec3("CAM EYE",*cameraEye);
+    print2Vec3("CAM CENTER",*cameraCenter);
+
 }
+
 
 mat4 KeyMouseHandler::getViewMatrix()
 {
@@ -66,6 +71,7 @@ mat4 KeyMouseHandler::getViewMatrix()
                   cameraCenter->x, cameraCenter->y, cameraCenter->z,
                   cameraUp->x, cameraUp->y, cameraUp->z);
 }
+
 
 void KeyMouseHandler::mouseUp()
 {

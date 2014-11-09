@@ -46,6 +46,81 @@ void ModelObject::setTexture(GLuint handle, GLuint id){
     numberOfTextures++;
 }
 
+// Loader for inline data to Model (almost same as LoadModelPlus)
+void ModelObject::LoadDataToModel(
+			GLfloat *vertices,
+			GLfloat *normals,
+			GLfloat *texCoords,
+			GLfloat *colors,
+			GLuint *indices,
+			int numVert,
+			int numInd)
+{
+
+	Model* m = (Model *)malloc(sizeof(Model));
+	memset(m, 0, sizeof(Model));
+
+	m->vertexArray = vertices;
+	m->texCoordArray = texCoords;
+	m->normalArray = normals;
+	m->indexArray = indices;
+	m->numVertices = numVert;
+	m->numIndices = numInd;
+
+	BuildModelVAO2(m);
+
+	this->modelVec.push_back(m);
+}
+
+void ModelObject::uploadNewVertexData(GLfloat* dataBuffer,size_t bufferSize){
+    Model* m = modelVec.at(0);
+    glBindVertexArray(m->vao);
+    glBindBuffer(GL_ARRAY_BUFFER, m->vb);
+     glBufferSubData(GL_ARRAY_BUFFER, 0, bufferSize, &dataBuffer[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void ModelObject::BuildModelVAO2(Model *m/*,
+			GLuint program,
+			char* vertexVariableName,
+			char* normalVariableName,
+			char* texCoordVariableName*/)
+{
+	glGenVertexArrays(1, &m->vao);
+	glGenBuffers(1, &m->vb);
+	glGenBuffers(1, &m->ib);
+	glGenBuffers(1, &m->nb);
+	if (m->texCoordArray != NULL)
+		glGenBuffers(1, &m->tb);
+
+	glBindVertexArray(m->vao);
+
+	// VBO for vertex data
+	glBindBuffer(GL_ARRAY_BUFFER, m->vb);
+	glBufferData(GL_ARRAY_BUFFER, m->numVertices*3*sizeof(GLfloat), m->vertexArray, GL_STREAM_DRAW);
+	//glVertexAttribPointer(glGetAttribLocation(program, vertexVariableName), 3, GL_FLOAT, GL_FALSE, 0, 0);
+	//glEnableVertexAttribArray(glGetAttribLocation(program, vertexVariableName));
+
+	// VBO for normal data
+	glBindBuffer(GL_ARRAY_BUFFER, m->nb);
+	glBufferData(GL_ARRAY_BUFFER, m->numVertices*3*sizeof(GLfloat), m->normalArray, GL_STATIC_DRAW);
+	//glVertexAttribPointer(glGetAttribLocation(program, normalVariableName), 3, GL_FLOAT, GL_FALSE, 0, 0);
+	//glEnableVertexAttribArray(glGetAttribLocation(program, normalVariableName));
+
+	// VBO for texture coordinate data NEW for 5b
+	if (m->texCoordArray != NULL)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, m->tb);
+		glBufferData(GL_ARRAY_BUFFER, m->numVertices*2*sizeof(GLfloat), m->texCoordArray, GL_STATIC_DRAW);
+		//glVertexAttribPointer(glGetAttribLocation(program, texCoordVariableName), 2, GL_FLOAT, GL_FALSE, 0, 0);
+		//glEnableVertexAttribArray(glGetAttribLocation(program, texCoordVariableName));
+	}
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m->ib);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m->numIndices*sizeof(GLuint), m->indexArray, GL_STATIC_DRAW);
+}
+
+
 void ModelObject::setModel(Model * m){
     modelVec.push_back(m);
 }

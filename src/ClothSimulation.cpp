@@ -2,25 +2,30 @@
 
 ClothSimulation::ClothSimulation()
 {
-    //Initialize cloth model object
+    //Physics create grid
+    createGridOfMasses();
+    connectMassToSpring();
+
+    // Initialize cloth model object
     mClothModel = new ModelObject();
 
-    GLuint shader = loadShaders("phong.vert", "phong.frag");
+    // Load model data
+    uploadInitialModelData();
+    uploadNewData();
+    // Load shader
+    GLuint shader = loadShaders("cloth.vert", "cloth.frag");
 	mClothModel->setShader(shader,0);
 
-	GLuint texture = 0;
-	LoadTGATextureSimple((char *)"test.tga",&texture);
-	mClothModel->setTexture(texture,0);
 
-    Model* myModel = LoadModelPlus((char *)"stanford-bunny.obj");
-    mClothModel->setModel(myModel);
 
-    mat4 transform1 = S(20,20,20);
+    // Set initial transform
+    mat4 transform1 = S(2,2,2);
     mClothModel->setTransform(transform1);
 
-    createGridOfMasses();
-   // connectMassToSpring();
 
+
+    Gravity = new vec3(0,0.982,0.0);
+ //   checkSprings();
 }
 
 ClothSimulation::~ClothSimulation()
@@ -32,12 +37,25 @@ void printVec3(char* head,vec3 v){
     printf("%s x: %f  y: %f z: %f \n",head, v.x , v.y ,v.z);
 }
 
+/** \brief
+ * Computes distance between two 3d points
+ * \param v1 vec3 3d point
+ * \param v2 vec3 3d point
+ * \return GLfloat distance between two 3d points
+ *
+ */
 GLfloat ClothSimulation::getDeltaLength(vec3 v1,vec3 v2 ){
     vec3 deltaPos = v1 - v2;
     GLfloat length = sqrt(DotProduct(deltaPos,deltaPos));
     return length;
 }
 
+/** \brief Creates a grid of masses. The masses reside in mMasses, which is a 2D array
+ * of Mass data type. The size of the grid is define in ClothSimulation.h. See CLOTH_DIM.
+ *
+ * \return void
+ *
+ */
 void ClothSimulation::createGridOfMasses(){
 
     Mass * currentMass;
@@ -53,7 +71,7 @@ void ClothSimulation::createGridOfMasses(){
         // X/Y positions are centered around zero, then normalized, then scaled with CLOTH_SIZE_<AXIS>.
         xInit =  CLOTH_SIZE_X*(GLfloat)(x - len)/len;
         yInit =  CLOTH_SIZE_Y*(GLfloat)(y - len)/len;
-        zInit =  0;
+        zInit =  8;
         currentMass->currentPosition = new vec3(xInit,yInit,zInit);
         currentMass->x = x;
         currentMass->y = y;
@@ -61,7 +79,11 @@ void ClothSimulation::createGridOfMasses(){
 
 
 }
-
+/****************************************************************************/
+/****************************************************************************/
+/* Initializing  Masses and Springs */
+/****************************************************************************/
+/****************************************************************************/
 /** \brief
  *  Creates a spring instance that is  connected to masses m1 and m2. Also
  *  assigned with rest length of the spring.
@@ -70,7 +92,7 @@ void ClothSimulation::createGridOfMasses(){
  * \return Spring * Pointer to a spring now connected to masses m1 and m2
  *
  */
-Spring * ClothSimulation::createSpring(Mass* m1, Mass* m2){
+Spring * ClothSimulation::createSpring(Mass* m1, Mass* m2, float springConstant,float dampConstant){
     Spring *spring = new Spring();
 
     //Connecting end points to masses
@@ -78,49 +100,240 @@ Spring * ClothSimulation::createSpring(Mass* m1, Mass* m2){
     spring->mass2 = m2;
 
     //Computing the initial rest length of the spring
-    GLfloat length = getDeltaLength(*(m1->currentPosition),*(m2->currentPosition));
-    spring->currSpringLength = length;
-    spring->restSpringLength = length;
+    GLfloat length      = getDeltaLength(*m1->currentPosition,*m2->currentPosition);
+    spring->length      = length;
+    spring->restLength  = length;
+
+    spring->springConstant    = springConstant;
+    spring->dampConstant    = dampConstant;
+
     return spring;
 
 }
 
+void ClothSimulation::checkSprings(){
+    Spring * spring;
+    for(std::vector<Spring*>::iterator it = mSprings.begin(); it != mSprings.end(); ++it) {
+        spring = *it;
+        printf("Spring with masses: m1(%d,%d) and m2(%d,%d)\n",
+
+               spring->mass1->x,spring->mass1->y,
+               spring->mass2->x,spring->mass2->y
+
+               );
+    }
+}
+
+/** \brief Creates spring instances which is connecting masses.
+ * There are 3 type of springs - structural, bend and shear springs.
+ * \return void
+ */
 void ClothSimulation::connectMassToSpring(){
     for(int y = 0; y < CLOTH_DIM; ++y)
         for(int x = 0; x < CLOTH_DIM; ++x){
 
         if(x < CLOTH_DIM - 1){
             //Right horizontal structural spring
-            mSprings.push_back(createSpring(&mMasses[y][x],&mMasses[y][x+1]));
+            mSprings.push_back(createSpring(&mMasses[y][x],&mMasses[y][x+1],SpringConstant,SpringDamping));
         }
 
         if(x < CLOTH_DIM - 2){
             //Right horizontal bend spring
-            mSprings.push_back(createSpring(&mMasses[y][x],&mMasses[y][x+2]));
+            mSprings.push_back(createSpring(&mMasses[y][x],&mMasses[y][x+2],SpringConstant,SpringDamping));
         }
 
         if(y < CLOTH_DIM - 1) {
             //upper vertical structural spring
-            mSprings.push_back(createSpring(&mMasses[y+1][x],&mMasses[y][x]));
+            mSprings.push_back(createSpring(&mMasses[y+1][x],&mMasses[y][x],SpringConstant,SpringDamping));
         }
         if(y < CLOTH_DIM - 2) {
             //upper vertical bend spring
-            mSprings.push_back(createSpring(&mMasses[y+2][x],&mMasses[y][x]));
+            mSprings.push_back(createSpring(&mMasses[y+2][x],&mMasses[y][x],SpringConstant,SpringDamping));
         }
 
         if( y < CLOTH_DIM - 1 && x < CLOTH_DIM - 1){
             //Right upper shear spring
-            mSprings.push_back(createSpring(&mMasses[y+1][x],&mMasses[y][x+1]));
+            mSprings.push_back(createSpring(&mMasses[y+1][x],&mMasses[y][x+1],SpringConstant,SpringDamping));
         }
-        if( y < 1 && x < CLOTH_DIM - 1){
+        if( y > 0 && x < CLOTH_DIM - 1){
             //Right lower shear spring
-            mSprings.push_back(createSpring(&mMasses[y-1][x],&mMasses[y][x+1]));
+            mSprings.push_back(createSpring(&mMasses[y-1][x],&mMasses[y][x+1],SpringConstant,SpringDamping));
         }
     }
 }
 
+/****************************************************************************/
+/****************************************************************************/
+/*Cloth Graphics*/
+/****************************************************************************/
+/****************************************************************************/
 
+void ClothSimulation::uploadInitialModelData(){
+
+
+    int vertexCount = CLOTH_DIM*CLOTH_DIM;
+	int triangleCount = (CLOTH_DIM-1) * (CLOTH_DIM-1)* 2;
+
+    GLfloat *vertexArray = (GLfloat *) malloc(sizeof(GLfloat) * FLOATS_PER_VERTEX * vertexCount);
+	GLfloat *normalArray = (GLfloat *) malloc(sizeof(GLfloat) * FLOATS_PER_VERTEX* vertexCount);
+	GLfloat *texCoordArray =(GLfloat *) malloc(sizeof(GLfloat) * FLOATS_PER_TEXEL * vertexCount);
+	GLuint *indexArray = (GLuint *)malloc(sizeof(GLuint) * triangleCount*VERTICES_PER_TRIANGLE);
+
+     for(GLuint y = 0; y < CLOTH_DIM; ++y)
+        for(GLuint x = 0; x < CLOTH_DIM; ++x){
+            Mass mass = mMasses[y][x];
+            vertexArray[(x + y * CLOTH_DIM)*3 + 0] = mass.currentPosition->x;
+            vertexArray[(x + y * CLOTH_DIM)*3 + 1] = mass.currentPosition->y;
+            vertexArray[(x + y * CLOTH_DIM)*3 + 2] = mass.currentPosition->z;
+
+            normalArray[(x + y * CLOTH_DIM)*3 + 0] = 0;
+            normalArray[(x + y * CLOTH_DIM)*3 + 1] = 0;
+            normalArray[(x + y * CLOTH_DIM)*3 + 2] = 1;
+
+			texCoordArray[(x + y * CLOTH_DIM)*2 + 0] = x; // (float)x / tex->width;
+			texCoordArray[(x + y * CLOTH_DIM)*2 + 1] = y; // (float)z / tex->height;
+        }
+
+	 for (GLuint y = 0; y < CLOTH_DIM-1; y++)
+        for (GLuint x = 0; x < CLOTH_DIM-1; x++)
+		{
+		// Triangle 1
+			indexArray[(x + y * (CLOTH_DIM-1))*6 + 0] = x + y * CLOTH_DIM;
+			indexArray[(x + y * (CLOTH_DIM-1))*6 + 1] = x + (y+1) * CLOTH_DIM;
+			indexArray[(x + y * (CLOTH_DIM-1))*6 + 2] = x+1 + y * CLOTH_DIM;
+		// Triangle 2
+			indexArray[(x + y * (CLOTH_DIM-1))*6 + 3] = x+1 + y * CLOTH_DIM;
+			indexArray[(x + y * (CLOTH_DIM-1))*6 + 4] = x + (y+1) * CLOTH_DIM;
+			indexArray[(x + y * (CLOTH_DIM-1))*6 + 5] = x+1 + (y+1) * CLOTH_DIM;
+		}
+        mClothModel->LoadDataToModel(
+			vertexArray,
+			normalArray,
+			texCoordArray,
+			NULL,
+			indexArray,
+			vertexCount,
+			triangleCount*3);
+}
 
 void ClothSimulation::draw(mat4 projectionMatrix, mat4 viewMatrix){
     mClothModel->draw(projectionMatrix, viewMatrix);
+}
+
+void ClothSimulation::uploadNewData(){
+    int vertexCount = CLOTH_DIM*CLOTH_DIM;
+    GLfloat *vertexArray = (GLfloat *) malloc(sizeof(GLfloat) * FLOATS_PER_VERTEX * vertexCount);
+   // GLfloat *normalArray = (GLfloat *) malloc(sizeof(GLfloat) * FLOATS_PER_VERTEX* vertexCount);
+    for(GLuint y = 0; y < CLOTH_DIM; ++y)
+    for(GLuint x = 0; x < CLOTH_DIM; ++x){
+        Mass mass = mMasses[y][x];
+        vertexArray[(x + y * CLOTH_DIM)*3 + 0] = mass.currentPosition->x;
+        vertexArray[(x + y * CLOTH_DIM)*3 + 1] = mass.currentPosition->y;
+        vertexArray[(x + y * CLOTH_DIM)*3 + 2] = mass.currentPosition->z;
+    }
+    mClothModel->uploadNewVertexData(vertexArray,vertexCount);
+
+}
+
+/****************************************************************************/
+/****************************************************************************/
+/*Cloth physics */
+/****************************************************************************/
+/****************************************************************************/
+
+/**
+* Check if current mass is a fix point. That not should be affected by any force.
+* There are two fix point which up hold the rest of the cloth.
+**/
+void ClothSimulation::update(){
+    applyForces();
+    integrate();
+}
+/**
+* Integrate position of each mass using verlet integration method:
+* X(n+1) = 2*X(n) - X(n-1) * A(x)*dt^2
+**/
+void ClothSimulation::integrate(){
+    for(int y = 0; y < CLOTH_DIM; ++y)
+        for(int x = 0; x < CLOTH_DIM; ++x){
+
+            vec3 pos = *mMasses[y][x].currentPosition;
+            vec3 prevPos = *mMasses[y][x].previousPosition;
+            vec3 acceleration = *mMasses[y][x].accelearation;
+
+            //Store previous position
+            *mMasses[y][x].previousPosition = pos;
+
+            //Update to new position if current mass are not fix
+            if(!isFixPoint(x,y)){
+                *mMasses[y][x].currentPosition = 2*pos -prevPos + acceleration*dt*dt;
+            }
+    }
+}
+bool ClothSimulation::isFixPoint(int x, int y){
+    return  ( x == FIX_POINT_1_X && y == FIX_POINT_1_Y ) ||
+            ( x == FIX_POINT_2_X && y == FIX_POINT_2_Y );
+
+}
+/**
+* Computing Velocity using verlet method:
+* v(n) = (p(n)-p(n-1))/dt
+*/
+vec3 ClothSimulation::getVerletVelocity(vec3 curVel, vec3 prevVel){
+    return (curVel-prevVel)/dt;
+}
+/**
+* Updating acceleration of each mass by computing force from gravity,springs and some nameless damping.
+*
+*/
+void ClothSimulation::applyForces(){
+     //Iterate over all masses in order to apply gravity and a damp force on each and every mass.
+     for(int y = 0; y < CLOTH_DIM; ++y)
+        for(int x = 0; x < CLOTH_DIM; ++x){
+            if(isFixPoint(mMasses[y][x].x,mMasses[y][x].y))
+            // Reset acceleration
+            *mMasses[y][x].accelearation = SetVector(0,0,0);
+
+            // Apply gravity force
+            *mMasses[y][x].accelearation += *Gravity;
+
+            // Apply damping force in regard to the current  velocity.
+            vec3 velocity = getVerletVelocity(*mMasses[y][x].currentPosition,*mMasses[y][x].previousPosition);
+            *mMasses[y][x].accelearation += velocity*VelocityDamping;
+        }
+
+    Spring * spring;
+    for(std::vector<Spring*>::iterator it = mSprings.begin(); it != mSprings.end(); ++it) {
+
+        spring = *it;
+        Mass * mass1 = spring->mass1;
+        Mass * mass2 = spring->mass2;
+
+        // Reading current and previous position
+        vec3 p1     = *mass1->currentPosition;
+        vec3 p1Prev = *mass1->previousPosition;
+        vec3 p2     = *mass2->currentPosition;
+        vec3 p2Prev = *mass2->previousPosition;
+
+        // Computing velocity, using Verlet method, for the two masses.
+        vec3 v1 = getVerletVelocity(p1,p1Prev);
+        vec3 v2 = getVerletVelocity(p2,p2Prev);
+
+        //
+        vec3 deltaPos = p1-p2;
+        vec3 deltaVel = v1-v2;
+
+        double springLength = getDeltaLength(p1,p2);
+
+        // Determine the spring and damp force for each spring
+        float springForce = -spring->springConstant *(springLength - spring->restLength);
+        float dampForce   = spring->dampConstant *(DotProduct(deltaPos,deltaVel)/springLength);
+
+        vec3 force = Normalize(deltaPos)*(springForce+dampForce);
+
+        // Add force from spring
+        *mass1->accelearation += force;
+        *mass2->accelearation += force;
+
+    }
 }

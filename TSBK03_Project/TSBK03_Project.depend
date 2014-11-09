@@ -264,7 +264,7 @@
 1368269360 c:\program files (x86)\codeblocks\mingw\include\gl\freeglut_ext.h
 	<stdarg.h>
 
-1414060344 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\common\loadobj.c
+1415556745 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\common\loadobj.c
 	"loadobj.h"
 	<stdio.h>
 	<stdlib.h>
@@ -297,7 +297,7 @@
 	<GL/gl.h>
 	<math.h>
 
-1415293926 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\main.cpp
+1415552324 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\main.cpp
 	<stdio.h>
 	<math.h>
 	<stdlib.h>
@@ -340,16 +340,18 @@
 	"GL_utilities.h"
 	"loadobj.h"
 
-1415275192 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\src\modelobject.cpp
+1415563785 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\src\modelobject.cpp
 	"ModelObject.h"
 
-1414080034 c:\users\datorn\desktop\tsbk03\openoliver\openoliver\src\modelobject.h
+1415563755 c:\users\datorn\desktop\tsbk03\openoliver\openoliver\src\modelobject.h
 	<vector>
 	"loadobj.h"
 	"VectorUtils3.h"
+	<stdlib.h>
+	<string.h>
 	<stdio.h>
 
-1415283427 c:\users\datorn\desktop\tsbk03\include\clothsimulation.h
+1415563820 c:\users\datorn\desktop\tsbk03\include\clothsimulation.h
 	"ModelObject.h"
 	"GL_utilities.h"
 	"VectorUtils3.h"
@@ -357,7 +359,7 @@
 	<math.h>
 	<vector>
 
-1415286539 source:c:\users\datorn\desktop\tsbk03\src\clothsimulation.cpp
+1415563986 source:c:\users\datorn\desktop\tsbk03\src\clothsimulation.cpp
 	"ClothSimulation.h"
 
 1415285091 c:\users\datorn\desktop\tsbk03\include\grasssimulation.h
@@ -365,7 +367,7 @@
 1415285091 source:c:\users\datorn\desktop\tsbk03\src\grasssimulation.cpp
 	"GrassSimulation.h"
 
-1415292167 source:c:\users\datorn\desktop\tsbk03\src\terrain.cpp
+1415551616 source:c:\users\datorn\desktop\tsbk03\src\terrain.cpp
 	"Terrain.h"
 
 1415287044 c:\users\datorn\desktop\tsbk03\include\terrain.h
@@ -378,7 +380,7 @@
 	"GL_utilities.h"
 	"VectorUtils3.h"
 
-1415293903 source:c:\users\datorn\desktop\tsbk03\src\keymousehandler.cpp
+1415563110 source:c:\users\datorn\desktop\tsbk03\src\keymousehandler.cpp
 	"KeyMouseHandler.h"
 	<stdio.h>
 
