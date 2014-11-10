@@ -33,7 +33,7 @@
 	<gl/glut.h>
 	<gl/freeglut_ext.h>
 
-1374498682 c:\program files (x86)\codeblocks\mingw\include\gl\glew.h
+1415529353 c:\program files (x86)\codeblocks\mingw\include\gl\glew.h
 	<stddef.h>
 	<inttypes.h>
 	<stdint.h>
@@ -49,17 +49,17 @@
 1341006776 c:\program files (x86)\codeblocks\mingw\include\stdint.h
 	<stddef.h>
 
-1301111164 c:\program files (x86)\codeblocks\mingw\include\gl\glu.h
+1415529353 c:\program files (x86)\codeblocks\mingw\include\gl\glu.h
 	<stddef.h>
 	<GL/gl.h>
 
-1301111164 c:\program files (x86)\codeblocks\mingw\include\gl\gl.h
+1415529353 c:\program files (x86)\codeblocks\mingw\include\gl\gl.h
 
-1411193073 c:\program files (x86)\codeblocks\mingw\include\gl\glut.h
+1415529353 c:\program files (x86)\codeblocks\mingw\include\gl\glut.h
 	"freeglut_std.h"
 	"freeglut_ext.h"
 
-1368269360 c:\program files (x86)\codeblocks\mingw\include\gl\freeglut_std.h
+1415529353 c:\program files (x86)\codeblocks\mingw\include\gl\freeglut_std.h
 	<windows.h>
 	<OpenGL/gl.h>
 	<OpenGL/glu.h>
@@ -261,10 +261,10 @@
 1301111156 c:\program files (x86)\codeblocks\mingw\include\oleidl.h
 	<objfwd.h>
 
-1368269360 c:\program files (x86)\codeblocks\mingw\include\gl\freeglut_ext.h
+1415529353 c:\program files (x86)\codeblocks\mingw\include\gl\freeglut_ext.h
 	<stdarg.h>
 
-1415556745 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\common\loadobj.c
+1414060344 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\common\loadobj.c
 	"loadobj.h"
 	<stdio.h>
 	<stdlib.h>
@@ -297,7 +297,11 @@
 	<GL/gl.h>
 	<math.h>
 
+<<<<<<< HEAD
 1415565362 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\main.cpp
+=======
+1415293926 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\main.cpp
+>>>>>>> origin/master
 	<stdio.h>
 	<math.h>
 	<stdlib.h>
@@ -340,18 +344,24 @@
 	"GL_utilities.h"
 	"loadobj.h"
 
+<<<<<<< HEAD
 1415572088 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\src\modelobject.cpp
+=======
+1415275192 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\src\modelobject.cpp
+>>>>>>> origin/master
 	"ModelObject.h"
 
-1415563755 c:\users\datorn\desktop\tsbk03\openoliver\openoliver\src\modelobject.h
+1414080034 c:\users\datorn\desktop\tsbk03\openoliver\openoliver\src\modelobject.h
 	<vector>
 	"loadobj.h"
 	"VectorUtils3.h"
-	<stdlib.h>
-	<string.h>
 	<stdio.h>
 
+<<<<<<< HEAD
 1415579624 c:\users\datorn\desktop\tsbk03\include\clothsimulation.h
+=======
+1415283427 c:\users\datorn\desktop\tsbk03\include\clothsimulation.h
+>>>>>>> origin/master
 	"ModelObject.h"
 	"GL_utilities.h"
 	"VectorUtils3.h"
@@ -359,7 +369,11 @@
 	<math.h>
 	<vector>
 
+<<<<<<< HEAD
 1415580978 source:c:\users\datorn\desktop\tsbk03\src\clothsimulation.cpp
+=======
+1415286539 source:c:\users\datorn\desktop\tsbk03\src\clothsimulation.cpp
+>>>>>>> origin/master
 	"ClothSimulation.h"
 
 1415285091 c:\users\datorn\desktop\tsbk03\include\grasssimulation.h
@@ -367,7 +381,7 @@
 1415285091 source:c:\users\datorn\desktop\tsbk03\src\grasssimulation.cpp
 	"GrassSimulation.h"
 
-1415551616 source:c:\users\datorn\desktop\tsbk03\src\terrain.cpp
+1415292167 source:c:\users\datorn\desktop\tsbk03\src\terrain.cpp
 	"Terrain.h"
 
 1415287044 c:\users\datorn\desktop\tsbk03\include\terrain.h
@@ -380,7 +394,114 @@
 	"GL_utilities.h"
 	"VectorUtils3.h"
 
+<<<<<<< HEAD
 1415577205 source:c:\users\datorn\desktop\tsbk03\src\keymousehandler.cpp
+=======
+1415293903 source:c:\users\datorn\desktop\tsbk03\src\keymousehandler.cpp
 	"KeyMouseHandler.h"
 	<stdio.h>
+
+1415529354 source:c:\users\joachim\documents\github\tsbk03\openoliver\openoliver\common\gl_utilities.c
+	<stdlib.h>
+	<stdio.h>
+	<stddef.h>
+	<string.h>
+	"GL_utilities.h"
+
+1415529354 c:\users\joachim\documents\github\tsbk03\openoliver\openoliver\common\gl_utilities.h
+	<OpenGL/gl3.h>
+	"MicroGlut.h"
+	<gl/glew.h>
+	<gl/glut.h>
+	<gl/freeglut_ext.h>
+
+1415529354 source:c:\users\joachim\documents\github\tsbk03\openoliver\openoliver\common\loadobj.c
+	"loadobj.h"
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<math.h>
+
+1415529354 c:\users\joachim\documents\github\tsbk03\openoliver\openoliver\common\loadobj.h
+	<OpenGL/gl3.h>
+	<GL/glew.h>
+
+1415529354 source:c:\users\joachim\documents\github\tsbk03\openoliver\openoliver\common\loadtga.c
+	"LoadTGA.h"
+
+1415529354 c:\users\joachim\documents\github\tsbk03\openoliver\openoliver\common\loadtga.h
+	<OpenGL/gl3.h>
+	<GL/glew.h>
+	<GL/gl.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+
+1415529354 source:c:\users\joachim\documents\github\tsbk03\openoliver\openoliver\common\vectorutils3.c
+	"VectorUtils3.h"
+
+1415529354 c:\users\joachim\documents\github\tsbk03\openoliver\openoliver\common\vectorutils3.h
+	<OpenGL/gl3.h>
+	<GL/gl.h>
+	<math.h>
+
+1415560341 source:c:\users\joachim\documents\github\tsbk03\openoliver\openoliver\main.cpp
+	<stdio.h>
+	<math.h>
+	<stdlib.h>
+	<windows.h>
+	<GL/glew.h>
+	<GL/glut.h>
+	<GL/freeglut_ext.h>
+	"common/GL_utilities.h"
+	<direct.h>
+	"ModelObject.h"
+	"LoadTGA.h"
+	"ClothSimulation.h"
+	"GrassSimulation.h"
+	"Terrain.h"
+	"KeyMouseHandler.h"
+
+1415529354 c:\users\joachim\documents\github\tsbk03\openoliver\openoliver\src\modelobject.h
+	<vector>
+	"loadobj.h"
+	"VectorUtils3.h"
+	<stdio.h>
+
+1415529354 c:\users\joachim\documents\github\tsbk03\include\clothsimulation.h
+	"ModelObject.h"
+	"GL_utilities.h"
+	"VectorUtils3.h"
+	"loadTGA.h"
+	<math.h>
+	<vector>
+
+1415529354 c:\users\joachim\documents\github\tsbk03\include\grasssimulation.h
+
+1415529354 c:\users\joachim\documents\github\tsbk03\include\terrain.h
+	"ModelObject.h"
+	"GL_utilities.h"
+	"VectorUtils3.h"
+	"loadTGA.h"
+
+1415529354 c:\users\joachim\documents\github\tsbk03\include\keymousehandler.h
+	"GL_utilities.h"
+	"VectorUtils3.h"
+
+1415529354 source:c:\users\joachim\documents\github\tsbk03\openoliver\openoliver\src\modelobject.cpp
+	"ModelObject.h"
+
+1415529354 source:c:\users\joachim\documents\github\tsbk03\src\clothsimulation.cpp
+	"ClothSimulation.h"
+
+1415529354 source:c:\users\joachim\documents\github\tsbk03\src\grasssimulation.cpp
+	"GrassSimulation.h"
+
+1415559865 source:c:\users\joachim\documents\github\tsbk03\src\keymousehandler.cpp
+>>>>>>> origin/master
+	"KeyMouseHandler.h"
+	<stdio.h>
+
+1415560359 source:c:\users\joachim\documents\github\tsbk03\src\terrain.cpp
+	"Terrain.h"
 

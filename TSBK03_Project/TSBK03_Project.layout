@@ -1,13 +1,30 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
+<<<<<<< HEAD
 	<File name="..\openoliver\openoliver\src\lab1-1.c" open="0" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="5199" topLine="184" />
+=======
+	<File name="..\openoliver\openoliver\src\ModelObject.cpp" open="0" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="1" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1063" topLine="20" />
 		</Cursor>
 	</File>
-	<File name="..\src\ClothSimulation.cpp" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="-2" zoom_2="0">
+	<File name="..\openoliver\openoliver\main.cpp" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
+			<Cursor1 position="2046" topLine="69" />
+		</Cursor>
+	</File>
+	<File name="..\include\Terrain.h" open="1" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="412" topLine="0" />
+>>>>>>> origin/master
+		</Cursor>
+	</File>
+	<File name="..\openoliver\openoliver\src\lab1-1.c" open="0" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+<<<<<<< HEAD
 			<Cursor1 position="6558" topLine="51" />
 		</Cursor>
 		<Folding>
@@ -49,12 +66,36 @@
 	<File name="..\include\ClothSimulation.h" open="0" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="-1" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="25" topLine="0" />
+=======
+			<Cursor1 position="5199" topLine="184" />
+		</Cursor>
+	</File>
+	<File name="..\openoliver\openoliver\common\GL_utilities.c" open="0" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="12931" topLine="353" />
+		</Cursor>
+	</File>
+	<File name="..\include\KeyMouseHandler.h" open="1" top="0" tabpos="10" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="359" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="..\openoliver\openoliver\common\loadobj.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="16275" topLine="676" />
+		</Cursor>
+	</File>
+	<File name="..\openoliver\openoliver\common\loadobj.h" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="486" topLine="6" />
+>>>>>>> origin/master
 		</Cursor>
 		<Folding>
 			<Collapse line="26" />
 			<Collapse line="35" />
 		</Folding>
 	</File>
+<<<<<<< HEAD
 	<File name="..\include\GrassSimulation.h" open="0" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="227" topLine="0" />
@@ -73,8 +114,7 @@
 	<File name="..\openoliver\openoliver\common\GL_utilities.c" open="0" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="12801" topLine="335" />
-		</Cursor>
-	</File>
+=======
 	<File name="..\openoliver\openoliver\common\LoadTGA.c" open="0" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="2226" topLine="140" />
@@ -85,11 +125,33 @@
 			<Cursor1 position="260" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="..\openoliver\openoliver\common\VectorUtils3.c" open="0" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="..\openoliver\openoliver\common\VectorUtils3.h" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="4565" topLine="120" />
+			<Cursor1 position="541" topLine="17" />
 		</Cursor>
 	</File>
+	<File name="..\src\ClothSimulation.cpp" open="1" top="1" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="3489" topLine="37" />
+>>>>>>> origin/master
+		</Cursor>
+	</File>
+	<File name="..\openoliver\openoliver\src\ModelObject.h" open="1" top="0" tabpos="8" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="552" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="..\include\ClothSimulation.h" open="1" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="-2" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="56" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="..\include\GrassSimulation.h" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="227" topLine="0" />
+		</Cursor>
+	</File>
+<<<<<<< HEAD
 	<File name="..\openoliver\openoliver\common\VectorUtils3.h" open="0" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="1789" topLine="74" />
@@ -124,6 +186,26 @@
 	<File name="..\openoliver\openoliver\src\ModelObject.h" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="711" topLine="12" />
+=======
+	<File name="..\openoliver\openoliver\common\VectorUtils3.c" open="1" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="4702" topLine="120" />
+		</Cursor>
+	</File>
+	<File name="..\src\GrassSimulation.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="143" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="..\src\KeyMouseHandler.cpp" open="0" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="302" topLine="21" />
+		</Cursor>
+	</File>
+	<File name="..\src\Terrain.cpp" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="-1" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="445" topLine="0" />
+>>>>>>> origin/master
 		</Cursor>
 	</File>
 </CodeBlocks_layout_file>

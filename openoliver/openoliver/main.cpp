@@ -48,14 +48,12 @@ void init(void)
 			0, 0, 1
 			);*/
 
-   // mTerrain = new Terrain();
+   mTerrain = new Terrain();
     printError("init terrain");
 
-    mClothSimulation = new ClothSimulation();
+ /*   mClothSimulation = new ClothSimulation();
 	printError("init cloth simulation");
 
-
-/*
 	mGrassSimulation = new GrassSimulation();
 	printError("init cloth simulation");
 */
@@ -91,9 +89,8 @@ void display(void)
 
     mClothSimulation->update();
     viewMatrix = mKeyMouseHandler.getViewMatrix();
-   // mTerrain->draw(projectionMatrix,viewMatrix);
-    mClothSimulation->draw(projectionMatrix,viewMatrix);
-    printError("Post draw");
+    mTerrain->draw(projectionMatrix,viewMatrix);
+    //mClothSimulation->draw(projectionMatrix,viewMatrix);
 	glutSwapBuffers();
 }
 

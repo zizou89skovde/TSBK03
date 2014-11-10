@@ -24,6 +24,7 @@
 #define FLOATS_PER_VERTEX 3
 #define FLOATS_PER_TEXEL 4
 #define VERTICES_PER_TRIANGLE 3
+
 typedef struct{
 
     vec3  *previousPosition;
@@ -36,10 +37,8 @@ typedef struct{
 typedef struct Spring{
     Mass* mass1;
     Mass* mass2;
-    float restLength;
-    float length;
-    float springConstant;
-    float dampConstant;
+    float restSpringLength;
+    float currSpringLength;
 }Spring;
 
 
@@ -53,12 +52,13 @@ class ClothSimulation
             void update();
     protected:
     private:
-        //Initialize Masses and Springs
+
         void createGridOfMasses();
         void connectMassToSpring();
-        void checkSprings();
 
+        Spring* createSpring(Mass* m1, Mass* m2);
         GLfloat getDeltaLength(vec3 v1,vec3 v2 );
+
         Spring*createSpring(Mass* m1, Mass* m2, float springConstant,float dampConstant);
 
         //Physics - Data containers
@@ -85,8 +85,6 @@ class ClothSimulation
         void generateFrameBuffer();
         FBOstruct *fboCloth;
         ModelObject * mClothModel;
-
-
 
 
 };

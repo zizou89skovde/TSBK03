@@ -45,7 +45,6 @@ void ModelObject::setTexture(GLuint handle, GLuint id){
     textureHandle[numberOfTextures][1] = id;
     numberOfTextures++;
 }
-
 // Loader for inline data to Model (almost same as LoadModelPlus)
 void ModelObject::LoadDataToModel(
 			GLfloat *vertices,
@@ -114,8 +113,6 @@ void ModelObject::BuildModelVAO2(Model *m){
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m->ib);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m->numIndices*sizeof(GLuint), m->indexArray, GL_STATIC_DRAW);
 }
-
-
 
 void ModelObject::setModel(Model * m){
     modelVec.push_back(m);
