@@ -1,6 +1,7 @@
 #ifndef MODELOBJECT_H
 #define MODELOBJECT_H
-
+#include <stdlib.h>
+#include <string.h>
 #include <vector>
 #include "loadobj.h"
 #include "VectorUtils3.h"
@@ -11,7 +12,16 @@ class ModelObject
 
         ModelObject();
         virtual ~ModelObject();
-
+        void LoadDataToModel(
+			GLfloat *vertices,
+			GLfloat *normals,
+			GLfloat *texCoords,
+			GLfloat *colors,
+			GLuint *indices,
+			int numVert,
+			int numInd);
+        void BuildModelVAO2(Model *m);
+        void uploadNewVertexData(GLfloat* dataBuffer,size_t bufferSize);
         void draw(mat4 projectionMatrix, mat4 viewMatrix);
         void setModel(Model * m);
         void setShader(GLuint handle, GLuint id);

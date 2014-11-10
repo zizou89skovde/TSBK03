@@ -2,6 +2,12 @@
 
 ClothSimulation::ClothSimulation()
 {
+
+    //Physics create grid
+    createGridOfMasses();
+    connectMassToSpring();
+
+
     //Initialize cloth model object
     mClothModel = new ModelObject();
 
@@ -36,13 +42,25 @@ ClothSimulation::~ClothSimulation()
 void printVec3(char* head,vec3 v){
     printf("%s x: %f  y: %f z: %f \n",head, v.x , v.y ,v.z);
 }
+/** \brief
+ * Computes distance between two 3d points
+ * \param v1 vec3 3d point
+ * \param v2 vec3 3d point
+ * \return GLfloat distance between two 3d points
+ *
+ */
 
 GLfloat ClothSimulation::getDeltaLength(vec3 v1,vec3 v2 ){
     vec3 deltaPos = v1 - v2;
     GLfloat length = sqrt(DotProduct(deltaPos,deltaPos));
     return length;
 }
-
+/** \brief Creates a grid of masses. The masses reside in mMasses, which is a 2D array
+ * of Mass data type. The size of the grid is define in ClothSimulation.h. See CLOTH_DIM.
+ *
+ * \return void
+ *
+ */
 void ClothSimulation::createGridOfMasses(){
 
     Mass * currentMass;
@@ -62,12 +80,18 @@ void ClothSimulation::createGridOfMasses(){
         currentMass->currentPosition =  new vec3(xInit,yInit,zInit);
         currentMass->previousPosition = new vec3(xInit,yInit,zInit);
         currentMass->accelearation = new vec3(0,0,0);
+        currentMass->x = x;
+        currentMass->y = y;
 
     }
 
 
 }
-
+/****************************************************************************/
+/****************************************************************************/
+/* Initializing  Masses and Springs */
+/****************************************************************************/
+/****************************************************************************/
 /** \brief
  *  Creates a spring instance that is  connected to masses m1 and m2. Also
  *  assigned with rest length of the spring.
@@ -76,7 +100,7 @@ void ClothSimulation::createGridOfMasses(){
  * \return Spring * Pointer to a spring now connected to masses m1 and m2
  *
  */
-Spring * ClothSimulation::createSpring(Mass* m1, Mass* m2){
+Spring * ClothSimulation::createSpring(Mass* m1, Mass* m2, float springConstant,float dampConstant){
     Spring *spring = new Spring();
 
     //Connecting end points to masses
@@ -84,43 +108,49 @@ Spring * ClothSimulation::createSpring(Mass* m1, Mass* m2){
     spring->mass2 = m2;
 
     //Computing the initial rest length of the spring
-    GLfloat length = getDeltaLength(*(m1->currentPosition),*(m2->currentPosition));
-    spring->currSpringLength = length;
-    spring->restSpringLength = length;
+    GLfloat length      = getDeltaLength(*m1->currentPosition,*m2->currentPosition);
+    spring->length      = length;
+    spring->restLength  = length;
+
+    spring->springConstant    = springConstant;
+    spring->dampConstant    = dampConstant;
     return spring;
 
 }
-
+/** \brief Creates spring instances which is connecting masses.
+ * There are 3 type of springs - structural, bend and shear springs.
+ * \return void
+ */
 void ClothSimulation::connectMassToSpring(){
     for(int y = 0; y < CLOTH_DIM; ++y)
         for(int x = 0; x < CLOTH_DIM; ++x){
 
         if(x < CLOTH_DIM - 1){
             //Right horizontal structural spring
-            mSprings.push_back(createSpring(&mMasses[y][x],&mMasses[y][x+1]));
+              mSprings.push_back(createSpring(&mMasses[y][x],&mMasses[y][x+1],SpringConstant,SpringDamping));
         }
 
         if(x < CLOTH_DIM - 2){
             //Right horizontal bend spring
-            mSprings.push_back(createSpring(&mMasses[y][x],&mMasses[y][x+2]));
+             mSprings.push_back(createSpring(&mMasses[y][x],&mMasses[y][x+2],SpringConstant,SpringDamping));
         }
 
         if(y < CLOTH_DIM - 1) {
             //upper vertical structural spring
-            mSprings.push_back(createSpring(&mMasses[y+1][x],&mMasses[y][x]));
+            mSprings.push_back(createSpring(&mMasses[y+1][x],&mMasses[y][x],SpringConstant,SpringDamping));
         }
         if(y < CLOTH_DIM - 2) {
             //upper vertical bend spring
-            mSprings.push_back(createSpring(&mMasses[y+2][x],&mMasses[y][x]));
+            mSprings.push_back(createSpring(&mMasses[y+2][x],&mMasses[y][x],SpringConstant,SpringDamping));
         }
 
         if( y < CLOTH_DIM - 1 && x < CLOTH_DIM - 1){
             //Right upper shear spring
-            mSprings.push_back(createSpring(&mMasses[y+1][x],&mMasses[y][x+1]));
+            mSprings.push_back(createSpring(&mMasses[y+1][x],&mMasses[y][x+1],SpringConstant,SpringDamping));
         }
-        if( y < 1 && x < CLOTH_DIM - 1){
+        if( y > 0 && x < CLOTH_DIM - 1){
             //Right lower shear spring
-            mSprings.push_back(createSpring(&mMasses[y-1][x],&mMasses[y][x+1]));
+            mSprings.push_back(createSpring(&mMasses[y-1][x],&mMasses[y][x+1],SpringConstant,SpringDamping));
         }
     }
 }

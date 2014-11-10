@@ -33,7 +33,7 @@
 	<gl/glut.h>
 	<gl/freeglut_ext.h>
 
-1415529353 c:\program files (x86)\codeblocks\mingw\include\gl\glew.h
+1374498682 c:\program files (x86)\codeblocks\mingw\include\gl\glew.h
 	<stddef.h>
 	<inttypes.h>
 	<stdint.h>
@@ -49,17 +49,17 @@
 1341006776 c:\program files (x86)\codeblocks\mingw\include\stdint.h
 	<stddef.h>
 
-1415529353 c:\program files (x86)\codeblocks\mingw\include\gl\glu.h
+1301111164 c:\program files (x86)\codeblocks\mingw\include\gl\glu.h
 	<stddef.h>
 	<GL/gl.h>
 
-1415529353 c:\program files (x86)\codeblocks\mingw\include\gl\gl.h
+1301111164 c:\program files (x86)\codeblocks\mingw\include\gl\gl.h
 
-1415529353 c:\program files (x86)\codeblocks\mingw\include\gl\glut.h
+1411193073 c:\program files (x86)\codeblocks\mingw\include\gl\glut.h
 	"freeglut_std.h"
 	"freeglut_ext.h"
 
-1415529353 c:\program files (x86)\codeblocks\mingw\include\gl\freeglut_std.h
+1368269360 c:\program files (x86)\codeblocks\mingw\include\gl\freeglut_std.h
 	<windows.h>
 	<OpenGL/gl.h>
 	<OpenGL/glu.h>
@@ -261,10 +261,10 @@
 1301111156 c:\program files (x86)\codeblocks\mingw\include\oleidl.h
 	<objfwd.h>
 
-1415529353 c:\program files (x86)\codeblocks\mingw\include\gl\freeglut_ext.h
+1368269360 c:\program files (x86)\codeblocks\mingw\include\gl\freeglut_ext.h
 	<stdarg.h>
 
-1414060344 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\common\loadobj.c
+1415583470 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\common\loadobj.c
 	"loadobj.h"
 	<stdio.h>
 	<stdlib.h>
@@ -297,11 +297,9 @@
 	<GL/gl.h>
 	<math.h>
 
-<<<<<<< HEAD
-1415565362 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\main.cpp
-=======
-1415293926 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\main.cpp
->>>>>>> origin/master
+1415293901 D
+
+1415584685 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\main.cpp
 	<stdio.h>
 	<math.h>
 	<stdlib.h>
@@ -317,6 +315,33 @@
 	"GrassSimulation.h"
 	"Terrain.h"
 	"KeyMouseHandler.h"
+
+1415559865 gin/master
+	<stdio.h>
+	<math.h>
+	<stdlib.h>
+	<windows.h>
+	<GL/glew.h>
+	<GL/glut.h>
+	<GL/freeglut_ext.h>
+	"common/GL_utilities.h"
+	<direct.h>
+	"ModelObject.h"
+	"LoadTGA.h"
+	"ClothSimulation.h"
+	"GrassSimulation.h"
+	"Terrain.h"
+	"KeyMouseHandler.h"
+	"ModelObject.h"
+	"ModelObject.h"
+	"GL_utilities.h"
+	"VectorUtils3.h"
+	"loadTGA.h"
+	<math.h>
+	<vector>
+	"ClothSimulation.h"
+	"KeyMouseHandler.h"
+	<stdio.h>
 
 1341006772 c:\program files (x86)\codeblocks\mingw\include\direct.h
 	<_mingw.h>
@@ -344,24 +369,18 @@
 	"GL_utilities.h"
 	"loadobj.h"
 
-<<<<<<< HEAD
-1415572088 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\src\modelobject.cpp
-=======
-1415275192 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\src\modelobject.cpp
->>>>>>> origin/master
+1415583738 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\src\modelobject.cpp
 	"ModelObject.h"
 
-1414080034 c:\users\datorn\desktop\tsbk03\openoliver\openoliver\src\modelobject.h
+1415584223 c:\users\datorn\desktop\tsbk03\openoliver\openoliver\src\modelobject.h
+	<stdlib.h>
+	<string.h>
 	<vector>
 	"loadobj.h"
 	"VectorUtils3.h"
 	<stdio.h>
 
-<<<<<<< HEAD
-1415579624 c:\users\datorn\desktop\tsbk03\include\clothsimulation.h
-=======
-1415283427 c:\users\datorn\desktop\tsbk03\include\clothsimulation.h
->>>>>>> origin/master
+1415584292 c:\users\datorn\desktop\tsbk03\include\clothsimulation.h
 	"ModelObject.h"
 	"GL_utilities.h"
 	"VectorUtils3.h"
@@ -369,11 +388,7 @@
 	<math.h>
 	<vector>
 
-<<<<<<< HEAD
-1415580978 source:c:\users\datorn\desktop\tsbk03\src\clothsimulation.cpp
-=======
-1415286539 source:c:\users\datorn\desktop\tsbk03\src\clothsimulation.cpp
->>>>>>> origin/master
+1415584606 source:c:\users\datorn\desktop\tsbk03\src\clothsimulation.cpp
 	"ClothSimulation.h"
 
 1415285091 c:\users\datorn\desktop\tsbk03\include\grasssimulation.h
@@ -381,7 +396,7 @@
 1415285091 source:c:\users\datorn\desktop\tsbk03\src\grasssimulation.cpp
 	"GrassSimulation.h"
 
-1415292167 source:c:\users\datorn\desktop\tsbk03\src\terrain.cpp
+1415583470 source:c:\users\datorn\desktop\tsbk03\src\terrain.cpp
 	"Terrain.h"
 
 1415287044 c:\users\datorn\desktop\tsbk03\include\terrain.h
@@ -394,10 +409,7 @@
 	"GL_utilities.h"
 	"VectorUtils3.h"
 
-<<<<<<< HEAD
-1415577205 source:c:\users\datorn\desktop\tsbk03\src\keymousehandler.cpp
-=======
-1415293903 source:c:\users\datorn\desktop\tsbk03\src\keymousehandler.cpp
+1415583527 source:c:\users\datorn\desktop\tsbk03\src\keymousehandler.cpp
 	"KeyMouseHandler.h"
 	<stdio.h>
 
@@ -498,9 +510,6 @@
 	"GrassSimulation.h"
 
 1415559865 source:c:\users\joachim\documents\github\tsbk03\src\keymousehandler.cpp
->>>>>>> origin/master
-	"KeyMouseHandler.h"
-	<stdio.h>
 
 1415560359 source:c:\users\joachim\documents\github\tsbk03\src\terrain.cpp
 	"Terrain.h"

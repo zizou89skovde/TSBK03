@@ -37,8 +37,10 @@ typedef struct{
 typedef struct Spring{
     Mass* mass1;
     Mass* mass2;
-    float restSpringLength;
-    float currSpringLength;
+    float restLength;
+    float length;
+    float springConstant;
+    float dampConstant;
 }Spring;
 
 

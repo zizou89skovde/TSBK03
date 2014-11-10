@@ -48,11 +48,13 @@ void init(void)
 			0, 0, 1
 			);*/
 
+
+  mClothSimulation = new ClothSimulation();
+	printError("init cloth simulation");
+/*
+
    mTerrain = new Terrain();
     printError("init terrain");
-
- /*   mClothSimulation = new ClothSimulation();
-	printError("init cloth simulation");
 
 	mGrassSimulation = new GrassSimulation();
 	printError("init cloth simulation");
@@ -87,10 +89,11 @@ void display(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-    mClothSimulation->update();
+
     viewMatrix = mKeyMouseHandler.getViewMatrix();
-    mTerrain->draw(projectionMatrix,viewMatrix);
-    //mClothSimulation->draw(projectionMatrix,viewMatrix);
+    //mTerrain->draw(projectionMatrix,viewMatrix);
+     mClothSimulation->update();
+    mClothSimulation->draw(projectionMatrix,viewMatrix);
 	glutSwapBuffers();
 }
 
