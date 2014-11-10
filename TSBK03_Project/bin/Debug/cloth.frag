@@ -3,19 +3,25 @@
 out vec4 out_Color;
 
 in vec3 v_Normal;
-in float v_Height;
+in vec3 v_Position;
+in vec3 v_LightPos;
 void main(void)
 {
-	const vec3 light = vec3(0.58, 0.58, 0.58); // Given in VIEW coordinates! You usually specify light sources in world coordinates.
-	float diffuse, shade;
+	vec4 color = vec4(0.8,0.0,0.0,1.0);
+    
+	vec3 normal = v_Normal;
 	
-	// Diffuse
-	diffuse = dot(normalize(v_Normal), light);
-	diffuse = max(0.0, diffuse); // No negative light
+	vec3  lightVector 	= normalize(v_LightPos);//(v_LightPos-v_Position);	
+	vec3 l = normalize(lightVector);
+	vec3 e = normalize(-v_Position);
+	vec3 n = normalize(normal);
+	vec3 r = reflect(-l,n);
 	
+	float specular = max(dot(r,e),0.0);
+	specular = pow(specular,40.0);
 	
-	float h = v_Height/25.0;
-	
-	shade = diffuse;
-	out_Color = vec4(1.0, 0, 0, 1.0);
+	float diffuse = max(dot(n,l),0.0);
+	float ambient = 0.0;
+
+	out_Color = (specular+diffuse+ambient)*color;
 }

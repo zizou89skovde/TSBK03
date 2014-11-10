@@ -76,16 +76,11 @@ void ModelObject::uploadNewVertexData(GLfloat* dataBuffer,size_t bufferSize){
     Model* m = modelVec.at(0);
     glBindVertexArray(m->vao);
     glBindBuffer(GL_ARRAY_BUFFER, m->vb);
-     glBufferSubData(GL_ARRAY_BUFFER, 0, bufferSize, &dataBuffer[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, bufferSize, dataBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void ModelObject::BuildModelVAO2(Model *m/*,
-			GLuint program,
-			char* vertexVariableName,
-			char* normalVariableName,
-			char* texCoordVariableName*/)
-{
+void ModelObject::BuildModelVAO2(Model *m){
 	glGenVertexArrays(1, &m->vao);
 	glGenBuffers(1, &m->vb);
 	glGenBuffers(1, &m->ib);
@@ -119,6 +114,7 @@ void ModelObject::BuildModelVAO2(Model *m/*,
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m->ib);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m->numIndices*sizeof(GLuint), m->indexArray, GL_STATIC_DRAW);
 }
+
 
 
 void ModelObject::setModel(Model * m){

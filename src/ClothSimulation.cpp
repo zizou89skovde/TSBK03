@@ -11,21 +11,23 @@ ClothSimulation::ClothSimulation()
 
     // Load model data
     uploadInitialModelData();
-    uploadNewData();
+    //Generate Cloth FBO, used in vertex shader for vertex displacement and also calculating normals.
+    generateFrameBuffer();
+    mClothModel->setTexture(fboCloth->texid,0);
+  //  uploadNewData();
+
     // Load shader
     GLuint shader = loadShaders("cloth.vert", "cloth.frag");
 	mClothModel->setShader(shader,0);
 
-
-
     // Set initial transform
-    mat4 transform1 = S(2,2,2);
+    mat4 transform1 = S(1,1,1);
     mClothModel->setTransform(transform1);
 
+    //Assign default values to some variables
+    previousTime = -1;
+    Gravity = new vec3(0,-0.982,0.0);
 
-
-    Gravity = new vec3(0,0.982,0.0);
- //   checkSprings();
 }
 
 ClothSimulation::~ClothSimulation()
@@ -70,9 +72,11 @@ void ClothSimulation::createGridOfMasses(){
         GLfloat len = CLOTH_RES/2.0;
         // X/Y positions are centered around zero, then normalized, then scaled with CLOTH_SIZE_<AXIS>.
         xInit =  CLOTH_SIZE_X*(GLfloat)(x - len)/len;
-        yInit =  CLOTH_SIZE_Y*(GLfloat)(y - len)/len;
-        zInit =  8;
-        currentMass->currentPosition = new vec3(xInit,yInit,zInit);
+        yInit =  8;//CLOTH_SIZE_Y*(GLfloat)(y - len)/len;
+        zInit =  CLOTH_SIZE_Y*(GLfloat)(y - len)/len;//8;
+        currentMass->currentPosition =  new vec3(xInit,yInit,zInit);
+        currentMass->previousPosition = new vec3(xInit,yInit,zInit);
+        currentMass->accelearation = new vec3(0,0,0);
         currentMass->x = x;
         currentMass->y = y;
     }
@@ -169,29 +173,26 @@ void ClothSimulation::connectMassToSpring(){
 /****************************************************************************/
 
 void ClothSimulation::uploadInitialModelData(){
-
-
     int vertexCount = CLOTH_DIM*CLOTH_DIM;
 	int triangleCount = (CLOTH_DIM-1) * (CLOTH_DIM-1)* 2;
 
-    GLfloat *vertexArray = (GLfloat *) malloc(sizeof(GLfloat) * FLOATS_PER_VERTEX * vertexCount);
+    GLfloat vertexArray[FLOATS_PER_VERTEX * vertexCount];
 	GLfloat *normalArray = (GLfloat *) malloc(sizeof(GLfloat) * FLOATS_PER_VERTEX* vertexCount);
-	GLfloat *texCoordArray =(GLfloat *) malloc(sizeof(GLfloat) * FLOATS_PER_TEXEL * vertexCount);
 	GLuint *indexArray = (GLuint *)malloc(sizeof(GLuint) * triangleCount*VERTICES_PER_TRIANGLE);
 
      for(GLuint y = 0; y < CLOTH_DIM; ++y)
         for(GLuint x = 0; x < CLOTH_DIM; ++x){
-            Mass mass = mMasses[y][x];
-            vertexArray[(x + y * CLOTH_DIM)*3 + 0] = mass.currentPosition->x;
-            vertexArray[(x + y * CLOTH_DIM)*3 + 1] = mass.currentPosition->y;
-            vertexArray[(x + y * CLOTH_DIM)*3 + 2] = mass.currentPosition->z;
 
+            float xPos = x/(float)CLOTH_DIM;
+            float yPos = y/(float)CLOTH_DIM;
+            vertexArray[(x + y * CLOTH_DIM)*3 + 0] = xPos;
+            vertexArray[(x + y * CLOTH_DIM)*3 + 1] = yPos;
+            vertexArray[(x + y * CLOTH_DIM)*3 + 2] = 0;
+            //printf("X: %f Y: %f \n",xPos,yPos);
             normalArray[(x + y * CLOTH_DIM)*3 + 0] = 0;
             normalArray[(x + y * CLOTH_DIM)*3 + 1] = 0;
             normalArray[(x + y * CLOTH_DIM)*3 + 2] = 1;
 
-			texCoordArray[(x + y * CLOTH_DIM)*2 + 0] = x; // (float)x / tex->width;
-			texCoordArray[(x + y * CLOTH_DIM)*2 + 1] = y; // (float)z / tex->height;
         }
 
 	 for (GLuint y = 0; y < CLOTH_DIM-1; y++)
@@ -209,19 +210,17 @@ void ClothSimulation::uploadInitialModelData(){
         mClothModel->LoadDataToModel(
 			vertexArray,
 			normalArray,
-			texCoordArray,
+			NULL,
 			NULL,
 			indexArray,
 			vertexCount,
 			triangleCount*3);
 }
-
 void ClothSimulation::draw(mat4 projectionMatrix, mat4 viewMatrix){
     mClothModel->draw(projectionMatrix, viewMatrix);
 }
-
 void ClothSimulation::uploadNewData(){
-    int vertexCount = CLOTH_DIM*CLOTH_DIM;
+  /*  int vertexCount = CLOTH_DIM*CLOTH_DIM;
     GLfloat *vertexArray = (GLfloat *) malloc(sizeof(GLfloat) * FLOATS_PER_VERTEX * vertexCount);
    // GLfloat *normalArray = (GLfloat *) malloc(sizeof(GLfloat) * FLOATS_PER_VERTEX* vertexCount);
     for(GLuint y = 0; y < CLOTH_DIM; ++y)
@@ -231,8 +230,63 @@ void ClothSimulation::uploadNewData(){
         vertexArray[(x + y * CLOTH_DIM)*3 + 1] = mass.currentPosition->y;
         vertexArray[(x + y * CLOTH_DIM)*3 + 2] = mass.currentPosition->z;
     }
-    mClothModel->uploadNewVertexData(vertexArray,vertexCount);
+    size_t buffSize = 4*3*vertexCount;
+    mClothModel->uploadNewVertexData(vertexArray,buffSize);*/
+    int vertexCount = CLOTH_DIM*CLOTH_DIM;
+    printError(" pre Cloth FBO");
 
+    GLfloat *vertexArray = (GLfloat *) malloc(sizeof(GLfloat) * (FLOATS_PER_TEXEL) * vertexCount);
+    for(GLuint y = 0; y < CLOTH_DIM; ++y)
+    for(GLuint x = 0; x < CLOTH_DIM; ++x){
+        Mass mass = mMasses[y][x];
+        vertexArray[(x + y * CLOTH_DIM)*FLOATS_PER_TEXEL + 0] = mass.currentPosition->x;
+        vertexArray[(x + y * CLOTH_DIM)*FLOATS_PER_TEXEL + 1] = mass.currentPosition->y;
+        vertexArray[(x + y * CLOTH_DIM)*FLOATS_PER_TEXEL+ 2]  = mass.currentPosition->z;
+        vertexArray[(x + y * CLOTH_DIM)*FLOATS_PER_TEXEL + 3] = 1;
+    }
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, CLOTH_DIM,CLOTH_DIM, 0, GL_RGBA, GL_FLOAT, vertexArray);
+	free(vertexArray);
+
+    glBindTexture(GL_TEXTURE_2D, fboCloth->texid);
+
+}
+ void ClothSimulation::generateFrameBuffer(){
+    //Create fbo struct
+    fboCloth = (FBOstruct*)malloc(sizeof(FBOstruct));
+
+    //Set set dimensions
+	fboCloth->width = CLOTH_DIM;
+	fboCloth->height = CLOTH_DIM;
+
+	//Generate frame buffer and texture
+    glGenFramebuffers(1, &fboCloth->fb);
+	glBindFramebuffer(GL_FRAMEBUFFER, fboCloth->fb);
+	glGenTextures(1, &fboCloth->texid);
+	glBindTexture(GL_TEXTURE_2D, fboCloth->texid);
+
+	//Select clamp and nearest configuration
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    int vertexCount = CLOTH_DIM*CLOTH_DIM;
+    printError(" pre Cloth FBO");
+
+    GLfloat *vertexArray = (GLfloat *) malloc(sizeof(GLfloat) * (FLOATS_PER_TEXEL) * vertexCount);
+    for(GLuint y = 0; y < CLOTH_DIM; ++y)
+    for(GLuint x = 0; x < CLOTH_DIM; ++x){
+        Mass mass = mMasses[y][x];
+        vertexArray[(x + y * CLOTH_DIM)*FLOATS_PER_TEXEL + 0] = mass.currentPosition->x;
+        vertexArray[(x + y * CLOTH_DIM)*FLOATS_PER_TEXEL + 1] = mass.currentPosition->y;
+        vertexArray[(x + y * CLOTH_DIM)*FLOATS_PER_TEXEL+ 2] = mass.currentPosition->z;
+        vertexArray[(x + y * CLOTH_DIM)*FLOATS_PER_TEXEL + 3] = 1;
+    }
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, CLOTH_DIM,CLOTH_DIM, 0, GL_RGBA, GL_FLOAT, vertexArray);
+	free(vertexArray);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    printError("Cloth FBO");
 }
 
 /****************************************************************************/
@@ -240,14 +294,29 @@ void ClothSimulation::uploadNewData(){
 /*Cloth physics */
 /****************************************************************************/
 /****************************************************************************/
-
 /**
 * Check if current mass is a fix point. That not should be affected by any force.
 * There are two fix point which up hold the rest of the cloth.
 **/
 void ClothSimulation::update(){
-    applyForces();
-    integrate();
+
+
+    if(previousTime < 0){
+        previousTime = glutGet(GLUT_ELAPSED_TIME);
+        return;
+    }
+
+    GLfloat newTime = (GLfloat) glutGet(GLUT_ELAPSED_TIME);
+    GLfloat elapsedTime = newTime-previousTime;
+
+
+    GLuint numIterations = (GLuint)(elapsedTime/(dt*500.0f));
+    if(numIterations > 0){
+        previousTime = newTime;
+        applyForces();
+        integrate();
+        uploadNewData();
+    }
 }
 /**
 * Integrate position of each mass using verlet integration method:
@@ -290,9 +359,8 @@ void ClothSimulation::applyForces(){
      //Iterate over all masses in order to apply gravity and a damp force on each and every mass.
      for(int y = 0; y < CLOTH_DIM; ++y)
         for(int x = 0; x < CLOTH_DIM; ++x){
-            if(isFixPoint(mMasses[y][x].x,mMasses[y][x].y))
             // Reset acceleration
-            *mMasses[y][x].accelearation = SetVector(0,0,0);
+            mMasses[y][x].accelearation = new vec3(0,0,0);
 
             // Apply gravity force
             *mMasses[y][x].accelearation += *Gravity;
@@ -333,7 +401,7 @@ void ClothSimulation::applyForces(){
 
         // Add force from spring
         *mass1->accelearation += force;
-        *mass2->accelearation += force;
+        *mass2->accelearation -= force;
 
     }
 }
