@@ -2,83 +2,247 @@
 
 ModelObject::ModelObject()
 {
-     //   modelVec          = new std::vector<Model*>();
-      //  modelTransformVec = new std::vector<mat4>();
-
-        numberOfShaders  = 0;
-        numberOfTextures = 0;
 }
 
 ModelObject::~ModelObject()
 {
-       // delete modelVec;
-       // delete modelTransformVec;
+    /** Clean up models **/
+    Model_Type * m;
+    for(std::vector<Model_Type*>::iterator it = mModelList.begin(); it != mModelList.end(); ++it) {
+        m = *it;
+        if(m->sModel->vertexArray!= NULL){
+            free(m->sModel->vertexArray);
+            glDeleteBuffers(1, &m->sModel->vb);
+        }
+        if(m->sModel->indexArray != NULL){
+            free(m->sModel->indexArray);
+            glDeleteBuffers(1,&m->sModel->ib);
+        }
+        if(m->sModel->texCoordArray != NULL){
+            free(m->sModel->texCoordArray);
+            glDeleteBuffers(1,&m->sModel->tb);
+        }
+        if(m->sModel->normalArray != NULL){
+            free(m->sModel->normalArray);
+            glDeleteBuffers(1,&m->sModel->nb);
+        }
+        /** Delete VAO **/
+        glDeleteVertexArrays(1,&m->sModel->vao);
+
+        /** Delete Model containers**/
+        free(m->sModel);
+        delete m;
+    }
+
+
+
+    /**Clear the list **/
+    mModelList.clear();
+
+    /** Delete Textures **/
+    Texture_Type * texture;
+    for(std::vector<Texture_Type*>::iterator it = mTextureList.begin(); it != mTextureList.end(); ++it) {
+        texture = *it;
+        glDeleteTextures(1,&texture->sTextureId);
+        delete texture->sUniformName;
+        delete texture;
+    }
+    mTextureList.clear();
+
+    /** Delete Uniform**/
+    Uniform_Type * uniform;
+    for(std::vector<Uniform_Type*>::iterator it = mUniformList.begin(); it != mUniformList.end(); ++it) {
+        uniform = *it;
+        delete uniform->sData;
+        delete uniform->sUniformName;
+        delete uniform;
+    }
+    mUniformList.clear();
+
+    Shader_Type * shader;
+    for(std::vector<Shader_Type*>::iterator it = mShaderList.begin(); it != mShaderList.end(); ++it) {
+        shader = *it;
+        glDeleteProgram(shader->sShaderHandleGPU);
+        delete shader;
+    }
+    mShaderList.clear();
+
+     Transform_Type * t;
+    for(std::vector<Transform_Type*>::iterator it = mTransformList.begin(); it != mTransformList.end(); ++it) {
+        t = *it;
+        delete t;
+    }
+    mTransformList.clear();
+    printError("Model Object Clean up");
 }
+void ModelObject::drawVP(mat4 projectionMatrix, mat4 viewMatrix){
+    Shader_Type * shader;
+    for(std::vector<Shader_Type*>::iterator it = mShaderList.begin(); it != mShaderList.end(); ++it) {
 
-void ModelObject::draw(mat4 projectionMatrix, mat4 viewMatrix){
+        shader = *it;
 
-  // for(int i = 0; i < numberOfShaders; i++){
-        int program = shaderHandle[0][0];
+        int program = shader->sShaderHandleGPU;
         glUseProgram(program);
 
         //Compute model2view , and model2view/projection matrix.
-        mat4 mvMatrix = Mult(viewMatrix,modelTransformVec.at(0));
+        mat4 mvMatrix = Mult(viewMatrix,*getTransform(shader->sShaderId));
         mat4 mvpMatrix = Mult(projectionMatrix,mvMatrix);
 
         glUniformMatrix4fv(glGetUniformLocation(program, "MV_Matrix"), 1, GL_TRUE, mvMatrix.m);
         glUniformMatrix4fv(glGetUniformLocation(program, "MVP_Matrix"), 1, GL_TRUE, mvpMatrix.m);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, textureHandle[0][0]);
-        glUniform1i(glGetUniformLocation(program, "texUnit"), 0);
-        DrawModel(modelVec.at(0), program, (char *)"in_Position", (char *)"in_Normal", NULL);
- //   }
+        uploadTexture(shader->sShaderId,program);
+        uploadUniformFloat(shader->sShaderId,program);
+
+
+    }
 
 }
-void ModelObject::setShader(GLuint handle, GLuint id){
-    shaderHandle[numberOfShaders][0] = handle;
-    shaderHandle[numberOfShaders][1] = id;
-    numberOfShaders++;
-}
-void ModelObject::setTexture(GLuint handle, GLuint id){
-    textureHandle[numberOfTextures][0] = handle;
-    textureHandle[numberOfTextures][1] = id;
-    numberOfTextures++;
-}
-// Loader for inline data to Model (almost same as LoadModelPlus)
-void ModelObject::LoadDataToModel(
-			GLfloat *vertices,
-			GLfloat *normals,
-			GLfloat *texCoords,
-			GLfloat *colors,
-			GLuint *indices,
-			int numVert,
-			int numInd)
-{
+void ModelObject::draw(mat4 projectionMatrix, mat4 viewMatrix){
+        Shader_Type * shader;
+        for(std::vector<Shader_Type*>::iterator it = mShaderList.begin(); it != mShaderList.end(); ++it) {
 
-	Model* m = (Model *)malloc(sizeof(Model));
-	memset(m, 0, sizeof(Model));
+        shader = *it;
 
-	m->vertexArray = vertices;
-	m->texCoordArray = texCoords;
-	m->normalArray = normals;
-	m->indexArray = indices;
-	m->numVertices = numVert;
-	m->numIndices = numInd;
+        int program = shader->sShaderHandleGPU;
+        glUseProgram(program);
 
-	BuildModelVAO2(m);
+        //Compute model2view , and model2view/projection matrix.
+        mat4 mvMatrix = Mult(viewMatrix,*getTransform(shader->sShaderId));
+        mat4 mvpMatrix = Mult(projectionMatrix,mvMatrix);
 
-	this->modelVec.push_back(m);
+        glUniformMatrix4fv(glGetUniformLocation(program, "MV_Matrix"), 1, GL_TRUE, mvMatrix.m);
+        glUniformMatrix4fv(glGetUniformLocation(program, "MVP_Matrix"), 1, GL_TRUE, mvpMatrix.m);
+
+        uploadTexture(shader->sShaderId,program);
+        uploadUniformFloat(shader->sShaderId,program);
+
+        drawModel(shader->sShaderId,program);
+
+
+    }
+
 }
 
-void ModelObject::uploadNewVertexData(GLfloat* dataBuffer,size_t bufferSize){
-    Model* m = modelVec.at(0);
-    glBindVertexArray(m->vao);
-    glBindBuffer(GL_ARRAY_BUFFER, m->vb);
+void ModelObject::uploadTexture(GLuint activeShaderId,GLuint activeShaderHandle){
+    Texture_Type * texture;
+    GLuint numActiveTextures = 0;
+    for(std::vector<Texture_Type*>::iterator it = mTextureList.begin(); it != mTextureList.end(); ++it) {
+        texture = *it;
+        if(texture->sShaderId == activeShaderId ){
+            glActiveTexture(GL_TEXTURE0+numActiveTextures);
+            glBindTexture(GL_TEXTURE_2D, texture->sTextureId);
+            glUniform1i(glGetUniformLocation(activeShaderHandle, texture->sUniformName), numActiveTextures);
+            numActiveTextures++;
+        }
+    }
+
+}
+void ModelObject::uploadUniformFloat(GLuint activeShaderId,GLuint activeShaderHandle){
+    Uniform_Type * uniform;
+    for(std::vector<Uniform_Type*>::iterator it = mUniformList.begin(); it != mUniformList.end(); ++it) {
+        uniform = *it;
+        if(uniform->sShaderId == activeShaderId){
+            switch(uniform->sSize){
+                case 1:
+                    glUniform1f(glGetUniformLocation(activeShaderHandle,uniform->sUniformName), uniform->sData[0]);
+                break;
+                case 2:
+                    glUniform2f(glGetUniformLocation(activeShaderHandle, uniform->sUniformName), uniform->sData[0],uniform->sData[1]);
+                break;
+                case 3:
+                    glUniform3f(glGetUniformLocation(activeShaderHandle, uniform->sUniformName), uniform->sData[0],uniform->sData[1],uniform->sData[2]);
+                break;
+                case 4:
+                    glUniform4f(glGetUniformLocation(activeShaderHandle, uniform->sUniformName), uniform->sData[0],uniform->sData[1],uniform->sData[2],uniform->sData[3]);
+                break;
+                default:
+                    break;
+            }
+        }
+    }
+}
+
+void ModelObject::setUniform(GLfloat * data, GLuint sizeData, GLuint shaderId, const char * uniformName){
+    Uniform_Type * uniform = new Uniform_Type();
+    uniform->sData = data;
+    uniform->sSize = sizeData;
+    uniform->sShaderId = shaderId;
+    memset(uniform->sUniformName,0,uniform->CHAR_LEN*sizeof(char));
+    strcpy(uniform->sUniformName,uniformName);
+    mUniformList.push_back(uniform);
+}
+void ModelObject::setShader(GLuint handleGPU, GLuint shaderId){
+    Shader_Type * shader = new Shader_Type();
+    shader->sShaderHandleGPU = handleGPU;
+    shader->sShaderId        = shaderId;
+    mShaderList.push_back(shader);
+}
+void ModelObject::setTexture(GLuint handle,GLuint shaderId,const char* uniformName){
+
+    Texture_Type * newTexture = new Texture_Type();
+    newTexture->sShaderId  = shaderId;
+    newTexture->sTextureId    = handle;
+    memset(newTexture->sUniformName,0,newTexture->CHAR_LEN*sizeof(char));
+    strcpy(newTexture->sUniformName,uniformName);
+    mTextureList.push_back(newTexture);
+
+
+}
+void ModelObject::setModel(Model * m, GLuint shaderId){
+    Model_Type * model = new Model_Type();
+    model->sModel = m;
+    model->sShaderId = shaderId;
+    mModelList.push_back(model);
+}
+void ModelObject::setTransform(mat4 transf,GLuint shaderId){
+    Transform_Type * transformT = new Transform_Type();
+    transformT->sTransform = transf;
+    transformT->sShaderId  = shaderId;
+    mTransformList.push_back(transformT);
+}
+
+void ModelObject::drawModel(GLuint shaderId,GLuint activeShaderHandle){
+    Model_Type * m;
+    for(std::vector<Model_Type*>::iterator it = mModelList.begin(); it != mModelList.end(); ++it) {
+        m = *it;
+        if(m->sShaderId == shaderId){
+
+            char* normalAttributeString= NULL;
+            if(m->sModel->normalArray != NULL) normalAttributeString = (char *)"in_Normal";
+
+            char* textureAttributeString = NULL;
+            if(m->sModel->texCoordArray != NULL) textureAttributeString = (char *)"in_TextureCoord";
+            DrawModel(m->sModel, activeShaderHandle,(char *)"in_Position" ,normalAttributeString , textureAttributeString);
+
+            return;
+        }
+    }
+    printf("ERROR: No model was selected for current shader. Shader id: %d",shaderId);
+}
+mat4 * ModelObject::getTransform(GLuint shaderId){
+    Transform_Type * t;
+    for(std::vector<Transform_Type*>::iterator it = mTransformList.begin(); it != mTransformList.end(); ++it) {
+        t = *it;
+        if(t->sShaderId == shaderId)
+            return &t->sTransform;
+    }
+    return NULL;
+}
+
+void ModelObject::uploadNewVertexData(GLfloat* dataBuffer,size_t bufferSize,GLuint shaderId){
+    Model* model = NULL;
+    Model_Type * m;
+    for(std::vector<Model_Type*>::iterator it = mModelList.begin(); it != mModelList.end(); ++it) {
+        m = *it;
+        if(m->sShaderId == shaderId)
+            model = m->sModel;
+    }
+    glBindVertexArray(model->vao);
+    glBindBuffer(GL_ARRAY_BUFFER, model->vb);
     glBufferSubData(GL_ARRAY_BUFFER, 0, bufferSize, dataBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
-
 void ModelObject::BuildModelVAO2(Model *m){
 	glGenVertexArrays(1, &m->vao);
 	glGenBuffers(1, &m->vb);
@@ -113,27 +277,31 @@ void ModelObject::BuildModelVAO2(Model *m){
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m->ib);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m->numIndices*sizeof(GLuint), m->indexArray, GL_STATIC_DRAW);
 }
+void ModelObject::LoadDataToModel(
+			GLfloat *vertices,
+			GLfloat *normals,
+			GLfloat *texCoords,
+			GLfloat *colors,
+			GLuint *indices,
+			int numVert,
+			int numInd,
+			GLuint shaderId)
+{
 
-void ModelObject::setModel(Model * m){
-    modelVec.push_back(m);
-}
+	Model* m = new Model(); //(Model *)malloc(sizeof(Model));
+	memset(m, 0, sizeof(Model));
 
-GLuint ModelObject::getTexture(GLuint id){
-    for(GLuint i = 0; i < numberOfTextures; i++){
-        if(textureHandle[i][1] == id)
-            return textureHandle[i][0];
-    }
-    return 0;
-}
+	m->vertexArray = vertices;
+	m->texCoordArray = texCoords;
+	m->normalArray = normals;
+	m->indexArray = indices;
+	m->numVertices = numVert;
+	m->numIndices = numInd;
 
-GLuint ModelObject::getShader(GLuint id){
-    for(GLuint i = 0; i < numberOfShaders; i++){
-        if(shaderHandle[i][1] == id)
-            return shaderHandle[i][0];
-    }
-    return 0;
-}
-void ModelObject::setTransform(mat4 transf){
- modelTransformVec.push_back(transf);
+	BuildModelVAO2(m);
+    Model_Type * model = new Model_Type();
+    model->sModel = m;
+    model->sShaderId = shaderId;
+	this->mModelList.push_back(model);
 }
 

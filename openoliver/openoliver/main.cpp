@@ -10,7 +10,7 @@
 #include <direct.h>
 #include "ModelObject.h"
 #include "LoadTGA.h"
-#include "ClothSimulation.h"
+#include "CPUClothSimulation.h"
 #include "GrassSimulation.h"
 #include "Terrain.h"
 #include "KeyMouseHandler.h"
@@ -28,7 +28,7 @@ mat4 viewMatrix;
 //-------------------------------------------------------------------------------------
 
 // Cloth simulation
-ClothSimulation *mClothSimulation;
+CPUClothSimulation *mClothSimulation;
 GrassSimulation *mGrassSimulation;
 Terrain *mTerrain;
 void init(void)
@@ -49,8 +49,9 @@ void init(void)
 			);*/
 
 
-  mClothSimulation = new ClothSimulation();
+  mClothSimulation = new CPUClothSimulation();
 	printError("init cloth simulation");
+  mKeyMouseHandler.mClothSimulation = mClothSimulation;
 /*
 
    mTerrain = new Terrain();
@@ -92,7 +93,7 @@ void display(void)
 
     viewMatrix = mKeyMouseHandler.getViewMatrix();
     //mTerrain->draw(projectionMatrix,viewMatrix);
-     mClothSimulation->update();
+
     mClothSimulation->draw(projectionMatrix,viewMatrix);
 	glutSwapBuffers();
 }
@@ -110,6 +111,7 @@ void reshape(GLsizei w, GLsizei h)
 // frame
 void idle()
 {
+    mClothSimulation->update();
 	glutPostRedisplay();
 }
 
@@ -137,7 +139,7 @@ int main(int argc, char *argv[])
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
 	glutInitWindowSize(W, H);
 
-	glutInitContextVersion(3, 2);
+	glutInitContextVersion(4, 1);
 	glutCreateWindow("Render to texture with FBO");
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);

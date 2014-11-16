@@ -9,7 +9,7 @@
 		<Build>
 			<Target title="Debug">
 				<Option output="bin/Debug/TSBK03_Project" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="C:/Program Files (x86)/CodeBlocks/MinGW/bin" />
+				<Option working_dir="bin/Debug" />
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -53,7 +53,8 @@
 			<Add library="gdi32" />
 			<Add directory="C:/Program Files (x86)/CodeBlocks/MinGW/lib" />
 		</Linker>
-		<Unit filename="../include/ClothSimulation.h" />
+		<Unit filename="../include/CPUClothSimulation.h" />
+		<Unit filename="../include/GPUClothSimulation.h" />
 		<Unit filename="../include/GrassSimulation.h" />
 		<Unit filename="../include/KeyMouseHandler.h" />
 		<Unit filename="../include/Terrain.h" />
@@ -82,7 +83,8 @@
 			<Option compilerVar="CC" />
 			<Option target="Release" />
 		</Unit>
-		<Unit filename="../src/ClothSimulation.cpp" />
+		<Unit filename="../src/CPUClothSimulation.cpp" />
+		<Unit filename="../src/GPUClothSimulation.cpp" />
 		<Unit filename="../src/GrassSimulation.cpp" />
 		<Unit filename="../src/KeyMouseHandler.cpp" />
 		<Unit filename="../src/Terrain.cpp" />

@@ -264,7 +264,7 @@
 1368269360 c:\program files (x86)\codeblocks\mingw\include\gl\freeglut_ext.h
 	<stdarg.h>
 
-1415583470 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\common\loadobj.c
+1416154537 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\common\loadobj.c
 	"loadobj.h"
 	<stdio.h>
 	<stdlib.h>
@@ -299,7 +299,7 @@
 
 1415293901 D
 
-1415584685 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\main.cpp
+1416137598 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\main.cpp
 	<stdio.h>
 	<math.h>
 	<stdlib.h>
@@ -311,7 +311,7 @@
 	<direct.h>
 	"ModelObject.h"
 	"LoadTGA.h"
-	"ClothSimulation.h"
+	"CPUClothSimulation.h"
 	"GrassSimulation.h"
 	"Terrain.h"
 	"KeyMouseHandler.h"
@@ -369,18 +369,19 @@
 	"GL_utilities.h"
 	"loadobj.h"
 
-1415583738 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\src\modelobject.cpp
+1416156929 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\src\modelobject.cpp
 	"ModelObject.h"
 
-1415584223 c:\users\datorn\desktop\tsbk03\openoliver\openoliver\src\modelobject.h
+1416156661 c:\users\datorn\desktop\tsbk03\openoliver\openoliver\src\modelobject.h
 	<stdlib.h>
 	<string.h>
 	<vector>
 	"loadobj.h"
 	"VectorUtils3.h"
+	"GL_utilities.h"
 	<stdio.h>
 
-1415584292 c:\users\datorn\desktop\tsbk03\include\clothsimulation.h
+1416100875 c:\users\datorn\desktop\tsbk03\include\clothsimulation.h
 	"ModelObject.h"
 	"GL_utilities.h"
 	"VectorUtils3.h"
@@ -388,7 +389,7 @@
 	<math.h>
 	<vector>
 
-1415584606 source:c:\users\datorn\desktop\tsbk03\src\clothsimulation.cpp
+1416100047 source:c:\users\datorn\desktop\tsbk03\src\clothsimulation.cpp
 	"ClothSimulation.h"
 
 1415285091 c:\users\datorn\desktop\tsbk03\include\grasssimulation.h
@@ -396,20 +397,21 @@
 1415285091 source:c:\users\datorn\desktop\tsbk03\src\grasssimulation.cpp
 	"GrassSimulation.h"
 
-1415583470 source:c:\users\datorn\desktop\tsbk03\src\terrain.cpp
+1416151262 source:c:\users\datorn\desktop\tsbk03\src\terrain.cpp
 	"Terrain.h"
 
-1415287044 c:\users\datorn\desktop\tsbk03\include\terrain.h
+1416151251 c:\users\datorn\desktop\tsbk03\include\terrain.h
 	"ModelObject.h"
 	"GL_utilities.h"
 	"VectorUtils3.h"
 	"loadTGA.h"
 
-1415293901 c:\users\datorn\desktop\tsbk03\include\keymousehandler.h
+1416137599 c:\users\datorn\desktop\tsbk03\include\keymousehandler.h
 	"GL_utilities.h"
 	"VectorUtils3.h"
+	"CPUClothSimulation.h"
 
-1415583527 source:c:\users\datorn\desktop\tsbk03\src\keymousehandler.cpp
+1415884504 source:c:\users\datorn\desktop\tsbk03\src\keymousehandler.cpp
 	"KeyMouseHandler.h"
 	<stdio.h>
 
@@ -513,4 +515,34 @@
 
 1415560359 source:c:\users\joachim\documents\github\tsbk03\src\terrain.cpp
 	"Terrain.h"
+
+1416157421 c:\users\datorn\desktop\tsbk03\include\cpuclothsimulation.h
+	"ModelObject.h"
+	"GL_utilities.h"
+	"VectorUtils3.h"
+	"loadTGA.h"
+	<math.h>
+	<vector>
+
+1416138495 source:c:\users\datorn\desktop\tsbk03\include\gpuclothsimulation.h
+	"ModelObject.h"
+	"GL_utilities.h"
+	"VectorUtils3.h"
+	"loadTGA.h"
+	<math.h>
+	<vector>
+
+1416157203 source:c:\users\datorn\desktop\tsbk03\src\cpuclothsimulation.cpp
+	"CPUClothSimulation.h"
+
+1416151208 source:c:\users\datorn\desktop\tsbk03\src\gpuclothsimulation.cpp
+	"GPUClothSimulation.h"
+
+1416156518 c:\users\datorn\desktop\tsbk03\include\gpuclothsimulation.h
+	"ModelObject.h"
+	"GL_utilities.h"
+	"VectorUtils3.h"
+	"loadTGA.h"
+	<math.h>
+	<vector>
 

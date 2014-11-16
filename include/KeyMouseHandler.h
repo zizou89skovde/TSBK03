@@ -3,10 +3,12 @@
 
 #include "GL_utilities.h"
 #include "VectorUtils3.h"
-
+#include "CPUClothSimulation.h"
 class KeyMouseHandler
 {
     public:
+
+        CPUClothSimulation* mClothSimulation;
         KeyMouseHandler();
         virtual ~KeyMouseHandler();
 

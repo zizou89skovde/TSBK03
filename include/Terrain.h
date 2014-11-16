@@ -7,6 +7,8 @@
 #include "loadTGA.h"
 
 //#include "LoadTGA.h"
+
+#define TERRAIN_SHADER 0
 class Terrain
 {
     public:
