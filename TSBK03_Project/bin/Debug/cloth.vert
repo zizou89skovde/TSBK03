@@ -54,7 +54,7 @@ out vec3 g_Normal;
 out vec3 g_Position;
 out vec3 g_LightPos;
 
-uniform mat4 MV_Matrix;
+uniform mat4 V_Matrix;
 
 uniform vec2 u_Resolution;
 
@@ -97,10 +97,10 @@ void main(void)
 	vec2 texCoord = in_Position.xy;	
 	vec4 light = vec4(0.0, 8.0, 8.0,1.0); 	
 	vec3 centerPos = readPositionWorld(texCoord,vec2(0.0));
-	mat4 normalMatrix = transpose(inverse(MV_Matrix));
+	mat4 normalMatrix = transpose(inverse(V_Matrix));
 	
     g_Normal		= mat3(normalMatrix)*getNormalWorld(texCoord,centerPos); 
-	g_LightPos 		= vec3(MV_Matrix*light);
+	g_LightPos 		= vec3(V_Matrix*light);
 	gl_Position = vec4(in_Position.xyz, 1.0); 	
 }
 

@@ -21,7 +21,7 @@ Terrain::Terrain()
 
 	//Load shader-kun
     GLuint shader = loadShaders("phong.vert", "phong.frag");
-	mTerrainModel->setShader(shader,TERRAIN_SHADER);
+	mTerrainModel->setShader(shader,TERRAIN_SHADER,MVP);
 
     mat4 transformMatrix =  S(20,20,20);//IdentityMatrix();
     mTerrainModel->setTransform(transformMatrix,TERRAIN_SHADER);

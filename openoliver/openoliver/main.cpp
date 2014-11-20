@@ -11,6 +11,7 @@
 #include "ModelObject.h"
 #include "LoadTGA.h"
 #include "CPUClothSimulation.h"
+#include "GPUClothSimulation.h"
 #include "GrassSimulation.h"
 #include "Terrain.h"
 #include "KeyMouseHandler.h"
@@ -19,6 +20,8 @@
 #define W 512
 #define H 512
 
+
+#define GPU
 void OnTimer(int value);
 KeyMouseHandler mKeyMouseHandler;
 //----------------------Globals-------------------------------------------------
@@ -27,8 +30,12 @@ mat4 projectionMatrix;
 mat4 viewMatrix;
 //-------------------------------------------------------------------------------------
 
+GLuint WIDTH;
+GLuint HEIGHT;
+
 // Cloth simulation
-CPUClothSimulation *mClothSimulation;
+CPUClothSimulation *cpuClothSimulation;
+GPUClothSimulation *gpuClothSimulation;
 GrassSimulation *mGrassSimulation;
 Terrain *mTerrain;
 void init(void)
@@ -48,10 +55,19 @@ void init(void)
 			0, 0, 1
 			);*/
 
+#ifdef GPU
+    gpuClothSimulation = new GPUClothSimulation(&WIDTH,&HEIGHT);
+#else
+    cpuClothSimulation = new CPUClothSimulation();
+#endif
+    printError("init cloth simulation");
 
-  mClothSimulation = new CPUClothSimulation();
-	printError("init cloth simulation");
-  mKeyMouseHandler.mClothSimulation = mClothSimulation;
+#ifndef GPU
+   mKeyMouseHandler.mClothSimulation = cpuClothSimulation;
+#endif
+
+
+
 /*
 
    mTerrain = new Terrain();
@@ -93,16 +109,29 @@ void display(void)
 
     viewMatrix = mKeyMouseHandler.getViewMatrix();
     //mTerrain->draw(projectionMatrix,viewMatrix);
-
-    mClothSimulation->draw(projectionMatrix,viewMatrix);
+#ifdef GPU
+    gpuClothSimulation->draw(projectionMatrix,viewMatrix);
+#else
+    cpuClothSimulation->draw(projectionMatrix,viewMatrix);
+#endif
 	glutSwapBuffers();
 }
 
 void reshape(GLsizei w, GLsizei h)
 {
-	glViewport(0, 0, w, h);
+    WIDTH = w;
+    HEIGHT = h;
+    GLint curfbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &curfbo);
+    if(curfbo == 0){
+        glViewport(0, 0, w, h);
+    }
+
 	GLfloat ratio = (GLfloat)w / (GLfloat)h;
+
+
 	projectionMatrix = perspective(90, ratio, 1.0, 800);
+	printError("Reshape");
 }
 
 
@@ -111,7 +140,14 @@ void reshape(GLsizei w, GLsizei h)
 // frame
 void idle()
 {
-    mClothSimulation->update();
+
+#ifdef GPU
+    //gpuClothSimulation->update();
+#else
+    cpuClothSimulation->update();
+#endif // GPU
+
+
 	glutPostRedisplay();
 }
 

@@ -34,6 +34,7 @@ layout(triangle_strip, max_vertices = 6) out;
 
 uniform mat4 MVP_Matrix;
 uniform mat4 MV_Matrix;
+uniform mat4 VP_Matrix;
 uniform sampler2D u_MassPos_Tex;
 uniform sampler2D u_SpringMap_Tex;
 uniform vec2 u_Vec2; // Resolution X & Y
@@ -131,14 +132,14 @@ void passSolidTriangle(){
 		//if( abs(textureCoords.x- 0.5) < 0.01 &&  abs(textureCoords.y) < 0.5){
 		if(!checkVertexConnectivity(textureCoords)){
 			// cheap ass way to hide vertex?!
-			vec4 tmp = MVP_Matrix*vec4(vertexPosition,1.0);
+			vec4 tmp = VP_Matrix*vec4(vertexPosition,1.0);
 			tmp.w = -1.0;
 			gl_Position = tmp;
 			return;
 		}
 
 		//Set gl_Position
-		gl_Position = MVP_Matrix*vec4(vertexPosition,1.0);
+		gl_Position = VP_Matrix*vec4(vertexPosition,1.0);
 		EmitVertex();
 	}
 	EndPrimitive();

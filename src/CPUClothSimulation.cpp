@@ -23,7 +23,7 @@ CPUClothSimulation::CPUClothSimulation()
 
     /** Load shader **/
     GLuint clothShader = loadShadersG("cloth.vert","cloth.frag","cloth.gs");
-	mCPUClothScene->setShader(clothShader,CLOTH_SHADER_ID);
+	mCPUClothScene->setShader(clothShader,CLOTH_SHADER_ID,VP);
 
     /**  Assign texture handles to the model object **/
     mCPUClothScene->setTexture(mFboMassPosition->texid,CLOTH_SHADER_ID,(const char *)"u_MassPos_Tex");

@@ -12,8 +12,16 @@
  Following structures are used
  are to combine each item with the
  corresponding shader. Serving the same purpose
- as a Hash map.
+ as "map", TODO: change to map.
 **/
+
+typedef enum{
+    //MPV = 0, DEFAUULT
+    MVP = 1,
+    VP,
+    P,
+    NONE
+}Tranform_Composition_Type;
 typedef struct{
     char sUniformName[40];
     static const GLuint CHAR_LEN = 40;
@@ -32,12 +40,15 @@ typedef struct{
 typedef struct{
     GLuint sShaderId;
     GLuint sShaderHandleGPU;
+    Tranform_Composition_Type sComposition;
 }Shader_Type;
 
 typedef struct{
     GLuint sShaderId;
     Model* sModel;
 }Model_Type;
+
+
 
 typedef struct{
     GLuint sShaderId;
@@ -66,17 +77,20 @@ class ModelObject
         void BuildModelVAO2(Model *m);
         void uploadNewVertexData(GLfloat* dataBuffer,size_t bufferSize,GLuint shaderId);
 
-        /** Draw Functions **/
+        /** Draw Function **/
         void draw(mat4 projectionMatrix, mat4 viewMatrix);
-        void drawVP(mat4 projectionMatrix, mat4 viewMatrix);
-        void drawP(mat4 projectionMatrix);
-
+        void draw(GLuint shaderId,mat4 projectionMatrix, mat4 viewMatrix);
         /** Set functions **/
         void setModel(Model * m,GLuint shaderId);
+        void setShader(GLuint handle,GLuint id,Tranform_Composition_Type  composition);
         void setShader(GLuint handle,GLuint id);
         void setTexture(GLuint handle,GLuint shaderId,const char* uniformName);
         void setUniform(GLfloat* data, GLuint sizeData, GLuint shaderId, const char* uniformName);
+        void setUniform(const GLfloat data, GLuint shaderId, const char* uniformName);
         void setTransform(mat4 transf,GLuint id);
+
+        void replaceTexture(GLuint handle,const char* uniformName);
+        void replaceUniform(GLuint handle,GLuint shaderId,const char* uniformName);
 
         /** Get functions **/
         mat4 * getTransform(GLuint ShaderId);
@@ -86,9 +100,9 @@ class ModelObject
     private:
 
         /** Private help functions **/
-        void   uploadUniformFloat(GLuint activeShaderIndex,GLuint activeShaderHandle);
+        void   uploadUniformFloat(GLuint activeShaderId);
         void   uploadTexture(GLuint activeShaderIndex,GLuint activeShaderHandle);
-
+        void   uploadTransform(Shader_Type * shader,mat4 projectionMatrix,mat4 viewMatrix);
 
         /** Private data containers **/
         std::vector<Texture_Type*> mTextureList;
