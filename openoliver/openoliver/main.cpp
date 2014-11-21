@@ -1,13 +1,24 @@
 
+#ifdef WIN32
+    #include <windows.h>
+    #include <GL/glew.h>
+    #include <GL/glut.h>
+    #include <GL/freeglut_ext.h>
+    #include <direct.h>
+#else
+    #include <GL/gl.h>
+    //#include "MicroGlut.h"
+    //#include <GL/glut.h>
+#endif
+
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-#include <windows.h>
-#include <GL/glew.h>
-#include <GL/glut.h>
-#include <GL/freeglut_ext.h>
+
+
+
 #include "common/GL_utilities.h"
-#include <direct.h>
+
 #include "ModelObject.h"
 #include "LoadTGA.h"
 #include "CPUClothSimulation.h"
@@ -15,7 +26,7 @@
 #include "GrassSimulation.h"
 #include "Terrain.h"
 #include "KeyMouseHandler.h"
-#define GetCurrentDir _getcwd
+
 // initial width and heights
 #define W 512
 #define H 512
@@ -180,6 +191,7 @@ int main(int argc, char *argv[])
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
 	glutIdleFunc(idle);
+#ifdef WIN32
 	GLenum err = glewInit();
     if (GLEW_OK != err)
     {
@@ -191,7 +203,7 @@ int main(int argc, char *argv[])
     }
     fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
     printError ("pre init");
-
+#endif
 	init();
 	glutKeyboardFunc(keyboard);
 	glutMouseFunc(mouseClick);

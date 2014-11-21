@@ -5,10 +5,14 @@
 extern "C" {
 #endif
 
-#ifdef __APPLE__
-	#include <OpenGL/gl3.h>
-#else
+#ifdef WIN32
 	#include <GL/glew.h>
+#else
+    //#include "MicroGlut.h"
+	#include <GL/gl.h>
+	//#include <GL/freeglut.h>
+	#include "MicroGlut.h"
+
 #endif
 
 typedef struct
@@ -20,7 +24,7 @@ typedef struct
   GLuint* indexArray;
   int numVertices;
   int numIndices;
-  
+
   // Space for saving VBO and VAO IDs
   GLuint vao; // VAO
   GLuint vb, ib, nb, tb; // VBOs
@@ -60,7 +64,7 @@ Model* LoadDataToModel(
 			GLuint *indices,
 			int numVert,
 			int numInd,
-			
+
 			GLuint program,
 			char* vertexVariableName,
 			char* normalVariableName,

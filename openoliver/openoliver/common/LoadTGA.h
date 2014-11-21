@@ -5,11 +5,16 @@
 extern "C" {
 #endif
 
-#ifdef __APPLE__
-	#include <OpenGL/gl3.h>
-#else
-    #include <GL/glew.h>
+#ifdef WIN32
+	#include <GL/glew.h>
 	#include <GL/gl.h>
+#else
+    #include <GL/gl.h>
+    //#include <GL/glut.h>
+    //#include <GL/freeglut.h>
+    //#include <GL/freeglut.h>
+    #include "MicroGlut.h"
+
 #endif
 #include <stdio.h>
 #include <stdlib.h>

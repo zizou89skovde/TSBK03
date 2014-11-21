@@ -4,7 +4,7 @@
 #include "ModelObject.h"
 #include "GL_utilities.h"
 #include "VectorUtils3.h"
-#include "loadTGA.h"
+#include "LoadTGA.h"
 
 #include <math.h>
 #include <vector>
