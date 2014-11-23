@@ -1,6 +1,6 @@
 #include "CPUClothSimulation.h"
 
-CPUClothSimulation::CPUClothSimulation()
+CPUClothSimulation::CPUClothSimulation(): SimulationClass()
 {
 
 

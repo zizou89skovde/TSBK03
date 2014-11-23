@@ -299,7 +299,7 @@
 
 1415293901 D
 
-1416289009 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\main.cpp
+1416678859 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\main.cpp
 	<stdio.h>
 	<math.h>
 	<stdlib.h>
@@ -370,10 +370,10 @@
 	"GL_utilities.h"
 	"loadobj.h"
 
-1416481541 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\src\modelobject.cpp
+1416692914 source:c:\users\datorn\desktop\tsbk03\openoliver\openoliver\src\modelobject.cpp
 	"ModelObject.h"
 
-1416481190 c:\users\datorn\desktop\tsbk03\openoliver\openoliver\src\modelobject.h
+1416692886 c:\users\datorn\desktop\tsbk03\openoliver\openoliver\src\modelobject.h
 	<stdlib.h>
 	<string.h>
 	<vector>
@@ -407,7 +407,7 @@
 	"VectorUtils3.h"
 	"loadTGA.h"
 
-1416137599 c:\users\datorn\desktop\tsbk03\include\keymousehandler.h
+1416678258 c:\users\datorn\desktop\tsbk03\include\keymousehandler.h
 	"GL_utilities.h"
 	"VectorUtils3.h"
 	"CPUClothSimulation.h"
@@ -517,11 +517,12 @@
 1415560359 source:c:\users\joachim\documents\github\tsbk03\src\terrain.cpp
 	"Terrain.h"
 
-1416157421 c:\users\datorn\desktop\tsbk03\include\cpuclothsimulation.h
+1416677269 c:\users\datorn\desktop\tsbk03\include\cpuclothsimulation.h
 	"ModelObject.h"
 	"GL_utilities.h"
 	"VectorUtils3.h"
 	"loadTGA.h"
+	"SimulationClass.h"
 	<math.h>
 	<vector>
 
@@ -533,17 +534,24 @@
 	<math.h>
 	<vector>
 
-1416204733 source:c:\users\datorn\desktop\tsbk03\src\cpuclothsimulation.cpp
+1416678194 source:c:\users\datorn\desktop\tsbk03\src\cpuclothsimulation.cpp
 	"CPUClothSimulation.h"
 
-1416498135 source:c:\users\datorn\desktop\tsbk03\src\gpuclothsimulation.cpp
+1416693657 source:c:\users\datorn\desktop\tsbk03\src\gpuclothsimulation.cpp
 	"GPUClothSimulation.h"
 
-1416498378 c:\users\datorn\desktop\tsbk03\include\gpuclothsimulation.h
+1416678485 c:\users\datorn\desktop\tsbk03\include\gpuclothsimulation.h
 	"ModelObject.h"
 	"GL_utilities.h"
 	"VectorUtils3.h"
+	"SimulationClass.h"
 	"loadTGA.h"
 	<math.h>
 	<vector>
+
+1416678135 c:\users\datorn\desktop\tsbk03\include\simulationclass.h
+	"VectorUtils3.h"
+
+1416677138 source:c:\users\datorn\desktop\tsbk03\src\simulationclass.cpp
+	"SimulationClass.h"
 

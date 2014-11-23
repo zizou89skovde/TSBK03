@@ -34,8 +34,7 @@ GLuint WIDTH;
 GLuint HEIGHT;
 
 // Cloth simulation
-CPUClothSimulation *cpuClothSimulation;
-GPUClothSimulation *gpuClothSimulation;
+SimulationClass  *clothSimulation;
 GrassSimulation *mGrassSimulation;
 Terrain *mTerrain;
 void init(void)
@@ -49,22 +48,11 @@ void init(void)
 	glDisable(GL_CULL_FACE);
 	printError("GL inits");
 
-	/*viewMatrix =  lookAt(
-            5, 20, 5,
-			0, -1, 0,
-			0, 0, 1
-			);*/
-
-#ifdef GPU
-    gpuClothSimulation = new GPUClothSimulation(&WIDTH,&HEIGHT);
-#else
-    cpuClothSimulation = new CPUClothSimulation();
-#endif
+    clothSimulation = new GPUClothSimulation(&WIDTH,&HEIGHT);
     printError("init cloth simulation");
 
-#ifndef GPU
-   mKeyMouseHandler.mClothSimulation = cpuClothSimulation;
-#endif
+   mKeyMouseHandler.mClothSimulation = clothSimulation;
+
 
 
 
@@ -98,9 +86,9 @@ void display(void)
 	// Enable Z-buffering
 	glEnable(GL_DEPTH_TEST);
 	// Enable backface culling
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-
+	//glEnable(GL_CULL_FACE);
+	//glCullFace(GL_BACK);
+    glDisable(GL_CULL_FACE);
 	//	glFlush(); // Can cause flickering on some systems. Can also be necessary to make drawing complete.
 	glClearColor(0.0, 1.0, 0.0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -109,11 +97,8 @@ void display(void)
 
     viewMatrix = mKeyMouseHandler.getViewMatrix();
     //mTerrain->draw(projectionMatrix,viewMatrix);
-#ifdef GPU
-    gpuClothSimulation->draw(projectionMatrix,viewMatrix);
-#else
-    cpuClothSimulation->draw(projectionMatrix,viewMatrix);
-#endif
+
+    clothSimulation->draw(projectionMatrix,viewMatrix);
 	glutSwapBuffers();
 }
 
@@ -141,12 +126,7 @@ void reshape(GLsizei w, GLsizei h)
 void idle()
 {
 
-#ifdef GPU
-    //gpuClothSimulation->update();
-#else
-    cpuClothSimulation->update();
-#endif // GPU
-
+    clothSimulation->update();
 
 	glutPostRedisplay();
 }

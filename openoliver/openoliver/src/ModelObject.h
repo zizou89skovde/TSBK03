@@ -90,7 +90,7 @@ class ModelObject
         void setTransform(mat4 transf,GLuint id);
 
         void replaceTexture(GLuint handle,const char* uniformName);
-        void replaceUniform(GLuint handle,GLuint shaderId,const char* uniformName);
+        void replaceUniform(GLfloat* handle,const char* uniformName);
 
         /** Get functions **/
         mat4 * getTransform(GLuint ShaderId);
@@ -100,7 +100,8 @@ class ModelObject
     private:
 
         /** Private help functions **/
-        void   uploadUniformFloat(GLuint activeShaderId);
+        void   uploadUniformFloat(Uniform_Type* uniform);
+
         void   uploadTexture(GLuint activeShaderIndex,GLuint activeShaderHandle);
         void   uploadTransform(Shader_Type * shader,mat4 projectionMatrix,mat4 viewMatrix);
 

@@ -57,6 +57,7 @@
 		<Unit filename="../include/GPUClothSimulation.h" />
 		<Unit filename="../include/GrassSimulation.h" />
 		<Unit filename="../include/KeyMouseHandler.h" />
+		<Unit filename="../include/SimulationClass.h" />
 		<Unit filename="../include/Terrain.h" />
 		<Unit filename="../openoliver/openoliver/common/GL_utilities.c">
 			<Option compilerVar="CC" />

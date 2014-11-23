@@ -1,6 +1,6 @@
 #include "GPUClothSimulation.h"
 
-GPUClothSimulation::GPUClothSimulation(GLuint * w,GLuint *h)
+GPUClothSimulation::GPUClothSimulation(GLuint * w,GLuint *h): SimulationClass(w,h)
 {
     /**
     HACK:  w,h pointers to variables that are assigned when
@@ -75,11 +75,43 @@ GPUClothSimulation::GPUClothSimulation(GLuint * w,GLuint *h)
     mGPUComputation->setUniform(GpuSpringConstantStruct,GPU_SHADER_COMPUTE_POSITION,(const char*)"u_SpringConstant");
     mGPUComputation->setUniform(GpuSpringConstantBend,GPU_SHADER_COMPUTE_POSITION,(const char*)"u_SpringConstantBend");
     mGPUComputation->setUniform(GpuRestLengthStruct,GPU_SHADER_COMPUTE_POSITION,(const char*)"u_RestLengthStruct");
-    mGPUComputation->setUniform((const float)sqrt(1.0*GpuRestLengthStruct),GPU_SHADER_COMPUTE_POSITION,(const char*)"u_RestLengthShear");
+    mGPUComputation->setUniform((const float)sqrt(2.0*GpuRestLengthStruct*GpuRestLengthStruct),GPU_SHADER_COMPUTE_POSITION,(const char*)"u_RestLengthShear");
     mGPUComputation->setUniform(GpuRestLengthBend,GPU_SHADER_COMPUTE_POSITION,(const char*)"u_RestLengthBend");
+
+    mWindVector[0] = 0;
+    mWindVector[1] = 0;
+    mWindVector[2] = 0;
+    mGPUComputation->setUniform(mWindVector,3,GPU_SHADER_COMPUTE_POSITION,(const char*)"u_Wind");
+
+        /** Sphere - For collision **/
+    Sphere * sphere = new Sphere();
+    sphere->position = new vec3(0,0,0);
+    sphere->radius = 1.0;
+    mSpheres.push_back(sphere);
+
+    /** Sphere Model **/
+    Model* modelSphere = LoadModelPlus((char *)"sphere.obj");
+    mGPUClothScene->setModel(modelSphere,GPU_SHADER_SPHERE);
+
+    /** Sphere Shader **/
+    GLuint sphereShader = loadShaders("sphere.vert", "sphere.frag");
+    mGPUClothScene->setShader(sphereShader,GPU_SHADER_SPHERE);
+
+    /** Sphere Transform **/
+    GLfloat r = sphere->radius;
+    vec3  pos = *sphere->position;
+    mat4 transform2 = T(pos.x,pos.y,pos.z)*S(r,r,r);
+
+    mGPUClothScene->setTransform(transform2,GPU_SHADER_SPHERE);
+    mGPUComputation->setUniform((GLfloat*)sphere->position,3,GPU_SHADER_COMPUTE_POSITION,(const char*)"u_SpherePosition");
+
+}
+/*
+GPUClothSimulation::intializeSimulation(){
 
 
 }
+*/
 GPUClothSimulation::~GPUClothSimulation(){
 
 }
@@ -114,19 +146,42 @@ void GPUClothSimulation::shiftFBO(){
     printError("Shift FBO");
 }
 
+void GPUClothSimulation::updateWind(){
+
+    /** Update wind  randomly**/
+     float previousWind = mWindVector[2];
+     float maxStrength = 0.004;
+     float variance = 0.0001;
+     float newWind      = previousWind +  ((float)(rand() & 255 + 1)/128.0 - 1.0)*variance;
+
+     if(abs(newWind) > maxStrength ){
+        (newWind > maxStrength ) ? mWindVector[2] = maxStrength : mWindVector[2] = newWind;
+        (newWind < -maxStrength) ? mWindVector[2] = -maxStrength: mWindVector[2] = newWind;
+     }else{
+        mWindVector[2] = newWind;
+        mWindVector[0] = -newWind*0.5;
+     }
+     mGPUComputation->replaceUniform(mWindVector,"u_Wind");
+}
+
 void GPUClothSimulation::draw(mat4 projectionMatrix, mat4 viewMatrix){
+
+   // updateWind();
+
     /** Computing shaders **/
-    GLuint numIterations = 1;
+    GLuint numIterations = 10;
     for(GLuint i = 0; i < numIterations; i++){
+
         shiftFBO();
-        glDisable(GL_CULL_FACE);
-        glDisable(GL_DEPTH_TEST);
+        /*glDisable(GL_CULL_FACE);
+        glDisable(GL_DEPTH_TEST);*/
         mGPUComputation->draw(GPU_SHADER_COMPUTE_POSITION,projectionMatrix,viewMatrix);
 
         /** TODO:
         shiftFBO();
         mGPUComputation->draw(GPU_SHADER_EVALUATE_SPRINGS,projectionMatrix,null);
         **/
+
     }
     printError("GPU Compute");
 
@@ -193,35 +248,8 @@ GLulong GPUClothSimulation::getSpringState(GLuint x,GLuint y){
                 springState |= temp;
             }
         }
-           return springState;
-/*
-        if(y < GPU_CLOTH_DIM - 1) {
-            //upper vertical structural spring
-            springState |= SPRING_STRUCT_UP;
-        }
-        if(y < GPU_CLOTH_DIM - 2) {
-            //upper vertical bend spring
-            springState |= SPRING_BEND_UP;
-        }
+        return springState;
 
-        if(x < GPU_CLOTH_DIM - 1){
-            //Right horizontal structural spring
-              springState |= SPRING_STRUCT_RIGHT;
-        }
-
-        if(x < GPU_CLOTH_DIM - 2){
-            //Right horizontal bend spring
-             springState |= SPRING_BEND_RIGHT;
-        }
-
-        if( y < GPU_CLOTH_DIM - 1 && x < GPU_CLOTH_DIM - 1){
-            //Right upper shear spring
-            springState |= SPRING_SHEAR_UP_RIGHT;
-        }
-        if( y > 0 && x < GPU_CLOTH_DIM - 1){
-            //Right lower shear spring
-            springState |= SPRING_SHEAR_DOWN_RIGHT;
-        }*/
 
 }
 /**
@@ -332,7 +360,7 @@ void GPUClothSimulation::uploadBufferCoordinates(ModelObject * modelObj,GLuint s
         vertexArray[(x + y * GPU_CLOTH_DIM)*GPU_FLOATS_PER_POSITION + 0] = GPU_CLOTH_SIZE*(GLfloat)(x - len)/len;
         vertexArray[(x + y * GPU_CLOTH_DIM)*GPU_FLOATS_PER_POSITION + 1] = GPU_CLOTH_SIZE*(GLfloat)(y - len)/len;
         vertexArray[(x + y * GPU_CLOTH_DIM)*GPU_FLOATS_PER_POSITION + 2] = 0;
-        //Following assignment expecting an implicit interpret cast. Might not be the case on all systems...
+        /** Following assignment expecting an implicit interpret cast. Might not be the case on all systems... **/
         vertexArray[(x + y * GPU_CLOTH_DIM)*GPU_FLOATS_PER_POSITION + 3] = getSpringState(x,y);
     }
 
@@ -386,4 +414,21 @@ void GPUClothSimulation::generateSpringBuffer(FBOstruct* fbo){
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
     printError("Cloth 1  FBO SPRING");
 }
+
+
+void GPUClothSimulation::updateSpherePosition(vec3 deltaPos){
+    //Update position of sphere
+    Sphere * s = mSpheres.at(0);
+    *s->position += deltaPos;
+    // Update computation uniform
+    mGPUClothScene->replaceUniform((GLfloat*)s->position,(const char*)"u_SpherePosition");
+    //Update model transform
+    mat4 * transf = mGPUClothScene->getTransform(GPU_SHADER_SPHERE);
+   // GLfloat r = s->radius;
+    vec3  pos = *s->position;
+     //printVec3("New Sphere pos:",pos);
+    *transf = T(pos.x,pos.y,pos.z); //*S(r,r,r);
+
+}
+
 

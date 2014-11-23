@@ -8,7 +8,7 @@ class KeyMouseHandler
 {
     public:
 
-        CPUClothSimulation* mClothSimulation;
+        SimulationClass* mClothSimulation;
         KeyMouseHandler();
         virtual ~KeyMouseHandler();
 

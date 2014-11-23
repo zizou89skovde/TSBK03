@@ -163,37 +163,35 @@ void ModelObject::uploadTexture(GLuint activeShaderId,GLuint activeShaderHandle)
     }
 
 }
-void ModelObject::uploadUniformFloat(GLuint activeShaderId){
+void ModelObject::uploadUniformFloat(Uniform_Type* uniform){
     Shader_Type * shader;
     for(std::vector<Shader_Type*>::iterator itShader = mShaderList.begin(); itShader != mShaderList.end(); ++itShader) {
         shader = *itShader;
-        Uniform_Type * uniform;
-        for(std::vector<Uniform_Type*>::iterator it = mUniformList.begin(); it != mUniformList.end(); ++it) {
-            uniform = *it;
-            if(uniform->sShaderId == shader->sShaderId){
-                glUseProgram(shader->sShaderHandleGPU);
-                int loc = glGetUniformLocation(shader->sShaderHandleGPU, uniform->sUniformName);
-                printError("Uniform invalid location");
-                switch(uniform->sSize){
-                    case 1:
-                        glUniform1f(loc, uniform->sData[0]);
-                    break;
-                    case 2:
-                        glUniform2f(loc, uniform->sData[0],uniform->sData[1]);
-                         printError("DEBUG Uniform");
-                    break;
-                    case 3:
-                        glUniform3f(loc, uniform->sData[0],uniform->sData[1],uniform->sData[2]);
-                    break;
-                    case 4:
-                        glUniform4f(loc, uniform->sData[0],uniform->sData[1],uniform->sData[2],uniform->sData[3]);
-                    break;
-                    default:
-                    break;
-                }
+        if(uniform->sShaderId == shader->sShaderId){
+            glUseProgram(shader->sShaderHandleGPU);
+            int loc = glGetUniformLocation(shader->sShaderHandleGPU, uniform->sUniformName);
+            printError("Uniform invalid location");
+            switch(uniform->sSize){
+                case 1:
+                    glUniform1f(loc, uniform->sData[0]);
+                break;
+                case 2:
+                    glUniform2f(loc, uniform->sData[0],uniform->sData[1]);
+                     printError("DEBUG Uniform");
+                break;
+                case 3:
+                    glUniform3f(loc, uniform->sData[0],uniform->sData[1],uniform->sData[2]);
+                break;
+                case 4:
+                    glUniform4f(loc, uniform->sData[0],uniform->sData[1],uniform->sData[2],uniform->sData[3]);
+                break;
+                default:
+                break;
             }
+            return;
         }
     }
+    printf("Could not find uniform with name: %s",uniform->sUniformName);
     printError("Upload Uniform");
 }
 
@@ -205,7 +203,8 @@ void ModelObject::setUniform(GLfloat * data, GLuint sizeData, GLuint shaderId, c
     memset(uniform->sUniformName,0,uniform->CHAR_LEN*sizeof(char));
     strcpy(uniform->sUniformName,uniformName);
     mUniformList.push_back(uniform);
-    uploadUniformFloat(shaderId);
+    uploadUniformFloat(uniform);
+
 }
 
 void ModelObject::setUniform(const GLfloat data,GLuint shaderId, const char * uniformName){
@@ -217,7 +216,7 @@ void ModelObject::setUniform(const GLfloat data,GLuint shaderId, const char * un
     memset(uniform->sUniformName,0,uniform->CHAR_LEN*sizeof(char));
     strcpy(uniform->sUniformName,uniformName);
     mUniformList.push_back(uniform);
-    uploadUniformFloat(shaderId);
+    uploadUniformFloat(uniform);
 }
 
 void ModelObject::setShader(GLuint handleGPU, GLuint shaderId,Tranform_Composition_Type  composition){
@@ -268,7 +267,19 @@ void ModelObject::replaceTexture(GLuint handle,const char* uniformName){
             }
     }
 }
-        //void replaceUniform(GLuint handle,GLuint shaderId,const char* uniformName);
+
+void ModelObject::replaceUniform(GLfloat* data,const char* uniformName){
+    Uniform_Type * uniform;
+    for(std::vector<Uniform_Type*>::iterator it = mUniformList.begin(); it != mUniformList.end(); ++it) {
+            uniform = *it;
+            if(strcmp(uniform->sUniformName,uniformName) == 0){
+                    uniform->sData = data;
+                    uploadUniformFloat(uniform);
+                    return;
+            }
+    }
+}
+
 void ModelObject::drawModel(GLuint shaderId,GLuint activeShaderHandle){
     Model_Type * m;
     for(std::vector<Model_Type*>::iterator it = mModelList.begin(); it != mModelList.end(); ++it) {
@@ -358,7 +369,7 @@ void ModelObject::LoadDataToModel(
 			GLuint shaderId)
 {
 
-	Model* m = new Model(); //(Model *)malloc(sizeof(Model));
+	Model* m = new Model();
 	memset(m, 0, sizeof(Model));
 
 	m->vertexArray = vertices;
