@@ -4,8 +4,8 @@
 #include "ModelObject.h"
 #include "GL_utilities.h"
 #include "VectorUtils3.h"
-#include "loadTGA.h"
 #include "SimulationClass.h"
+
 #include <math.h>
 #include <vector>
 
