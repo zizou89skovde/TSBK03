@@ -1,14 +1,14 @@
 
 #ifdef WIN32
-    #include <windows.h>
-    #include <GL/glew.h>
-    #include <GL/glut.h>
-    #include <GL/freeglut_ext.h>
-    #include <direct.h>
+#include <windows.h>
+#include <GL/glew.h>
+#include <GL/glut.h>
+#include <GL/freeglut_ext.h>
+#include <direct.h>
 #else
-    #include <GL/gl.h>
-    //#include "MicroGlut.h"
-    //#include <GL/glut.h>
+#include <GL/gl.h>
+#include "MicroGlut.h"
+//#include <GL/glut.h>
 #endif
 
 #include <stdio.h>
@@ -32,7 +32,9 @@
 #define H 512
 
 
-#define GPU
+#define GPU_CLOTH
+//#define CPU_CLOTH
+#define GRASS
 void OnTimer(int value);
 KeyMouseHandler mKeyMouseHandler;
 //----------------------Globals-------------------------------------------------
@@ -45,7 +47,8 @@ GLuint WIDTH;
 GLuint HEIGHT;
 
 // Cloth simulation
-SimulationClass  *clothSimulation;
+CPUClothSimulation *cpuClothSimulation;
+GPUClothSimulation *gpuClothSimulation;
 GrassSimulation *mGrassSimulation;
 Terrain *mTerrain;
 void init(void)
@@ -59,24 +62,33 @@ void init(void)
 	glDisable(GL_CULL_FACE);
 	printError("GL inits");
 
-    clothSimulation = new CPUClothSimulation();//GPUClothSimulation(&WIDTH,&HEIGHT);
-    printError("init cloth simulation");
+	mTerrain  = new Terrain();
+#ifdef GPU_CLOTH
+	gpuClothSimulation = new GPUClothSimulation(&WIDTH,&HEIGHT);
+#endif
 
-   mKeyMouseHandler.mClothSimulation = clothSimulation;
+#ifdef CPU_CLOTH
+	printf("GPUUUUAUAU");
+	cpuClothSimulation = new CPUClothSimulation();
+#endif
+	printError("init cloth simulation");
+
+#ifdef CPU_CLOTH
+	mKeyMouseHandler.mClothSimulation = cpuClothSimulation;
+#endif
+
+#ifdef GRASS
+	mGrassSimulation = new GrassSimulation();
+#endif
 
 
-
-
-/*
-
-   mTerrain = new Terrain();
-    printError("init terrain");
-
+	mTerrain = new Terrain();
+	printError("init terrain");
+	/*
 	mGrassSimulation = new GrassSimulation();
 	printError("init cloth simulation");
-*/
-    // Create key/mouse handler
-    //mKeyMouseHandler = KeyMouseHandler();
+	 */
+	// Create key/mouse handler
 
 	glutTimerFunc(5, &OnTimer, 0);
 }
@@ -97,31 +109,42 @@ void display(void)
 	// Enable Z-buffering
 	glEnable(GL_DEPTH_TEST);
 	// Enable backface culling
-	//glEnable(GL_CULL_FACE);
-	//glCullFace(GL_BACK);
-    glDisable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+
 	//	glFlush(); // Can cause flickering on some systems. Can also be necessary to make drawing complete.
 	glClearColor(0.0, 1.0, 0.0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
 
-    viewMatrix = mKeyMouseHandler.getViewMatrix();
-    //mTerrain->draw(projectionMatrix,viewMatrix);
-
-    clothSimulation->draw(projectionMatrix,viewMatrix);
+	viewMatrix = mKeyMouseHandler.getViewMatrix();
+	//mTerrain->draw(projectionMatrix,viewMatrix);
+#ifdef GPU_CLOTH
+	gpuClothSimulation->draw(projectionMatrix,viewMatrix);
+#endif
+#ifdef CPU_CLOTH
+	cpuClothSimulation->update();
+#endif 
+#ifdef CPU_CLOTH
+	cpuClothSimulation->draw(projectionMatrix,viewMatrix);
+#endif
+#ifdef GRASS
+	mGrassSimulation->draw(projectionMatrix,viewMatrix);
+#endif
+	mTerrain->draw(projectionMatrix,viewMatrix);
 	glutSwapBuffers();
 }
 
 void reshape(GLsizei w, GLsizei h)
 {
-    WIDTH = w;
-    HEIGHT = h;
-    GLint curfbo;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &curfbo);
-    if(curfbo == 0){
-        glViewport(0, 0, w, h);
-    }
+	WIDTH = w;
+	HEIGHT = h;
+	GLint curfbo;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &curfbo);
+	if(curfbo == 0){
+		glViewport(0, 0, w, h);
+	}
 
 	GLfloat ratio = (GLfloat)w / (GLfloat)h;
 
@@ -137,25 +160,31 @@ void reshape(GLsizei w, GLsizei h)
 void idle()
 {
 
-    clothSimulation->update();
 
+#ifdef CPU_CLOTH
+	cpuClothSimulation->update();
+#endif 
+
+#ifdef GRASS
+	mGrassSimulation->update();
+#endif
 	glutPostRedisplay();
 }
 
 void keyboard (unsigned char key, int x, int y)
 {
-    mKeyMouseHandler.keyPress(key, 0, 0);
+	mKeyMouseHandler.keyPress(key, 0, 0);
 }
 
 void mouseClick (int button, int state, int x, int y)
 {
-    if (state == GLUT_UP)
-        mKeyMouseHandler.mouseUp();
+	if (state == GLUT_UP)
+		mKeyMouseHandler.mouseUp();
 }
 
 void mouse (int x, int y)
 {
-    mKeyMouseHandler.mouseHandle(x, y);
+	mKeyMouseHandler.mouseHandle(x, y);
 }
 
 //-----------------------------main-----------------------------------------------
@@ -167,22 +196,22 @@ int main(int argc, char *argv[])
 	glutInitWindowSize(W, H);
 
 	glutInitContextVersion(4, 1);
-	glutCreateWindow("Render to texture with FBO");
+	glutCreateWindow((char*)"Render to texture with FBO");
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
 	glutIdleFunc(idle);
 #ifdef WIN32
 	GLenum err = glewInit();
-    if (GLEW_OK != err)
-    {
-      fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
-    }
-    if (glewIsSupported("GL_VERSION_1_4  GL_ARB_point_sprite"))
-    {
-        fprintf(stdout, "Status: GL_VERSION 1_4");
-    }
-    fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
-    printError ("pre init");
+	if (GLEW_OK != err)
+	{
+		fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+	}
+	if (glewIsSupported("GL_VERSION_1_4  GL_ARB_point_sprite"))
+	{
+		fprintf(stdout, "Status: GL_VERSION 1_4");
+	}
+	fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+	printError ("pre init");
 #endif
 	init();
 	glutKeyboardFunc(keyboard);
@@ -191,4 +220,5 @@ int main(int argc, char *argv[])
 	glutMainLoop();
 	exit(0);
 }
+
 

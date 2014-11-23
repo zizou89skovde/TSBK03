@@ -5,18 +5,16 @@
 extern "C" {
 #endif
 
-
 #ifdef WIN32
 	#include <gl/glew.h>
-	//#include <gl/glut.h>
-	//#include <gl/freeglut_ext.h>
-	//#include <gl/freeglut.h>
-//	#include <GL/gl.h>
+	#include <gl/glut.h>
+	#include <gl/freeglut_ext.h>
+
+
 #else
-		#include <GL/gl.h>
-		//#include <GL/freeglut.h>
-		//#include <GL/glut.h>
-		#include "MicroGlut.h"
+	#include <GL/gl.h>
+	#include "MicroGlut.h"
+//	#include <GL/gl.h>
 #endif
 
 void printError(const char *functionName);

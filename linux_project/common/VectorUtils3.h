@@ -8,11 +8,7 @@
 	#include <OpenGL/gl3.h>
 #else
 	#include <GL/gl.h>
-	//#include <GL/freeglut.h>
-	//#include "MicroGlut.h"
-
 #endif
-
 #include <math.h>
 
 #ifndef M_PI
@@ -27,7 +23,7 @@
 #define Point3D vec3
 #define Matrix3D mat3
 #define Matrix4D mat4
-
+	
 	// vec3 is very useful
 	typedef struct vec3
 	{
@@ -39,7 +35,7 @@
 		#endif
 	}
 	vec3, *vec3Ptr;
-
+	
 	// vec4 is not as useful. Can be a color with alpha, or a quaternion, but IMHO you
 	// rarely need homogenous coordinate vectors on the CPU.
 	typedef struct vec4
@@ -47,7 +43,7 @@
 		GLfloat x, y, z, w; // w or h
 		#ifdef __cplusplus
 			vec4(GLfloat x2, GLfloat y2, GLfloat z2, GLfloat w2) : x(x2), y(y2), z(z2), w(w2) {}
-
+			
 			vec4(vec3 v) : x(v.x), y(v.y), z(v.z), w(1) {}
 		#endif
 	}
@@ -113,7 +109,7 @@ extern "C" {
 
 // GLU replacement functions
 	mat4 lookAtv(vec3 p, vec3 l, vec3 v);
-	mat4 lookAt(GLfloat px, GLfloat py, GLfloat pz,
+	mat4 lookAt(GLfloat px, GLfloat py, GLfloat pz, 
 			GLfloat lx, GLfloat ly, GLfloat lz,
 			GLfloat vx, GLfloat vy, GLfloat vz);
 	mat4 perspective(float fovyInDegrees, float aspectRatio,

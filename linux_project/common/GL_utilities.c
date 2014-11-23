@@ -227,7 +227,7 @@ void printError(const char *functionName)
 // Keymap mini manager
 // Important! Uses glutKeyboardFunc/glutKeyboardUpFunc so you can't use them
 // elsewhere or they will conflict.
-// (This functionality is built-in in , as "glutKeyIsDown" where this conflict should not exist.)
+// (This functionality is built-in in MicroGlut, as "glutKeyIsDown" where this conflict should not exist.)
 
 char keymap[256];
 

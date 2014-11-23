@@ -7,7 +7,7 @@
     #include <direct.h>
 #else
     #include <GL/gl.h>
-    //#include "MicroGlut.h"
+    #include "MicroGlut.h"
     //#include <GL/glut.h>
 #endif
 
@@ -32,7 +32,9 @@
 #define H 512
 
 
-#define GPU
+//#define GPU_CLOTH
+//#define CPU_CLOTH
+#define GRASS
 void OnTimer(int value);
 KeyMouseHandler mKeyMouseHandler;
 //----------------------Globals-------------------------------------------------
@@ -45,7 +47,8 @@ GLuint WIDTH;
 GLuint HEIGHT;
 
 // Cloth simulation
-SimulationClass  *clothSimulation;
+CPUClothSimulation *cpuClothSimulation;
+GPUClothSimulation *gpuClothSimulation;
 GrassSimulation *mGrassSimulation;
 Terrain *mTerrain;
 void init(void)
@@ -59,14 +62,30 @@ void init(void)
 	glDisable(GL_CULL_FACE);
 	printError("GL inits");
 
-    clothSimulation = new CPUClothSimulation();//GPUClothSimulation(&WIDTH,&HEIGHT);
+	/*viewMatrix =  lookAt(
+            5, 20, 5,
+			0, -1, 0,
+			0, 0, 1
+			);*/
+
+    mTerrain  = new Terrain();
+#ifdef GPU_CLOTH
+    gpuClothSimulation = new GPUClothSimulation(&WIDTH,&HEIGHT);
+#endif
+
+#ifdef CPU_CLOTH
+    printf("GPUUUUAUAU");
+    cpuClothSimulation = new CPUClothSimulation();
+#endif
     printError("init cloth simulation");
 
-   mKeyMouseHandler.mClothSimulation = clothSimulation;
+#ifdef CPU_CLOTH
+   mKeyMouseHandler.mClothSimulation = cpuClothSimulation;
+#endif
 
-
-
-
+#ifdef GRASS
+   mGrassSimulation = new GrassSimulation();
+#endif
 /*
 
    mTerrain = new Terrain();
@@ -97,9 +116,9 @@ void display(void)
 	// Enable Z-buffering
 	glEnable(GL_DEPTH_TEST);
 	// Enable backface culling
-	//glEnable(GL_CULL_FACE);
-	//glCullFace(GL_BACK);
-    glDisable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+
 	//	glFlush(); // Can cause flickering on some systems. Can also be necessary to make drawing complete.
 	glClearColor(0.0, 1.0, 0.0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -108,8 +127,18 @@ void display(void)
 
     viewMatrix = mKeyMouseHandler.getViewMatrix();
     //mTerrain->draw(projectionMatrix,viewMatrix);
-
-    clothSimulation->draw(projectionMatrix,viewMatrix);
+#ifdef GPU_CLOTH
+    gpuClothSimulation->draw(projectionMatrix,viewMatrix);
+#endif
+#ifdef CPU_CLOTH
+    cpuClothSimulation->update();
+#endif 
+#ifdef CPU_CLOTH
+    cpuClothSimulation->draw(projectionMatrix,viewMatrix);
+#endif
+#ifdef GRASS
+    mGrassSimulation->draw(projectionMatrix,viewMatrix);
+#endif
 	glutSwapBuffers();
 }
 
@@ -137,8 +166,17 @@ void reshape(GLsizei w, GLsizei h)
 void idle()
 {
 
-    clothSimulation->update();
+#ifdef GPU_CLOTH
+    gpuClothSimulation->update();
+#endif
 
+#ifdef CPU_CLOTH
+    cpuClothSimulation->update();
+#endif 
+
+#ifdef GRASS
+    mGrassSimulation->update();
+#endif
 	glutPostRedisplay();
 }
 
@@ -191,4 +229,5 @@ int main(int argc, char *argv[])
 	glutMainLoop();
 	exit(0);
 }
+
 

@@ -1,0 +1,37 @@
+#include "GrassSimulation.h"
+
+GrassSimulation::GrassSimulation()
+{
+
+    mGrassScene = new ModelObject();
+
+   /** Sphere Model **/
+    Model* modelSphere = LoadModelPlus((char *)"sphere.obj");
+    mGrassScene->setModel(modelSphere,SPHERE_SHADER_ID);
+
+    /** Sphere Shader **/
+    GLuint sphereShader = loadShaders("sphere.vert", "sphere.frag");
+    mGrassScene->setShader(sphereShader,SPHERE_SHADER_ID);
+
+    /** Sphere Transform **/
+    mat4 transform2 = T(0,0,0); 
+    mGrassScene->setTransform(transform2,SPHERE_SHADER_ID);
+
+    
+
+
+}
+
+
+void GrassSimulation::draw(mat4 projectionMatrix,mat4 viewMatrix){
+    mGrassScene->draw(projectionMatrix,viewMatrix);
+}
+
+void GrassSimulation::update(){
+    
+}
+
+GrassSimulation::~GrassSimulation()
+{
+    //dtor
+}

@@ -6,15 +6,10 @@ extern "C" {
 #endif
 
 #ifdef WIN32
-	#include <GL/glew.h>
+    #include <GL/glew.h>
 	#include <GL/gl.h>
 #else
-    #include <GL/gl.h>
-    //#include <GL/glut.h>
-    //#include <GL/freeglut.h>
-    //#include <GL/freeglut.h>
-    #include "MicroGlut.h"
-
+	#include <GL/gl.h>   
 #endif
 #include <stdio.h>
 #include <stdlib.h>
