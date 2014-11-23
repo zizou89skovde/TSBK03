@@ -28,7 +28,7 @@ endif
 
 CCFILES = $(SOURCEDIR)CPUClothSimulation.cpp $(SOURCEDIR)GPUClothSimulation.cpp $(SOURCEDIR)GrassSimulation.cpp $(SOURCEDIR)main.cpp $(SOURCEDIR)Terrain.cpp $(SOURCEDIR)ModelObject.cpp $(SOURCEDIR)KeyMouseHandler.cpp 
 UTILS = $(COMMONDIR)GL_utilities.c $(COMMONDIR)VectorUtils3.c $(COMMONDIR)loadobj.c $(COMMONDIR)LoadTGA.c $(COMMONDIR)MicroGlut.c
-OFILES = CPUClothSimulation.o GPUClothSimulation.o GrassSimulation.o main.o Terrain.o ModelObject.o KeyMouseHandler.o $(COMMONDIR)GL_utilities.o $(COMMONDIR)loadobj.o $(COMMONDIR)LoadTGA.o $(COMMONDIR)VectorUtils3.o $(COMMONDIR)MicroGlut.o
+OFILES = $(SOURCEDIR)CPUClothSimulation.o $(SOURCEDIR)GPUClothSimulation.o $(SOURCEDIR)GrassSimulation.o $(SOURCEDIR)main.o $(SOURCEDIR)Terrain.o $(SOURCEDIR)ModelObject.o KeyMouseHandler.o $(COMMONDIR)GL_utilities.o $(COMMONDIR)loadobj.o $(COMMONDIR)LoadTGA.o $(COMMONDIR)VectorUtils3.o $(COMMONDIR)MicroGlut.o
 
 
 main: $(OFILES)
