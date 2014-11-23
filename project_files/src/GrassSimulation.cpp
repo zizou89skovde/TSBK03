@@ -5,35 +5,20 @@ GrassSimulation::GrassSimulation()
 	/** Initalize grass model object **/
     mGrassScene = new ModelObject(); //Notera: ModelObject är lite feldöpt. Den borde heta Scene object. Eftersom den kan hålla flera olika modeller/shaders osv.
 
-   /** Sphere Model **/
-    Model* modelSphere = LoadModelPlus((char *)"sphere.obj");
-    mGrassScene->setModel(modelSphere,GRASS_SPHERE_SHADER_ID);
-
-    /** Sphere Shader **/
-    GLuint sphereShader = loadShaders("sphere.vert", "sphere.frag");
-    mGrassScene->setShader(sphereShader,GRASS_SPHERE_SHADER_ID);
-
-    /** Sphere Transform **/
-    mat4 transform2 = T(0,0,0);
-    mGrassScene->setTransform(transform2,GRASS_SPHERE_SHADER_ID);
-
 	/* Jocke */
-
-
-
 	/** Load shader **/
-	GLuint grassShader = loadShadersG("grass.vert", "grass.frag", "grass.gs");
-	mGrassScene->setShader(grassShader, GRASS_SHADER_ID);
+	GLuint grassShader = loadShadersG("shaders/grass.vert", "shaders/grass.frag", "shaders/grass.gs");
+	mGrassScene->setShader(grassShader, GRASS_SHADER_ID,VP);
 
 	 /**  Assign texture handles to the model object **/
-    GLuint grassMaskTexture;
+    /*GLuint grassMaskTexture;
 	LoadTGATextureSimple((char*)"texture.tga",&grassMaskTexture);
     mGrassScene->setTexture(grassMaskTexture,GRASS_SHADER_ID,(const char*)"u_GrassMask");
 
     GLuint heightMapTexture;
     LoadTGATextureSimple((char*)"terrain.tga",&heightMapTexture);
     mGrassScene->setTexture(heightMapTexture,GRASS_SHADER_ID,(const char*)"u_HeightMap");
-
+*/
     /**  Upload buffer coordinates **/
     uploadBufferCoordinates(mGrassScene,GRASS_SHADER_ID);
 

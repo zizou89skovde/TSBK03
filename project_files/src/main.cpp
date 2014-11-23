@@ -56,7 +56,6 @@ void init(void)
 	glClearColor(0.1, 0.1, 0.3, 0);
 	glClearDepth(1.0);
 	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
 	printError("GL inits");
 
     clothSimulation = new GPUClothSimulation(&WIDTH,&HEIGHT);//CPUClothSimulation();//
@@ -65,7 +64,7 @@ void init(void)
    mKeyMouseHandler.mClothSimulation = clothSimulation;
 
 
-
+    mGrassSimulation = new GrassSimulation();
 
 /*
 
@@ -101,15 +100,15 @@ void display(void)
 	//glCullFace(GL_BACK);
     glDisable(GL_CULL_FACE);
 	//	glFlush(); // Can cause flickering on some systems. Can also be necessary to make drawing complete.
-	glClearColor(0.0, 1.0, 0.0, 0);
+	glClearColor(0.0, 0.0, 0.0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
 
     viewMatrix = mKeyMouseHandler.getViewMatrix();
     //mTerrain->draw(projectionMatrix,viewMatrix);
-
-    clothSimulation->draw(projectionMatrix,viewMatrix);
+    mGrassSimulation->draw(projectionMatrix,viewMatrix);
+    //clothSimulation->draw(projectionMatrix,viewMatrix);
 	glutSwapBuffers();
 }
 

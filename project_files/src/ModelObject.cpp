@@ -132,6 +132,7 @@ void ModelObject::uploadTransform(Shader_Type * shader,mat4 projectionMatrix,mat
         vpMatrix = Mult(projectionMatrix,viewMatrix);
         glUniformMatrix4fv(glGetUniformLocation(shader->sShaderHandleGPU, "V_Matrix"), 1, GL_TRUE, viewMatrix.m);
         glUniformMatrix4fv(glGetUniformLocation(shader->sShaderHandleGPU, "VP_Matrix"), 1, GL_TRUE, vpMatrix.m);
+        glUniformMatrix4fv(glGetUniformLocation(shader->sShaderHandleGPU, "P_Matrix"), 1, GL_TRUE, projectionMatrix.m);
         break;
     case P:
         glUniformMatrix4fv(glGetUniformLocation(shader->sShaderHandleGPU, "P_Matrix"), 1, GL_TRUE, projectionMatrix.m);

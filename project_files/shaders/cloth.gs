@@ -29,8 +29,8 @@ void main()
 //#version 410 core   
 
 layout (triangles) in;
-//layout(triangle_strip, max_vertices = 6) out;
-layout(line_strip, max_vertices =3) out;
+layout(triangle_strip, max_vertices = 6) out;
+//layout(line_strip, max_vertices =3) out;
 
 uniform mat4 MVP_Matrix;
 uniform mat4 MV_Matrix;
