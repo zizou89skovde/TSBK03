@@ -48,7 +48,7 @@ void init(void)
 	glDisable(GL_CULL_FACE);
 	printError("GL inits");
 
-    clothSimulation = new GPUClothSimulation(&WIDTH,&HEIGHT);
+    clothSimulation = new CPUClothSimulation();//GPUClothSimulation(&WIDTH,&HEIGHT);
     printError("init cloth simulation");
 
    mKeyMouseHandler.mClothSimulation = clothSimulation;

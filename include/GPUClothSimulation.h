@@ -5,7 +5,7 @@
 #include "GL_utilities.h"
 #include "VectorUtils3.h"
 #include "SimulationClass.h"
-#include "loadTGA.h"
+
 
 #include <math.h>
 #include <vector>

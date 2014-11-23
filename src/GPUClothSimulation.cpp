@@ -85,7 +85,7 @@ GPUClothSimulation::GPUClothSimulation(GLuint * w,GLuint *h): SimulationClass(w,
 
         /** Sphere - For collision **/
     Sphere * sphere = new Sphere();
-    sphere->position = new vec3(0,0,0);
+    sphere->position = new vec3(0,0,-20);
     sphere->radius = 1.0;
     mSpheres.push_back(sphere);
 
@@ -150,15 +150,15 @@ void GPUClothSimulation::updateWind(){
 
     /** Update wind  randomly**/
      float previousWind = mWindVector[2];
-     float maxStrength = 0.004;
-     float variance = 0.0001;
+     float maxStrength = 0.04;
+     float variance = 0.004;
      float newWind      = previousWind +  ((float)(rand() & 255 + 1)/128.0 - 1.0)*variance;
 
      if(abs(newWind) > maxStrength ){
         (newWind > maxStrength ) ? mWindVector[2] = maxStrength : mWindVector[2] = newWind;
         (newWind < -maxStrength) ? mWindVector[2] = -maxStrength: mWindVector[2] = newWind;
      }else{
-        mWindVector[2] = newWind;
+        mWindVector[2] = 0;
         mWindVector[0] = -newWind*0.5;
      }
      mGPUComputation->replaceUniform(mWindVector,"u_Wind");
@@ -166,7 +166,7 @@ void GPUClothSimulation::updateWind(){
 
 void GPUClothSimulation::draw(mat4 projectionMatrix, mat4 viewMatrix){
 
-   // updateWind();
+    updateWind();
 
     /** Computing shaders **/
     GLuint numIterations = 10;
@@ -358,8 +358,8 @@ void GPUClothSimulation::uploadBufferCoordinates(ModelObject * modelObj,GLuint s
     for(GLuint y = 0; y < GPU_CLOTH_DIM; ++y)
         for(GLuint x = 0; x < GPU_CLOTH_DIM; ++x){
         vertexArray[(x + y * GPU_CLOTH_DIM)*GPU_FLOATS_PER_POSITION + 0] = GPU_CLOTH_SIZE*(GLfloat)(x - len)/len;
-        vertexArray[(x + y * GPU_CLOTH_DIM)*GPU_FLOATS_PER_POSITION + 1] = GPU_CLOTH_SIZE*(GLfloat)(y - len)/len;
-        vertexArray[(x + y * GPU_CLOTH_DIM)*GPU_FLOATS_PER_POSITION + 2] = 0;
+        vertexArray[(x + y * GPU_CLOTH_DIM)*GPU_FLOATS_PER_POSITION + 1] = 0;
+        vertexArray[(x + y * GPU_CLOTH_DIM)*GPU_FLOATS_PER_POSITION + 2] = GPU_CLOTH_SIZE*(GLfloat)(y - len)/len;
         /** Following assignment expecting an implicit interpret cast. Might not be the case on all systems... **/
         vertexArray[(x + y * GPU_CLOTH_DIM)*GPU_FLOATS_PER_POSITION + 3] = getSpringState(x,y);
     }

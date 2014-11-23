@@ -19,6 +19,8 @@ openoliver/openoliver/Debug/openoliver.tlog/cl.command.1.tlog
 *.vcxproj
 *.o
 *.cbp
-
+*.cscope_file_list
+*.depend
+*.layout
 
 *.depend
