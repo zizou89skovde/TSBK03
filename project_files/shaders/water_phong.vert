@@ -1,14 +1,15 @@
 
 #version 150// core   
 
-uniform sampler2D texUnit;
+uniform sampler2D u_Position_Texture;
+uniform sampler2D u_Normal_Texture;
+
 in  vec3 in_Position;
 
-out vec2 g_Texcoord;
-out vec3 g_Normal;
-out vec3 g_Position;
-out vec3 g_LightPos;
-out highp uint g_SpringState;
+out vec3 f_Normal;
+out vec3 f_Position;
+out vec3 f_LightPos;
+
 uniform mat4 V_Matrix;
 uniform mat4 VP_Matrix;
 
@@ -17,7 +18,7 @@ uniform vec2 u_Resolution;
 vec3 readPositionWorld(vec2 tcoord,vec2 offset){
 	//Add offset to tex coord, and clamp. 
 	vec2 textureCoordinate =  clamp(tcoord+offset,0.0,0.99);
-	return texture(texUnit, textureCoordinate).xyz;
+	return texture(u_Position_Texture, textureCoordinate).xyz;
 }
 
 vec3 getNormalWorld(vec2 texCoord,vec3 centerPos){
@@ -41,7 +42,6 @@ vec3 getNormalWorld(vec2 texCoord,vec3 centerPos){
 		normal += normalize(cross(deltaVec[index1],deltaVec[index2]));
 	}
 	normal /= float(numTriangles);
-	
 	return normal;
 
 }
@@ -50,25 +50,23 @@ void main(void)
 {
 	/* Calculate normal matrix */
 	mat4 normalMatrix = transpose(inverse(V_Matrix));
+	
 	/* Read buffer position */
 	vec2 texCoord = in_Position.xy;	
 	
 	/* Hard coded light position, To be uniform */
-	vec4 light = vec4(0.0, 2.0, -8.0,1.0); 	
+	vec4 light = vec4(0.0, 1.0, 0.0,1.0); 	
 	
 	/* Read data for current vertex */
-	vec4 centerElement =  texture(texUnit, clamp(texCoord,0.0,0.99));
+	vec4 centerElement =  texture(u_Position_Texture, clamp(texCoord,0.0,0.99));
 	vec3 centerPos = centerElement.xyz;
 	
-	/* Set output variables */
-	g_SpringState	= uint(centerElement.w);
-	g_Texcoord	    = vec2(in_Position.xy); 	
-    g_Normal		= mat3(normalMatrix)*getNormalWorld(texCoord,centerPos); 
-	g_LightPos 		= vec3(V_Matrix*light);
 	
-	/* Quick fix */
-	centerPos 		+= vec3(0.0,3.5,0.0);
-	g_Position 		= vec3(V_Matrix*vec4(centerPos,1.0));
-	gl_Position 	= vec4(centerPos, 1.0); 	
+	/* Set output variables */
+    f_Normal		= mat3(normalMatrix)*getNormalWorld(texCoord,centerPos); 
+	f_LightPos 		= mat3(normalMatrix)*light.xyz; //vec3(V_Matrix*light);
+	f_Position 		= vec3(V_Matrix*vec4(centerPos,1.0));
+	
+	gl_Position 	= VP_Matrix*vec4(centerPos, 1.0); 	
 }
 

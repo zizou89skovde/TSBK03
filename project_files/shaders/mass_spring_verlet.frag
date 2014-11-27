@@ -23,7 +23,7 @@ uniform float u_RestLengthBend;
 
 
 in vec2 f_TexCoord;
-out vec4 out_Color;
+//t vec4 out_Position[2];
 
 /* Array of spring directions  */
 const float springDirections[] ={
@@ -113,13 +113,13 @@ float getSpringConstant(uint springState){
 	return springConstant;
 }
 
-vec3 springContribution(vec3 mass1Position, vec3 mass1Velocity, vec2 textureOffset, float springConstant, float springRestLength){
+vec4 springContribution(vec3 mass1Position, vec3 mass1Velocity, vec2 textureOffset, float springConstant, float springRestLength){
 	/* Reading position and velocity of the mass on the other end of selected spring */
 	vec2 mass2TextureCoordinate = f_TexCoord+textureOffset;
-	if(mass2TextureCoordinate.x < 0.0 || mass2TextureCoordinate.x > 1.0)
-		return vec3(0.0);
+	/*if(mass2TextureCoordinate.x < 0.0 || mass2TextureCoordinate.x > 1.0)
+		return vec4(0.0);
 	if(mass2TextureCoordinate.y < 0.0 || mass2TextureCoordinate.y > 1.0)
-		return vec3(0.0);
+		return vec4(0.0);*/
 		
 	vec3 mass2Position;
 	vec3 mass2Velocity;
@@ -135,11 +135,16 @@ vec3 springContribution(vec3 mass1Position, vec3 mass1Velocity, vec2 textureOffs
 	
 	vec3 force = normalize(deltaPosition)*(springForce+dampForce);
 	
+	/* Check if spring has breaked */
+	float springHasBreaked = 0.0;
+	/*if(springLength > 4.0*springRestLength){
+		springHasBreaked = 1.0;
+	}*/
 	/* Force = acceleration since the mass is considered to be 1. */
-	return force;
+	return vec4(force,springHasBreaked);
 }
 
-vec3 applySpringForce(vec3 position, vec3 velocity,highp uint springState){
+vec3 applySpringForce(vec3 position, vec3 velocity,highp uint springState,out highp uint outSpringState){
 	
 	vec3 force = vec3(0.0);
 	/* Step in texture to read near by mass */
@@ -147,53 +152,71 @@ vec3 applySpringForce(vec3 position, vec3 velocity,highp uint springState){
 
 	/* Loop through all 12 possible spring connectivities */
 	/* Add force contribution from each spring that is currently 
-	   to the mass at position */
+	   to the mass at position */ 
+	outSpringState = springState;
 	for(int i = 0; i < 12; ++i){
 		highp uint springMask = RIGHT_STRUCTURAL_SPRING << i; 
 		if((springState & springMask ) != 0){
+			
+			float restLength = getRestLength(springMask); 
+			float springConstant = getSpringConstant(springMask);
+			
+			/*Read spring contribution*/
 			vec2 step = vec2(springDirections[2*i],springDirections[2*i+1]);
 			vec2 textureOffset = stepSize*step;
-			float restLength = getRestLength(springMask); //length(step)*2.0*u_Resolution.y/u_Resolution.x; //
-			float springConstant = getSpringConstant(springMask);
-			force += springContribution(position,velocity,textureOffset,springConstant,restLength);
+			vec4 result = springContribution(position,velocity,textureOffset,springConstant,restLength);
+			
+			/*Check if spring has breaked */
+			float springHasBreaked = result.w;
+			if(springHasBreaked != 0.0){
+				/*If spring break remove spring from the spring state variable */
+				outSpringState &= ~springMask;	
+			}else{
+				vec3 forceAddition = result.xyz;
+				force += forceAddition;
+			}
+	
 		}
 		
 	}
 	/* Force = acceleration since the mass is considered to be 1. */
-	
+
 	return  force;
 }
 
-vec3 sphereCollision(vec3 position){
-	float sphereRadius = 1.0;
+vec4 sphereCollision(vec3 position){
+	float sphereRadius = 1.1;
 	vec3 spherePosition = u_SpherePosition; //vec3(0.0);
 	vec3 delta = position-spherePosition;
 	float distance = length(delta);
+	vec4 adjustedPosition = vec4(position,0.0);
 	
 	if(distance < sphereRadius){
-		position += delta; //distance*normalize(
+		float adjustDistance = sphereRadius - distance;
+		adjustedPosition.xyz += 0.5*adjustDistance*normalize(delta);
+		adjustedPosition.w = 1.0;
 	}
-	return position;
+	return adjustedPosition;
 }
 
 /* GPU implementation of the applyForces in CPUClothsimulation.cpp */
-vec3 applyForces(vec3 position, vec3 velocity,highp uint springState){
+vec3 applyForces(vec3 position, vec3 velocity,highp uint springState,out highp uint outSpringState){
 	
 	vec3 acceleration = vec3(0.0);
 	
 	/* Apply gravity force */
-	acceleration += vec3(0.0,1.0*u_Gravity,0.0);
+	acceleration += vec3(0.0,u_Gravity,0.0);
 	
 	/* Apply wind force */
-	acceleration += u_Wind;
+	//acceleration += u_Wind;
 	
 	/* Damping force */
-	acceleration += velocity*(-0.0125);//u_SystemDamping;
+	acceleration += velocity*u_SystemDamping;
 	
 	/* Add force from springs */
-	acceleration+= applySpringForce(position,velocity,springState);
+	acceleration+= applySpringForce(position,velocity,springState,outSpringState);
 	
-	/* return force=acceleration, due the mass is set to 1.0 */
+	/* return force=acceleration, due mass is set to 1.0 */
 	return acceleration;
 }
 
@@ -207,43 +230,34 @@ void main(void)
 {
 	vec4 massData	 	  = texture(u_CurrentPosition, f_TexCoord);
 	float springState	  = massData.w;
-	
-	/* Home made shenanigans: unpack spring state into high precision unsigned integer */
-	highp uint springStateBits = uint(springState);
-	
+
 	vec3 position		  = massData.xyz;
 	vec3 previousPosition = texture(u_PreviousPosition, f_TexCoord).xyz;
 	vec3 velocity 		  = getVerletVelocity(position,previousPosition);
 	
-	vec3 acceleration 	  = applyForces(position,velocity,springStateBits);
+	/* Home made shenanigans: unpack spring state into high precision unsigned integer */
+	highp uint springStateBits = uint(springState);
+	highp uint nextSpringStateBits;
+	vec3 acceleration 	  = applyForces(position,velocity,springStateBits,nextSpringStateBits);
 	
 	/* Temp hack. Fixed regions should be uploaded as uniform */
-	if( (f_TexCoord.x < P1_X  && f_TexCoord.y > P1_Y) || (f_TexCoord.x > P2_X  && f_TexCoord.y > P1_Y))
+	if(  mod(f_TexCoord.x,0.25) < 0.05  && f_TexCoord.y > P1_Y )
 		acceleration = vec3(0.0);
 		
 	vec3 nextPosition 	  = integrate(position,previousPosition,acceleration);
 	
-	nextPosition = sphereCollision(nextPosition);
-	/*
-	if((springStateBits & (RIGHT_STRUCTURAL_SPRING << 0)) == 0)
-		out_Color 			  = vec4(position,springState); 
-	else{
-		out_Color 			  = vec4(nextPosition,springState); 
+	/*Check collistion with spehere */
+	vec4 ajdustedPosition = sphereCollision(nextPosition);
+	/* If collided .w element is set to 1.0 */
+	if(ajdustedPosition.w != 0.0){
+		
+		/* Adjusting position and previous position */
+		nextPosition = ajdustedPosition.xyz;
+		position 	  = ajdustedPosition.xyz;
 	}
-	*/
-	/* Home made shenanigans: pack spring state into float */
-	out_Color 			  = vec4(nextPosition,springState); 
+
+	/* Set next position */
+	gl_FragData[0]  = vec4(nextPosition,float(nextSpringStateBits)); 
+	/* Set previous position */
+	gl_FragData[1]  = vec4(position,float(nextSpringStateBits)); 
 }
-/*
-  const uint RIGHT_STRUCTURAL_SPRING   =  0x1;
-  const uint UP_STRUCTURAL_SPRING      =  0x2;
-  const uint LEFT_STRUCTURAL_SPRING    =  0x4;
-  const uint DOWN_STRUCTURAL_SPRING    =  0x8;
-  const uint UP_RIGHT_SHEAR_SPRING     =  0x10;
-  const uint UP_LEFT_SHEAR_SPRING      =  0x20;
-  const uint DOWN_LEFT_SHEAR_SPRING    =  0x40;
-  const uint RIGHT_BEND_SPRING         =  0x100;
-  const uint UP_BEND_SPRING            =  0x200;
-  const uint LEFT_BEND_SPRING          =  0x400;
-  const uint DOWN_BEND_SPRING          =  0x800;
-*/

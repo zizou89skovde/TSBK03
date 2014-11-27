@@ -33,6 +33,7 @@ char keyIsDown(unsigned char c);
 //------------a structure for FBO information-------------------------------------
 typedef struct
 {
+    GLuint* texids;
 	GLuint texid;
 	GLuint fb;
 	GLuint rb;

@@ -1,35 +1,29 @@
 #version 150
 
-// Simplified Phong: No materials, only one, hard coded light source
-// (in view coordinates) and no ambient
+out vec4 out_Color;
 
-// Note: Simplified! In particular, the light source is given in view
-// coordinates, which means that it will follow the camera.
-// You usually give light sources in world coordinates.
-
-out vec4 outColor;
-in vec3 exNormal; // Phong
-in vec3 exSurface; // Phong (specular)
-in float exHeight;
+in vec3 v_Normal;
+in vec3 v_Position;
+in vec3 v_LightPos;
+in float v_Height;
 void main(void)
 {
-	const vec3 light = vec3(0.58, 0.58, 0.58); // Given in VIEW coordinates! You usually specify light sources in world coordinates.
-	float diffuse, specular, shade;
+	vec4 color = vec4(0.0,0.0,1.0,1.0);
+    
+	vec3 normal = v_Normal;
 	
-	// Diffuse
-	diffuse = dot(normalize(exNormal), light);
-	diffuse = max(0.0, diffuse); // No negative light
+	vec3  lightVector 	= normalize(v_LightPos-v_Position);	
+	vec3 l = normalize(lightVector);
+	vec3 e = normalize(-v_Position);
+	vec3 n = normalize(normal);
+	vec3 r = reflect(-l,n);
 	
-	// Specular
-	vec3 r = reflect(-light, normalize(exNormal));
-	vec3 v = normalize(-exSurface); // View direction
-	specular = dot(r, v);
-	if (specular > 0.0)
-		specular = 1.0 * pow(specular, 150.0);
-	specular = max(specular, 0.0);
-	shade = 0.7*diffuse + 1.0*specular;
+	float specular = max(dot(r,e),0.0);
+	specular = pow(specular,40.0);
 	
-	float heightAtt = exHeight/26.0;
-	
-	outColor = heightAtt*vec4(shade, shade, shade, 1.0);
+	float diffuse = max(dot(n,-l),0.0);
+	float ambient = 0.0;
+
+	out_Color = (specular+diffuse+ambient)*color;
 }
+

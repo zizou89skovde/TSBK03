@@ -116,6 +116,28 @@ void ModelObject::draw(GLuint shaderId,mat4 projectionMatrix, mat4 viewMatrix){
     }
 
 }
+
+
+void ModelObject::drawBuffers(GLuint shaderId,GLuint numBuffers,GLuint * attachment){
+
+
+  Shader_Type * shader;
+        for(std::vector<Shader_Type*>::iterator it = mShaderList.begin(); it != mShaderList.end(); ++it) {
+        shader = *it;
+        if(shader->sShaderId == shaderId){
+            int program = shader->sShaderHandleGPU;
+            glUseProgram(program);
+         //
+            uploadTexture(shader->sShaderId,program);
+
+            drawModel(shader->sShaderId,program);
+
+            return;
+        }
+    }
+
+}
+
 void ModelObject::uploadTransform(Shader_Type * shader,mat4 projectionMatrix,mat4 viewMatrix){
     mat4 mvMatrix;
     mat4 mvpMatrix;
@@ -381,6 +403,12 @@ void ModelObject::LoadDataToModel(
 	m->numIndices = numInd;
 
 	BuildModelVAO2(m);
+	m->vertexArray   = NULL;
+	m->texCoordArray = NULL;
+	m->normalArray   = NULL;
+	m->indexArray    = NULL;
+
+
     Model_Type * model = new Model_Type();
     model->sModel      = m;
     model->sShaderId   = shaderId;

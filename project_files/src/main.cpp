@@ -23,6 +23,8 @@
 #include "LoadTGA.h"
 #include "CPUClothSimulation.h"
 #include "GPUClothSimulation.h"
+#include "GPUWaterSimulation.h"
+
 #include "GrassSimulation.h"
 #include "Terrain.h"
 #include "KeyMouseHandler.h"
@@ -31,8 +33,6 @@
 #define W 512
 #define H 512
 
-
-#define GPU
 void OnTimer(int value);
 KeyMouseHandler mKeyMouseHandler;
 //----------------------Globals-------------------------------------------------
@@ -45,8 +45,9 @@ GLuint WIDTH;
 GLuint HEIGHT;
 
 // Cloth simulation
-SimulationClass  *clothSimulation;
-GrassSimulation *mGrassSimulation;
+SimulationClass * clothSimulation;
+GrassSimulation * mGrassSimulation;
+GPUWaterSimulation * waterSimulation;
 Terrain *mTerrain;
 void init(void)
 {
@@ -58,17 +59,22 @@ void init(void)
 	glEnable(GL_DEPTH_TEST);
 	printError("GL inits");
 
-    clothSimulation = new GPUClothSimulation(&WIDTH,&HEIGHT);//CPUClothSimulation();//
+    GLuint texId;
+    LoadTGATextureSimple((char*)"textures/terrain2.tga",&texId);
+
+    //clothSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT,"shaders/water_verlet.vert","shaders/water_verlet.frag"); //new GPUClothSimulation(&WIDTH,&HEIGHT,"shaders/mass_spring_verlet.vert","shaders/mass_spring_verlet.frag");
+
+    //waterSimulation = new GPUWaterSimulation(&WIDTH,&HEIGHT,"shaders/water_verlet.vert","shaders/water_verlet.frag");
     printError("init cloth simulation");
 
-   mKeyMouseHandler.mClothSimulation = clothSimulation;
-
-
+    mKeyMouseHandler.mClothSimulation = clothSimulation;
+    mTerrain = new Terrain();
+/*
     mGrassSimulation = new GrassSimulation();
 
-/*
 
-   mTerrain = new Terrain();
+
+
     printError("init terrain");
 
 	mGrassSimulation = new GrassSimulation();
@@ -106,9 +112,9 @@ void display(void)
 
 
     viewMatrix = mKeyMouseHandler.getViewMatrix();
-    //mTerrain->draw(projectionMatrix,viewMatrix);
-    mGrassSimulation->draw(projectionMatrix,viewMatrix);
-    //clothSimulation->draw(projectionMatrix,viewMatrix);
+    mTerrain->draw(projectionMatrix,viewMatrix);
+    //mGrassSimulation->draw(projectionMatrix,viewMatrix);
+    clothSimulation->draw(projectionMatrix,viewMatrix);
 	glutSwapBuffers();
 }
 
@@ -136,7 +142,7 @@ void reshape(GLsizei w, GLsizei h)
 void idle()
 {
 
-    clothSimulation->update();
+ //   clothSimulation->update();
 
 	glutPostRedisplay();
 }

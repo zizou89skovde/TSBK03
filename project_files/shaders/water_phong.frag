@@ -13,7 +13,7 @@ void main(void)
 	vec3 normal = f_Normal;
 	vec3 position = f_Position;
 	vec3 lightPosition = f_LightPos;
-	vec3  lightVector 	= normalize(lightPosition-position);	
+	vec3  lightVector 	= normalize(lightPosition);	 //-position
 	vec3 l = normalize(lightVector);
 	vec3 e = normalize(-position);
 	vec3 n = normalize(normal);

@@ -17,7 +17,11 @@ class Terrain
         virtual ~Terrain();
     protected:
     private:
-        Model* GenerateTerrain(TextureData *tex);
+        void GenerateTerrain(TextureData *tex);
+        vec3 calcNormal(GLuint x,GLuint z,GLfloat planeRes,GLfloat heightRes, TextureData * tex);
+        void uploadBufferCoordinates(ModelObject * modelObj,GLuint shaderId);
+
+        vec4 * mTerrainMetaData;
 
         ModelObject* mTerrainModel;
 };

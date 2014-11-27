@@ -79,6 +79,7 @@ class ModelObject
 
         /** Draw Function **/
         void draw(mat4 projectionMatrix, mat4 viewMatrix);
+        void drawBuffers(GLuint shaderId,GLuint numBuffers,GLuint * attachment);
         void draw(GLuint shaderId,mat4 projectionMatrix, mat4 viewMatrix);
         /** Set functions **/
         void setModel(Model * m,GLuint shaderId);
