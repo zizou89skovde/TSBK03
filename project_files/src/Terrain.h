@@ -7,13 +7,22 @@
 #include "LoadTGA.h"
 
 //#include "LoadTGA.h"
-
+typedef struct{
+        float TerrainSize;
+        float TerrainDimension; /*Number of elements per size*/
+        float TerrainResolution; /* size divided by dimension */
+        float HeightScale;
+    }TerrainMetaData;
 #define TERRAIN_SHADER 0
 class Terrain
 {
+
+
     public:
         Terrain();
         void draw(mat4 proj, mat4 view);
+        TextureData * getTextureData();
+        TerrainMetaData * getTerrainMetaData();
         virtual ~Terrain();
     protected:
     private:
@@ -21,8 +30,9 @@ class Terrain
         vec3 calcNormal(GLuint x,GLuint z,GLfloat planeRes,GLfloat heightRes, TextureData * tex);
         void uploadBufferCoordinates(ModelObject * modelObj,GLuint shaderId);
 
-        vec4 * mTerrainMetaData;
+       TerrainMetaData * mTerrainMetaData;
 
+        TextureData* mTerrainTextureData;
         ModelObject* mTerrainModel;
 };
 

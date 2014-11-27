@@ -5,6 +5,7 @@
 #include "GL_utilities.h"
 #include "VectorUtils3.h"
 #include "SimulationClass.h"
+#include "Terrain.h"
 
 #include <math.h>
 #include <vector>
@@ -22,17 +23,23 @@
 class GPUSimulation: public SimulationClass
 {
     public:
-        GPUSimulation(GLuint* w,GLuint* h, const char * vertexShader, const char * fragmentShader);
-        virtual ~GPUSimulation();
-
-        typedef struct{
+              typedef struct{
             GLuint  GridDimension;
             GLfloat GridSize;
             GLfloat GridOffset[3];
             bool isUpward;
-            const char * VertexShader;
-            const char * FragmentShader;
+            static const GLuint MAX_LEN_STRING = 40;
+            char VertexShader[MAX_LEN_STRING];
+            char FragmentShader[MAX_LEN_STRING];
         }SimulationData_Type;
+
+
+        GPUSimulation(GLuint* w,GLuint* h);
+        virtual ~GPUSimulation();
+        virtual void initialize(){};
+
+
+        void setTerrain(Terrain * terrain){mTerrain = terrain;}
 
 
     protected:
@@ -49,7 +56,7 @@ class GPUSimulation: public SimulationClass
         void replaceSimulationTexture(GLuint texid,const char* uniformName);
 
         FBOstruct* simulate(GLuint numIterations);
-
+         Terrain* mTerrain;
         GLuint* mScreenWidth;
         GLuint* mScreenHeight;
     private:

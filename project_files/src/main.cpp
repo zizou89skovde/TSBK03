@@ -45,7 +45,7 @@ GLuint WIDTH;
 GLuint HEIGHT;
 
 // Cloth simulation
-SimulationClass * clothSimulation;
+GPUSimulation * clothSimulation;
 GrassSimulation * mGrassSimulation;
 GPUWaterSimulation * waterSimulation;
 Terrain *mTerrain;
@@ -58,27 +58,24 @@ void init(void)
 	glClearDepth(1.0);
 	glEnable(GL_DEPTH_TEST);
 	printError("GL inits");
+	mTerrain = new Terrain();
 
-    GLuint texId;
-    LoadTGATextureSimple((char*)"textures/terrain2.tga",&texId);
+    mGrassSimulation = new GrassSimulation();
+    mGrassSimulation->setTerrain(mTerrain);
+    mGrassSimulation->initialize();
 
-    //clothSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT,"shaders/water_verlet.vert","shaders/water_verlet.frag"); //new GPUClothSimulation(&WIDTH,&HEIGHT,"shaders/mass_spring_verlet.vert","shaders/mass_spring_verlet.frag");
+    //clothSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
+    //clothSimulation->setTerrain(mTerrain);
+    //clothSimulation->initialize();
 
-    //waterSimulation = new GPUWaterSimulation(&WIDTH,&HEIGHT,"shaders/water_verlet.vert","shaders/water_verlet.frag");
     printError("init cloth simulation");
 
-    mKeyMouseHandler.mClothSimulation = clothSimulation;
-    mTerrain = new Terrain();
+
+   // mKeyMouseHandler.mClothSimulation = clothSimulation;
+ //   mTerrain = new Terrain();
 /*
-    mGrassSimulation = new GrassSimulation();
 
 
-
-
-    printError("init terrain");
-
-	mGrassSimulation = new GrassSimulation();
-	printError("init cloth simulation");
 */
     // Create key/mouse handler
     //mKeyMouseHandler = KeyMouseHandler();
@@ -113,8 +110,8 @@ void display(void)
 
     viewMatrix = mKeyMouseHandler.getViewMatrix();
     mTerrain->draw(projectionMatrix,viewMatrix);
-    //mGrassSimulation->draw(projectionMatrix,viewMatrix);
-    clothSimulation->draw(projectionMatrix,viewMatrix);
+    mGrassSimulation->draw(projectionMatrix,viewMatrix);
+    //clothSimulation->draw(projectionMatrix,viewMatrix);
 	glutSwapBuffers();
 }
 

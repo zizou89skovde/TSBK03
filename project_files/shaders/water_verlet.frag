@@ -8,6 +8,8 @@ uniform float u_Gravity;
 uniform float u_DeltaTime;
 uniform float u_Time;
 uniform float u_SystemDamping;
+uniform float u_TerrainHeight;
+uniform float u_TerrainDim;
 
 in vec2 f_TexCoord;
 /* Array of spring directions  */
@@ -131,10 +133,15 @@ vec3 integrate(vec3 position, vec3 previousPosition, vec3 acceleration){
 		return nextPosition;
 }
 
-vec3 groundCollision(vec3 inPosition,vec3 outPosition,out bool colllided){
-	float height = texture(u_PreviousPosition, f_TexCoord).x;
-	vec2 groundXZ = (f_TexCoord-0.5)*2.0;
-	return vec3(0.0);
+vec3 groundCollision(vec3 inPosition,out bool colllided){
+	vec2 mapPosition = (inPosition.xz)/u_TerrainDim;
+	float height = texture(u_PreviousPosition, mapPosition).x;
+	vec3 newPosition = inPosition;
+	if(height < inPosition.y){
+			newPosition = height;
+			newPosition = true;
+	}
+	return newPosition;
 }
 
 void main(void)
@@ -151,15 +158,21 @@ void main(void)
 	vec3 acceleration 	  = applyForces(position,velocity,springStateBits,nextSpringStateBits);
 	vec3 outPosition;
 	vec3 outPrevPosition;
+	
+	/* Let current particle be influenced by an external source */
 	if(waveSource(position,outPrevPosition,outPosition) < 0.1){
 		outPrevPosition = position;
 		outPosition 	= integrate(position,previousPosition,acceleration);
 	}
 	
-	//groundCollision
-	
-	
-	
+	/* Check ground collision */
+	/*bool hasCollidied;
+	vec3 adjustedPosition = groundCollision(outPosition,hasCollided);
+	if(hasCollided){
+		outPosition 	= adjustedPosition;
+		outPrevPosition = adjustedPosition;
+	}*/
+
 	/* Set next position */
 	gl_FragData[0]  = vec4(outPosition,springState); 
 	/* Set previous position */

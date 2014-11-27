@@ -24,8 +24,9 @@
 class GPUClothSimulation:public GPUSimulation
 {
     public:
-        GPUClothSimulation(GLuint * w,GLuint *h,const char * vertexShader, const char * fragmentShader);
+        GPUClothSimulation(GLuint * w,GLuint *h);
         virtual ~GPUClothSimulation();
+        void initialize();
         void draw(mat4 projectionMatrix, mat4 viewMatrix);
         void updateSpherePosition(vec3 deltaPos);
 
@@ -42,7 +43,7 @@ class GPUClothSimulation:public GPUSimulation
         static const GLfloat GpuSystemGravity        = -0.00981f;
 
         static const GLfloat GpuRestLengthStruct     = 2.0*GPU_CLOTH_SIZE/(GPU_CLOTH_DIM-1.0);
-        static const GLfloat GpuRestLengthBend        = 4.0*GPU_CLOTH_SIZE/(GPU_CLOTH_DIM-1.0);
+        static const GLfloat GpuRestLengthBend       = 4.0*GPU_CLOTH_SIZE/(GPU_CLOTH_DIM-1.0);
 
         /** Wind **/
         void updateWind();

@@ -16,7 +16,6 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <string.h>
-
 #include "GL_utilities.h"
 
 // Shader loader
@@ -191,6 +190,7 @@ GLuint loadShadersGT(const char *vertFileName, const char *fragFileName, const c
 	if (gs != NULL) free(gs);
 	if (tcs != NULL) free(tcs);
 	if (tes != NULL) free(tes);
+
 	return p;
 }
 

@@ -1,12 +1,30 @@
 #version 150
 in  vec3 in_Position;
 
-uniform sampler2D texUnit;
-uniform float u_Wind;
+
+
+uniform sampler2D u_HeightMap;
+uniform float u_GridHeightScale;
+
+uniform float u_GridSize;
+uniform vec3 u_GridOffset;
+
 void main(void)
 {
-	vec2 texCoord = in_Position.xy;
-	float size = 1.0;
-	gl_Position = vec4(size*in_Position.x,0.0,size*in_Position.y,1.0);//texture(texUnit, texCoord);
+
+	
+	
+	/* Compute world coordinates */
+	vec3 position = vec3(in_Position.x,0.0,in_Position.y)*u_GridSize + u_GridOffset;
+	
+	/* Read vertex y-value (height) from heightmap */
+	float height = texture(u_HeightMap,in_Position.xy).x;
+	/* Scale and bias */
+	height = (height-0.5)*2.0*u_GridHeightScale;
+	
+	/* Set y position */
+	position.y = height;
+	
+	gl_Position = vec4(position,1.0);
 }
 

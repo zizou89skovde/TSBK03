@@ -10,7 +10,7 @@ extern "C" {
 	#include <gl/glew.h>
 	#include <gl/glut.h>
 	#include <gl/freeglut_ext.h>
-    #include <GL/gl.h>
+   // #include <GL/gl.h>
 #else
 		#include <GL/gl.h>
 		//#include <GL/freeglut.h>

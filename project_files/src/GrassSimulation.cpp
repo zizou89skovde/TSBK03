@@ -2,6 +2,11 @@
 
 GrassSimulation::GrassSimulation()
 {
+
+
+}
+
+void GrassSimulation::initialize(){
 	/** Initalize grass model object **/
     mGrassScene = new ModelObject(); //Notera: ModelObject är lite feldöpt. Den borde heta Scene object. Eftersom den kan hålla flera olika modeller/shaders osv.
 
@@ -11,33 +16,41 @@ GrassSimulation::GrassSimulation()
 	mGrassScene->setShader(grassShader, GRASS_SHADER_ID,VP);
 
 	 /**  Assign texture handles to the model object **/
-    /*GLuint grassMaskTexture;
-	LoadTGATextureSimple((char*)"texture.tga",&grassMaskTexture);
-    mGrassScene->setTexture(grassMaskTexture,GRASS_SHADER_ID,(const char*)"u_GrassMask");
-
-    GLuint heightMapTexture;
-    LoadTGATextureSimple((char*)"terrain.tga",&heightMapTexture);
-    mGrassScene->setTexture(heightMapTexture,GRASS_SHADER_ID,(const char*)"u_HeightMap");
-*/
+    /*  GLuint grassMaskTexture;
+        LoadTGATextureSimple((char*)"texture.tga",&grassMaskTexture);
+        mGrassScene->setTexture(grassMaskTexture,GRASS_SHADER_ID,(const char*)"u_GrassMask");
+    */
     /**  Upload buffer coordinates **/
     uploadBufferCoordinates(mGrassScene,GRASS_SHADER_ID);
 
-    /** Upload uniform parameters **/
+    /** Upload terrain parameters **/
+    TerrainMetaData* terrainData = mTerrain->getTerrainMetaData();
     mGrassScene->setUniform(1.0f,GRASS_SHADER_ID,"u_Wind");
 
-    GLfloat * arrayTest = (GLfloat*)malloc(sizeof(GLfloat)*3);
-    arrayTest[0] = 1;
-    arrayTest[1] = 1;
-    arrayTest[2] = 1;
-    mGrassScene->setUniform(arrayTest,3,GRASS_SHADER_ID,"u_CenterPosition");
+
+    GLfloat * gridOffset = (GLfloat*)malloc(sizeof(GLfloat)*3);
+    gridOffset[0] = -terrainData->TerrainSize/2.0;
+    gridOffset[1] = 0;
+    gridOffset[2] = -terrainData->TerrainSize/2.0;
+    mGrassScene->setUniform(gridOffset,3,GRASS_SHADER_ID,"u_GridOffset");
+    //mGrassScene->setUniform(terrainData->TerrainResolution,"u_GridResolution");
+    mGrassScene->setUniform(terrainData->TerrainSize,GRASS_SHADER_ID,"u_GridSize");
+    mGrassScene->setUniform(terrainData->HeightScale,GRASS_SHADER_ID,"u_GridHeightScale");
+
+    /** Set hight map texture **/
+    mGrassScene->setTexture(mTerrain->getTextureData()->texID,GRASS_SHADER_ID,"u_HeightMap");
 
 	/* End Jocke*/
+}
 
+
+void GrassSimulation::setTerrain(Terrain * terrain){
+    mTerrain = terrain;
 }
 
 void GrassSimulation::uploadBufferCoordinates(ModelObject * modelobject,GLuint shaderId){
 
-    GLuint DIM = 4;
+    GLuint DIM = 64;
 
     GLuint vertexCount = DIM*DIM;
 	GLuint triangleCount = (DIM-1) * (DIM-1)* 2;
@@ -67,10 +80,10 @@ void GrassSimulation::uploadBufferCoordinates(ModelObject * modelobject,GLuint s
 			indexArray[(x + y * (DIM-1))*6 + 5] = x+1 + (y+1) * DIM;
 		}
         modelobject->LoadDataToModel(
-			vertexArray,
-			NULL,
-			NULL,
-			NULL,
+			vertexArray, /* in_Position */
+			NULL,          /* in_Normal */
+			NULL,           /* in_TextureCoordinate */
+			NULL,           /* in_Colasofsgm */
 			indexArray,
 			vertexCount,
 			triangleCount*3,

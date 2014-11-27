@@ -13,7 +13,7 @@
 
 /** SIMULATION CONSTANTS **/
 #define GPU_WATER_DIM 64
-#define GPU_WATER_SIZE 20
+#define GPU_WATER_SIZE 10
 
 /** SHADER ID'S **/
 #define GPU_SHADER_WATER 0
@@ -23,8 +23,9 @@
 class GPUWaterSimulation:public GPUSimulation
 {
     public:
-        GPUWaterSimulation(GLuint * w,GLuint *h,const char * vertexShader, const char * fragmentShader);
+        GPUWaterSimulation(GLuint * w,GLuint *h);
         virtual ~GPUWaterSimulation();
+        void initialize();
         void draw(mat4 projectionMatrix, mat4 viewMatrix);
 
     protected:

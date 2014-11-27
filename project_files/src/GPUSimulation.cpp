@@ -1,11 +1,12 @@
 #include "GPUSimulation.h"
 
-GPUSimulation::GPUSimulation(GLuint* w,GLuint* h, const char * vertexShader, const char * fragmentShader)
+GPUSimulation::GPUSimulation(GLuint* w,GLuint* h)
 {
     mScreenWidth = w;
     mScreenHeight = h;
 
 }
+
 
 GPUSimulation::~GPUSimulation(){
 
@@ -18,7 +19,8 @@ void GPUSimulation::intializeSimulation(SimulationData_Type * simulationData){
     mGPUSimulation = new ModelObject();
     uploadSquareModelData(mGPUSimulation,GPU_SHADER_COMPUTE);
 
-    GLuint verletShader = loadShaders(mSimulationData.VertexShader,mSimulationData.FragmentShader);
+    GLuint verletShader = loadShaders(simulationData->VertexShader,simulationData->FragmentShader);
+    printf("ALLAN");
     mGPUSimulation->setShader(verletShader,GPU_SHADER_COMPUTE,NONE);
 
     FRAME_ATTACHMENT[0] = GL_COLOR_ATTACHMENT0;
@@ -227,7 +229,7 @@ void GPUSimulation::uploadBufferCoordinates(ModelObject * modelObj,GLuint shader
     int vertexCount = GRID_DIM*GRID_DIM;
 
     int triangleCount = (GRID_RES) * (GRID_RES)* 2;
-    GLfloat vertexArray[(GPU_FLOATS_PER_POSITION) * vertexCount];// = (GLfloat *) malloc(sizeof(GLfloat) * (GPU_FLOATS_PER_POSITION) * vertexCount);
+    GLfloat* vertexArray = (GLfloat *) malloc( sizeof(GLfloat) * (GPU_FLOATS_PER_POSITION) * vertexCount);
 
     for(GLuint y = 0; y < GRID_DIM; ++y)
         for(GLuint x = 0; x < GRID_DIM; ++x){
@@ -240,7 +242,7 @@ void GPUSimulation::uploadBufferCoordinates(ModelObject * modelObj,GLuint shader
 
     }
 
-    GLuint indexArray[triangleCount*VERTICES_PER_TRIANGLE];// = (GLuint *)malloc(sizeof(GLuint) * triangleCount*VERTICES_PER_TRIANGLE);
+    GLuint* indexArray = (GLuint *)malloc(sizeof(GLuint) * triangleCount*VERTICES_PER_TRIANGLE);
     for (GLuint y = 0; y < GRID_DIM-1; y++)
     for (GLuint x = 0; x < GRID_DIM-1; x++)
     {

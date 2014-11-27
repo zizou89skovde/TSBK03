@@ -403,11 +403,6 @@ void ModelObject::LoadDataToModel(
 	m->numIndices = numInd;
 
 	BuildModelVAO2(m);
-	m->vertexArray   = NULL;
-	m->texCoordArray = NULL;
-	m->normalArray   = NULL;
-	m->indexArray    = NULL;
-
 
     Model_Type * model = new Model_Type();
     model->sModel      = m;

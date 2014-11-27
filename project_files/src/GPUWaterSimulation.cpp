@@ -1,18 +1,30 @@
 #include "GPUWaterSimulation.h"
 
-GPUWaterSimulation::GPUWaterSimulation(GLuint * w,GLuint *h, const char * vertexShader, const char * fragmentShader): GPUSimulation(w,h,vertexShader,fragmentShader)
+GPUWaterSimulation::GPUWaterSimulation(GLuint * w,GLuint *h): GPUSimulation(w,h)
 {
 
+
+
+}
+
+void GPUWaterSimulation::initialize(){
     /** Initializing GPU Simulation **/
     SimulationData_Type * simulationData = new SimulationData_Type();
-    simulationData->VertexShader   = vertexShader;
-    simulationData->FragmentShader = fragmentShader;
+
+
     simulationData->GridDimension  = GPU_WATER_DIM;
     simulationData->GridSize       = GPU_WATER_SIZE;
     simulationData->GridOffset[0] = 0;
     simulationData->GridOffset[1] = 0;
     simulationData->GridOffset[2] = 0;
     simulationData->isUpward       = false;
+
+    const char * vert = "shaders/phong.vert";
+    const char * frag = "shaders/phong.frag";
+    memset(simulationData->VertexShader,0,simulationData->MAX_LEN_STRING);
+    memset(simulationData->FragmentShader,0,simulationData->MAX_LEN_STRING);
+    strcpy(simulationData->VertexShader,vert);
+    strcpy(simulationData->FragmentShader,frag);
 
     intializeSimulation(simulationData);
 
@@ -39,7 +51,6 @@ GPUWaterSimulation::GPUWaterSimulation(GLuint * w,GLuint *h, const char * vertex
 	meta[1] = GPU_WATER_SIZE;
     mGPUWaterScene->setUniform(meta,2,GPU_SHADER_WATER,"u_Resolution");
     setSimulationConstant(meta,2,(const char*) "u_Meta");
-
 }
 
 GPUWaterSimulation::~GPUWaterSimulation(){
@@ -49,9 +60,12 @@ GPUWaterSimulation::~GPUWaterSimulation(){
 void GPUWaterSimulation::configureSimulation(){
 
     /** Upload ground heightmap **/
-    GLuint texId;
-    LoadTGATextureSimple((char*)"textures/terrain2.tga",&texId);
-    setSimulationTexture(texId,"u_HeightMap");
+    /*TextureData* textureData = mTerrain->getTextureData();
+    setSimulationTexture(textureData->texID,"u_HeightMap");
+
+    vec4 terrainMeta = mTerrain->getTerrainMetaData();
+    setSimulationConstant(terrainMeta.x, "u_TerrainHeight");
+    setSimulationConstant(terrainMeta.y, "u_TerrainDim");*/
 
     /** Upload system props **/
     setSimulationConstant(GpuSystemDeltaTime,"u_DeltaTime");

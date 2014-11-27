@@ -1,12 +1,22 @@
 #include "GPUClothSimulation.h"
 
-GPUClothSimulation::GPUClothSimulation(GLuint * w,GLuint *h, const char * vertexShader, const char * fragmentShader): GPUSimulation(w,h,vertexShader,fragmentShader)
+GPUClothSimulation::GPUClothSimulation(GLuint * w,GLuint *h): GPUSimulation(w,h)
 {
 
+}
+
+void GPUClothSimulation::initialize(){
     /** Initializing GPU Simulation **/
     SimulationData_Type * simulationData = new SimulationData_Type();
-    simulationData->VertexShader   = vertexShader;
-    simulationData->FragmentShader = fragmentShader;
+    //simulationData->VertexShader   = "shaders/mass_spring_verlet.vert";
+    //simulationData->FragmentShader = "shaders/mass_spring_verlet.frag";
+    const char * vert = "shaders/mass_spring_verlet.vert";
+    const char * frag = "shaders/mass_spring_verlet.frag";
+    memset(simulationData->VertexShader,0,simulationData->MAX_LEN_STRING);
+    memset(simulationData->FragmentShader,0,simulationData->MAX_LEN_STRING);
+    memset(simulationData->FragmentShader,0,simulationData->MAX_LEN_STRING);
+    strcpy(simulationData->VertexShader,vert);
+    strcpy(simulationData->FragmentShader,frag);
     simulationData->GridDimension  = GPU_CLOTH_DIM;
     simulationData->GridSize       = GPU_CLOTH_SIZE;
     simulationData->GridOffset[0] = 0;

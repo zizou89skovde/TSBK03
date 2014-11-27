@@ -13,7 +13,7 @@
 static bool gMipmap = true;
 
 // Note that turning mimpapping on and off refers to the loading stage only.
-// If you want to turn off mipmapping later, use 
+// If you want to turn off mipmapping later, use
 // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 void LoadTGASetMipmapping(bool active)
@@ -42,11 +42,11 @@ bool LoadTGATextureData(char *filename, TextureData *texture)	// Loads A TGA Fil
 	int b;
 	long row, rowLimit;
 	GLubyte pixelData[4];
-	
+
 	// Nytt fšr flipping-stšd 111114
 	char flipped;
 	long step;
-	
+
 	FILE *file = fopen(filename, "rb");			// Open The TGA File
 	err = 0;
 	if (file == NULL) err = 1;				// Does File Even Exist?
@@ -59,7 +59,7 @@ bool LoadTGATextureData(char *filename, TextureData *texture)	// Loads A TGA Fil
 			)
 				err = 3; // Does The Header Match What We Want?
 	else if (fread(header, 1, sizeof(header), file) != sizeof(header)) err = 4; // If So Read Next 6 Header Bytes
-	
+
 	if (err != 0)
 	{
 		switch (err)
@@ -69,7 +69,7 @@ bool LoadTGATextureData(char *filename, TextureData *texture)	// Loads A TGA Fil
 			case 3: printf("unsupported format in %s\n", filename); break;
 			case 4: printf("could not read file %s\n", filename); break;
 		}
-		
+
 		if(file == NULL)		// Did The File Even Exist? *Added Jim Strong*
 			return false;
 		else
@@ -88,15 +88,15 @@ bool LoadTGATextureData(char *filename, TextureData *texture)	// Loads A TGA Fil
 		return false;
 	}
 	flipped = (header[5] & 32) != 0; // Testa om flipped
-	
+
 	w = 1;
 	while (w < texture->width) w = w << 1;
 	h = 1;
 	while (h < texture->height) h = h << 1;
 	texture->texWidth = (GLfloat)texture->width / w;
 	texture->texHeight = (GLfloat)texture->height / h;
-	
-	
+
+
 	texture->bpp = header[4];		// Grab The TGA's Bits Per Pixel (24 or 32)
 	bytesPerPixel = texture->bpp/8;		// Divide By 8 To Get The Bytes Per Pixel
 	imageSize = w * h * bytesPerPixel;	// Calculate The Memory Required For The TGA Data
@@ -192,7 +192,7 @@ bool LoadTGATexture(char *filename, TextureData *texture)	// Loads A TGA File In
 {
 	char ok;
 	GLuint type = GL_RGBA;		// Set The Default GL Mode To RBGA (32 BPP)
-	
+
 	ok = LoadTGATextureData(filename, texture);	// Loads A TGA File Into Memory
 	if (!ok)
 		return false;
@@ -211,13 +211,13 @@ bool LoadTGATexture(char *filename, TextureData *texture)	// Loads A TGA File In
 		type=GL_RGB;			// If So Set The 'type' To GL_RGB
 	}
 	glTexImage2D(GL_TEXTURE_2D, 0, type, texture->w, texture->h, 0, type, GL_UNSIGNED_BYTE, texture[0].imageData);
-	
+
 	if (gMipmap)
 	{
 		glGenerateMipmap(GL_TEXTURE_2D);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);	// Linear Filtered
 	}
-	
+
 	return true;				// Texture Building Went Ok, Return True
 }
 
@@ -225,7 +225,7 @@ void LoadTGATextureSimple(char *filename, GLuint *tex) // If you really only nee
 {
 	TextureData texture;
 	memset(&texture, 0, sizeof(texture)); // Bug fix 130905.
-	
+
 	if (LoadTGATexture(filename, &texture))
 	{
 		if(texture.imageData != NULL)

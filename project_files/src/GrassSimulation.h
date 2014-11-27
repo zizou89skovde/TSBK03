@@ -5,7 +5,8 @@
 
 #include "GL_utilities.h"
 #include "ModelObject.h"
-#include "loadTGA.h"
+#include "LoadTGA.h"
+#include "Terrain.h"
 
 #define GRASS_SPHERE_SHADER_ID 0
 #define GRASS_SHADER_ID 1
@@ -20,13 +21,15 @@ class GrassSimulation
     public:
         GrassSimulation();
         virtual ~GrassSimulation();
+        void initialize();
         void draw(mat4 projectionMatrix,mat4 viewMatrix);
+        void setTerrain(Terrain * terrain);
         void update();
 
     protected:
 
     private:
-
+        Terrain * mTerrain;
     	ModelObject * mGrassScene;
 
     	void uploadBufferCoordinates(ModelObject * modelobject,GLuint shaderId);
