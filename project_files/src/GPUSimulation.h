@@ -20,6 +20,11 @@
 /** MISC **/
 #define DUMMY_TEXTURE -1
 
+#ifndef WIN32
+typedef long unsigned int GLulong;
+
+#endif
+
 class GPUSimulation: public SimulationClass
 {
     public:

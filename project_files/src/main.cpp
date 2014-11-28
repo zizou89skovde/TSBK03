@@ -17,7 +17,7 @@
 
 
 
-#include "common/GL_utilities.h"
+#include "GL_utilities.h"
 
 #include "ModelObject.h"
 #include "LoadTGA.h"
