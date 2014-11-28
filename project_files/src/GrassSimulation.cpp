@@ -27,7 +27,7 @@ void GrassSimulation::initialize(){
     TerrainMetaData* terrainData = mTerrain->getTerrainMetaData();
     mGrassScene->setUniform(1.0f,GRASS_SHADER_ID,"u_Wind");
 
-
+/*** WATCH OUT **/
     GLfloat * gridOffset = (GLfloat*)malloc(sizeof(GLfloat)*3);
     gridOffset[0] = -terrainData->TerrainSize/2.0;
     gridOffset[1] = 0;
@@ -39,6 +39,12 @@ void GrassSimulation::initialize(){
 
     /** Set hight map texture **/
     mGrassScene->setTexture(mTerrain->getTextureData()->texID,GRASS_SHADER_ID,"u_HeightMap");
+/*** WATCH OUT **/
+
+    /** Grass mask **/
+    GLuint grassMaskTexture;
+    LoadTGATextureSimple((char*)"textures/test.tga", &grassMaskTexture);
+    mGrassScene->setTexture(grassMaskTexture,GRASS_SHADER_ID,"u_GrassMask");
 
 	/* End Jocke*/
 }
@@ -50,7 +56,7 @@ void GrassSimulation::setTerrain(Terrain * terrain){
 
 void GrassSimulation::uploadBufferCoordinates(ModelObject * modelobject,GLuint shaderId){
 
-    GLuint DIM = 64;
+    GLuint DIM = 400; /* Antal vertices per rad*/
 
     GLuint vertexCount = DIM*DIM;
 	GLuint triangleCount = (DIM-1) * (DIM-1)* 2;

@@ -24,9 +24,10 @@ Terrain::Terrain()
 		type=GL_RGB;			// If So Set The 'type' To GL_RGB
 	}
 	glTexImage2D(GL_TEXTURE_2D, 0, type, mTerrainTextureData->w, mTerrainTextureData->h, 0, type, GL_UNSIGNED_BYTE, mTerrainTextureData[0].imageData);
+	/********* MIPMAP ******************/
     glGenerateMipmap(GL_TEXTURE_2D);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);	// Linear Filtered
-
+    /***************************/
 
 	//Load shader-kun
     GLuint shader = loadShaders("shaders/phong.vert", "shaders/phong.frag");

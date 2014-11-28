@@ -9,18 +9,20 @@ uniform float u_GridHeightScale;
 uniform float u_GridSize;
 uniform vec3 u_GridOffset;
 
+out vec2 g_TextureCoord;
+ 
 void main(void)
 {
-
-	
+	/* Set out texture coordinate */
+	g_TextureCoord = in_Position.xy;
 	
 	/* Compute world coordinates */
 	vec3 position = vec3(in_Position.x,0.0,in_Position.y)*u_GridSize + u_GridOffset;
 	
 	/* Read vertex y-value (height) from heightmap */
-	float height = texture(u_HeightMap,in_Position.xy).x;
+	float height = texture(u_HeightMap,in_Position.xy).x; //vec2(1.0-in_Position.xxxxxxx,1.0-in_Position.y)
 	/* Scale and bias */
-	height = (height-0.5)*2.0*u_GridHeightScale;
+	height = (height-0.5)*u_GridHeightScale;
 	
 	/* Set y position */
 	position.y = height;

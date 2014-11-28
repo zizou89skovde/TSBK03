@@ -12,7 +12,7 @@
 
 
 /** SIMULATION CONSTANTS **/
-#define GPU_CLOTH_DIM 322
+#define GPU_CLOTH_DIM 255
 #define GPU_CLOTH_SIZE 4
 
 /** SHADER ID'S **/

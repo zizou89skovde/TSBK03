@@ -110,7 +110,7 @@ void GPUClothSimulation::updateWind(){
 
 void GPUClothSimulation::draw(mat4 projectionMatrix, mat4 viewMatrix){
 
-    //updateWind();
+    updateWind();
 
     /** Computing shaders **/
     FBOstruct * resultFbo = simulate(20);

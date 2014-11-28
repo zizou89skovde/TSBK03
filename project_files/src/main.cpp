@@ -64,14 +64,14 @@ void init(void)
     mGrassSimulation->setTerrain(mTerrain);
     mGrassSimulation->initialize();
 
-    //clothSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
+    //clothSimulation =  new GPUClothSimulation(&WIDTH,&HEIGHT);
     //clothSimulation->setTerrain(mTerrain);
     //clothSimulation->initialize();
 
     printError("init cloth simulation");
 
 
-   // mKeyMouseHandler.mClothSimulation = clothSimulation;
+    mKeyMouseHandler.mClothSimulation = clothSimulation;
  //   mTerrain = new Terrain();
 /*
 
