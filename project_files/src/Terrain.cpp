@@ -6,7 +6,7 @@ Terrain::Terrain()
     mTerrainModel = new ModelObject();
     // Load model
     mTerrainTextureData = new TextureData;
-    LoadTGATextureData((char*)"textures/fft-terrain.tga", mTerrainTextureData);
+    LoadTGATextureData((char*)"textures/fft-terrain2.tga", mTerrainTextureData);
     GenerateTerrain(mTerrainTextureData);
 
     GLuint type = GL_RGBA;

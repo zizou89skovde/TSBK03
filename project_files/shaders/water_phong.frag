@@ -24,6 +24,5 @@ void main(void)
 	
 	float diffuse = max(dot(n,-l),0.0);
 	float ambient = 0.0;
-
 	out_Color = (specular+diffuse+ambient)*color;
 }

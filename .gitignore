@@ -10,6 +10,8 @@ openoliver/openoliver/common/MicroGlut.h
 openoliver/openoliver/common/zpr.c
 *.h~
 *.c~
+*~*
+main
 openoliver/openoliver/common/zpr.h
 openoliver/openoliver/Debug/openoliver.log
 openoliver/openoliver/Debug/openoliver.tlog/cl.command.1.tlog

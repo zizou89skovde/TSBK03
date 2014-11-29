@@ -22,7 +22,7 @@ void main(void)
 	specular = pow(specular,40.0);
 	
 	float diffuse = max(dot(n,-l),0.0);
-	float ambient = 0.0;
+	float ambient = 0.1;
 
 	out_Color = (specular+diffuse+ambient)*color;
 }
