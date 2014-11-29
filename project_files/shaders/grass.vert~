@@ -23,8 +23,11 @@ void main(void)
 	/* Read vertex y-value (height) from heightmap */
 	float height = texture(u_HeightMap,in_Position.xy).x; //vec2(1.0-in_Position.xxxxxxx,1.0-in_Position.y)
 	/* Scale and bias */
-	g_Height = (height-0.5)*u_GridHeightScale;
-
+	height = (height-0.5)*u_GridHeightScale;
+	
+	/* Set y position */
+	position.y = height;
+	
 	gl_Position = vec4(position,1.0);
 }
 

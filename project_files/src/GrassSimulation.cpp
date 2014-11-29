@@ -2,24 +2,17 @@
 
 GrassSimulation::GrassSimulation()
 {
-
-
 }
 
 void GrassSimulation::initialize(){
+
 	/** Initalize grass model object **/
     mGrassScene = new ModelObject(); //Notera: ModelObject är lite feldöpt. Den borde heta Scene object. Eftersom den kan hålla flera olika modeller/shaders osv.
 
-	/* Jocke */
 	/** Load shader **/
 	GLuint grassShader = loadShadersG("shaders/grass.vert", "shaders/grass.frag", "shaders/grass.gs");
 	mGrassScene->setShader(grassShader, GRASS_SHADER_ID,VP);
 
-	 /**  Assign texture handles to the model object **/
-    /*  GLuint grassMaskTexture;
-        LoadTGATextureSimple((char*)"texture.tga",&grassMaskTexture);
-        mGrassScene->setTexture(grassMaskTexture,GRASS_SHADER_ID,(const char*)"u_GrassMask");
-    */
     /**  Upload buffer coordinates **/
     uploadBufferCoordinates(mGrassScene,GRASS_SHADER_ID);
 
@@ -27,7 +20,8 @@ void GrassSimulation::initialize(){
     TerrainMetaData* terrainData = mTerrain->getTerrainMetaData();
     mGrassScene->setUniform(1.0f,GRASS_SHADER_ID,"u_Wind");
 
-/*** WATCH OUT **/
+	/***** START WATCH OUT **********************************************************************************/
+
     GLfloat * gridOffset = (GLfloat*)malloc(sizeof(GLfloat)*3);
     gridOffset[0] = -terrainData->TerrainSize/2.0;
     gridOffset[1] = 0;
@@ -39,16 +33,19 @@ void GrassSimulation::initialize(){
 
     /** Set hight map texture **/
     mGrassScene->setTexture(mTerrain->getTextureData()->texID,GRASS_SHADER_ID,"u_HeightMap");
-/*** WATCH OUT **/
+
+	/***** END WATCH OUT **********************************************************************************/
 
     /** Grass mask **/
     GLuint grassMaskTexture;
     LoadTGATextureSimple((char*)"textures/test.tga", &grassMaskTexture);
     mGrassScene->setTexture(grassMaskTexture,GRASS_SHADER_ID,"u_GrassMask");
 
-	/* End Jocke*/
+    /** Noise **/
+    GLuint grassNoiseTexture;
+    LoadTGATextureSimple((char*)"textures/noise.tga", &grassNoiseTexture);
+    mGrassScene->setTexture(grassNoiseTexture,GRASS_SHADER_ID,"u_GrassNoise");
 }
-
 
 void GrassSimulation::setTerrain(Terrain * terrain){
     mTerrain = terrain;
@@ -56,7 +53,7 @@ void GrassSimulation::setTerrain(Terrain * terrain){
 
 void GrassSimulation::uploadBufferCoordinates(ModelObject * modelobject,GLuint shaderId){
 
-    GLuint DIM = 400; /* Antal vertices per rad*/
+    GLuint DIM = 5; /* Antal vertices per rad*/
 
     GLuint vertexCount = DIM*DIM;
 	GLuint triangleCount = (DIM-1) * (DIM-1)* 2;
@@ -65,7 +62,6 @@ void GrassSimulation::uploadBufferCoordinates(ModelObject * modelobject,GLuint s
 
      for(GLuint y = 0; y < DIM; ++y)
         for(GLuint x = 0; x < DIM; ++x){
-
             float xPos = x/(float)(DIM-1);
             float yPos = y/(float)(DIM-1);
             vertexArray[(x + y * DIM)*3 + 0] = xPos;
