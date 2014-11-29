@@ -12,8 +12,8 @@
 
 
 /** SIMULATION CONSTANTS **/
-#define GPU_WATER_DIM 32
-#define GPU_WATER_SIZE 8
+#define GPU_WATER_DIM 128
+#define GPU_WATER_SIZE 16
 
 /** SHADER ID'S **/
 #define GPU_SHADER_WATER 0
@@ -38,9 +38,9 @@ class GPUWaterSimulation:public GPUSimulation
 
         static const GLfloat GpuSpringDamping        = -.805f;
         static const GLfloat GpuSpringConstant       = 20.75f;
-        static const GLfloat GpuRestLength          = GPU_WATER_SIZE/(GPU_WATER_DIM-1.0);
+        static const GLfloat GpuRestLength          = 2.0*GPU_WATER_SIZE/(GPU_WATER_DIM-1.0);
         /** Wind **/
-        GLfloat mTime;
+      
 
         /********** GRAPHICS ********/
         ModelObject * mGPUWaterScene;

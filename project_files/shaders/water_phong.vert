@@ -25,13 +25,20 @@ vec3 getNormalWorld(vec2 texCoord,vec3 centerPos){
 	int numTriangles = 6;
 	vec2 resolution = u_Resolution;
 	float step = 1.0/(resolution.x+1.0);
-	vec3 deltaVec[6];
+	vec3 deltaVec[6];/*
 	deltaVec[0] = readPositionWorld(texCoord,vec2(step,0.0)) - centerPos; // EAST
 	deltaVec[1] = readPositionWorld(texCoord,vec2(step,step)) - centerPos; // North East
 	deltaVec[2] = readPositionWorld(texCoord,vec2(0.0,step)) - centerPos; // North 
 	deltaVec[3] = readPositionWorld(texCoord,vec2(-step,0.0)) - centerPos; // West 
 	deltaVec[4] = readPositionWorld(texCoord,vec2(-step,-step)) - centerPos; // South West 
 	deltaVec[5] = readPositionWorld(texCoord,vec2(0.0,-step)) - centerPos; // South  
+*/
+	deltaVec[0] = readPositionWorld(texCoord,vec2(step,0.0)) - centerPos; // EAST
+	deltaVec[1] = readPositionWorld(texCoord,vec2(0.0,step)) - centerPos; // North
+	deltaVec[2] = readPositionWorld(texCoord,vec2(-step,step)) - centerPos; // North 
+	deltaVec[3] = readPositionWorld(texCoord,vec2(-step,0.0)) - centerPos; // West 
+	deltaVec[4] = readPositionWorld(texCoord,vec2(0.0,-step)) - centerPos; // South West 
+	deltaVec[5] = readPositionWorld(texCoord,vec2(step,-step)) - centerPos; // South  
 
 	vec3 normal = vec3(0.0);
 	

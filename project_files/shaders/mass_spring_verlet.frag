@@ -16,6 +16,9 @@ uniform float u_RestLengthStruct;
 uniform float u_RestLengthShear;
 uniform float u_RestLengthBend;
 
+out vec4 out1;
+out vec4 out2;
+
 /** DEBUG SPHERE **/
 
 
@@ -26,7 +29,7 @@ in vec2 f_TexCoord;
 //t vec4 out_Position[2];
 
 /* Array of spring directions  */
-const float springDirections[] ={
+const float springDirections[] = float[24](
 	// Struct
 	1.0 ,0.0,
 	0.0 ,1.0,
@@ -42,7 +45,7 @@ const float springDirections[] ={
 	0.0,2.0,
 	-2.0,0.0,
 	0.0 ,-2.0
- };
+ );
 /* The spring state are encoded according to following bit table: */
 
 /* STRUCTURAL SRPINGS:  */
@@ -208,7 +211,7 @@ vec3 applyForces(vec3 position, vec3 velocity,highp uint springState,out highp u
 	acceleration += vec3(0.0,u_Gravity,0.0);
 	
 	/* Apply wind force */
-	//acceleration += u_Wind;
+	acceleration += u_Wind;
 	
 	/* Damping force */
 	acceleration += velocity*u_SystemDamping;
@@ -257,7 +260,14 @@ void main(void)
 	}
 
 	/* Set next position */
-	gl_FragData[0]  = vec4(nextPosition,float(nextSpringStateBits)); 
 	/* Set previous position */
-	gl_FragData[1]  = vec4(position,float(nextSpringStateBits)); 
+/*
+	gl_FragData[0]  = vec4(nextPosition,float(nextSpringStateBits)); 
+
+	gl_FragData[1]  = vec4(position,float(nextSpringStateBits));
+*/
+
+	out1 = vec4(nextPosition,float(nextSpringStateBits));
+	out2 = vec4(position,float(nextSpringStateBits));
+
 }

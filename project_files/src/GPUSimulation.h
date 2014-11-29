@@ -52,6 +52,8 @@ class GPUSimulation: public SimulationClass
         void intializeSimulation(SimulationData_Type * simulationData);
         void uploadBufferCoordinates(ModelObject * modelObj,GLuint shaderId);
 
+		void uploadTime(GLfloat deltaTime);
+
         void setSimulationConstant(GLfloat constant, const char *uniformName);
         void setSimulationConstant(GLfloat* constant,GLuint sizeConstant, const char *uniformName);
         void setSimulationTexture(GLuint texid,const char* uniformName);
@@ -98,6 +100,10 @@ class GPUSimulation: public SimulationClass
 
         /** Simulation data **/
         SimulationData_Type mSimulationData;
+
+	   GLfloat mTime;
+	   GLfloat mDeltaTime;
+	   bool mTimeEnabled;
 
 };
 

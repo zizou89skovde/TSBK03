@@ -13,9 +13,14 @@ uniform float u_TerrainSize;
 uniform float u_RestLength;
 uniform float u_SpringConstant;
 uniform float u_SpringDamping;
+uniform float u_SeaLevel;
 in vec2 f_TexCoord;
+
+out vec4 out1;
+out vec4 out2;
+
 /* Array of spring directions  */
-const float springDirections[] ={
+const float springDirections[24] =float[24](
 	// Struct
 	1.0 ,0.0,
 	0.0 ,1.0,
@@ -31,7 +36,7 @@ const float springDirections[] ={
 	0.0,2.0,
 	-2.0,0.0,
 	0.0 ,-2.0
- };
+ );
  
    const uint RIGHT_STRUCTURAL_SPRING   =  0x1;
  
@@ -47,6 +52,16 @@ void readMassData(vec2 textureCoordinate, out vec3 position, out vec3 velocity){
 }
 
 
+float heightOverGround(vec3 position){
+
+	vec2 mapPosition = 0.5+(position.xz)/u_TerrainSize;
+	float height = (texture(u_HeightMap, mapPosition).x-0.5)*u_TerrainHeight;
+	
+	return (u_SeaLevel-height);
+
+}
+
+
 vec3 applySpringForce(vec3 centerPosition, vec3 velocity,highp uint springState,out highp uint outSpringState){
 	
 	vec3 force = vec3(0.0);
@@ -56,12 +71,13 @@ vec3 applySpringForce(vec3 centerPosition, vec3 velocity,highp uint springState,
 	vec3 neighbourPosition[4];
 	vec4 heightDiffs;
 	/* Do not update  elements on the border of the grid */
-	if(  (f_TexCoord.x <  stepSize || f_TexCoord.x  > 1.0-stepSize) ||
-		 (f_TexCoord.y <  stepSize || f_TexCoord.y  > 1.0-stepSize)){
+	if(  f_TexCoord.x <  stepSize || f_TexCoord.x  > 1.0-stepSize ||
+		 f_TexCoord.y <  stepSize || f_TexCoord.y  > 1.0-stepSize
+	  ){
 		return vec3(0.0);	 
 	}
 		
-	
+	vec3 sumNeighbours = vec3(0.0);
 	for(int i = 0; i < 4; ++i){
 			
 			/*Determine neighbour texture coordinate */
@@ -70,33 +86,33 @@ vec3 applySpringForce(vec3 centerPosition, vec3 velocity,highp uint springState,
 			texCoord = clamp(texCoord,0.0,0.999);
 		
 			/* Read neighbour position */
-			neighbourPosition[i] = texture(u_CurrentPosition,texCoord).xyz;
+			sumNeighbours += texture(u_CurrentPosition,texCoord).xyz;
 		
-			/* asd */
-			heightDiffs[i] = clamp(abs(neighbourPosition[i].y - centerPosition.y),0.0,1.0);
 			
 	}
-	
-	vec3 sumNeighbours = vec3(0.0);
-	//if(length(heightDiffs) > 0.0){
-		//heightDiffs = normalize(heightDiffs);
-	for(int i = 0; i < 4; i++){
-		sumNeighbours += neighbourPosition[i]*(1.0+0.1*heightDiffs[i]);
-	}
-	/*}else{
-		sumNeighbours = 4.0*centerPosition;
-	}*/
 
-	force = (sumNeighbours - 4.0*centerPosition)*0.005;
 	
+
+	force = (sumNeighbours - 4.0*centerPosition)*0.5;
+	/* FAKE #1337 */
+	float deltaHeight =  u_SeaLevel - centerPosition.y;
+	force.y += 0.004 * deltaHeight;
+
+
+	float hog = heightOverGround(centerPosition);
+	if(hog <= 0.5){	
+		force *= clamp(hog,0.0,1.0);
+	}
+
+
 	/* Force = acceleration since the mass is considered to be 1. */
 	return  force;
 }
 
 float waveSource(vec3 position,out vec3 out1,out vec3 out2){
-	float strength = clamp((2.0 - length(position.xz)),0.0,1.0);
+	float strength = clamp((0.2 - length(position.xz)),0.0,1.0);
 	if(strength >= 0.1){
-		position.y = 1.0*sin(u_Time);
+		position.y = u_SeaLevel+0.10*sin(2.0*u_Time);
 		out1 = position;
 		out2 = position;
 	}
@@ -110,7 +126,7 @@ vec3 applyForces(vec3 position, vec3 velocity,highp uint springState,out highp u
 	vec3 acceleration = vec3(0.0);
 
 	/* Apply gravity force */
-	acceleration += vec3(0.0,-0.00001,0.0);
+	//acceleration += vec3(0.0,-0.00001,0.0);
 	
 	/* Damping force */
 	acceleration += velocity*u_SystemDamping;
@@ -135,7 +151,6 @@ vec3 groundCollision(vec3 inPosition,out float colllided){
 	vec3 newPosition = inPosition;
 	colllided  = 0.0;
 	if(height > inPosition.y){
-			newPosition.y = height;
 			colllided = 1.0;
 	}
 	return newPosition;
@@ -157,24 +172,24 @@ void main(void)
 	vec3 outPrevPosition = position;
 	
 	/* Let current particle be influenced by an external source */
-	/*if(waveSource(position,outPrevPosition,outPosition) < 0.1){
+	if(waveSource(position,outPrevPosition,outPosition) < 0.1){
 		outPrevPosition = position;
 		outPosition 	= integrate(position,previousPosition,acceleration);
-	}*/
-	outPrevPosition = position;
-	outPosition 	= integrate(position,previousPosition,acceleration);
+	}
+	//outPrevPosition = position;
+	//outPosition 	= integrate(position,previousPosition,acceleration);
 	/* Check ground collision */
 	
-	float hasCollided;
+/*	float hasCollided;
 	vec3 adjustedPosition = groundCollision(position,hasCollided);
 	if(hasCollided != 0.0){
 		outPosition 	= adjustedPosition;
 		outPrevPosition = adjustedPosition;
-	}
+	}*/
 
 	/* Set next position */
-	gl_FragData[0]  = vec4(outPosition,springState); 
+	out1  = vec4(outPosition,springState); 	//gl_FragData[0]  = vec4(outPosition,springState); 
 	/* Set previous position */
-	gl_FragData[1]  = vec4(outPrevPosition,springState); 
+	out2  = vec4(position,springState); 	//gl_FragData[1]  = vec4(outPrevPosition,springState); 
 }
 

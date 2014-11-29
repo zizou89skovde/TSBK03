@@ -15,7 +15,7 @@ void GPUWaterSimulation::initialize(){
     simulationData->GridDimension  = GPU_WATER_DIM;
     simulationData->GridSize       = GPU_WATER_SIZE;
     simulationData->GridOffset[0] = -1;
-    simulationData->GridOffset[1] = 4;
+    simulationData->GridOffset[1] = -2;
     simulationData->GridOffset[2] = 0;
     simulationData->isUpward       = false;
 
@@ -27,7 +27,7 @@ void GPUWaterSimulation::initialize(){
     strcpy(simulationData->FragmentShader,frag);
 
     intializeSimulation(simulationData);
-
+    setSimulationConstant( simulationData->GridOffset[1],"u_SeaLevel");
     configureSimulation();
 
     mGPUWaterScene = new ModelObject();
@@ -73,20 +73,19 @@ void GPUWaterSimulation::configureSimulation(){
     setSimulationConstant(GpuSpringDamping,"u_SpringDamping");
     setSimulationConstant(GpuSpringConstant,"u_SpringConstant");
     setSimulationConstant(GpuRestLength,"u_RestLength");
+
     /** Upload wind **/
-    mTime = 0;
-    setSimulationConstant(mTime,"u_Time");
+	uploadTime(0.019);
 
 }
 
 
 void GPUWaterSimulation::draw(mat4 projectionMatrix, mat4 viewMatrix){
 
-    mTime += 0.001;
-    replaceSimulationConstant(mTime,"u_Time");
+ 
 
     /** Computing shaders **/
-    FBOstruct * resultFbo = simulate(1);
+    FBOstruct * resultFbo = simulate(5);
 
     /** Render Cloth **/
     mGPUWaterScene->replaceTexture(resultFbo->texids[0],"u_Position_Texture");

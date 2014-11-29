@@ -4,7 +4,7 @@ GPUSimulation::GPUSimulation(GLuint* w,GLuint* h)
 {
     mScreenWidth = w;
     mScreenHeight = h;
-
+	mTimeEnabled = false;
 }
 
 
@@ -125,6 +125,10 @@ FBOstruct* GPUSimulation::simulate(GLuint numIterations){
     for(GLuint i = 0; i < numIterations; i++){
             shiftFBO();
             mGPUSimulation->draw(GPU_SHADER_COMPUTE,emptyMat,emptyMat);
+			if(mTimeEnabled){
+ 				mTime += mDeltaTime;
+	       		replaceSimulationConstant(mTime,"u_Time");
+			}
     }
     enableFbo(NULL);
     return getActiveFBO();
@@ -155,6 +159,18 @@ The spring state are encoded according to following bit table:
   DOWN BEND SPRING          =  s & 2048
 
 **/
+
+void GPUSimulation::uploadTime(GLfloat deltaTime){
+
+   mTime = 0.0;
+   mDeltaTime = deltaTime;
+   mTimeEnabled = true;
+   setSimulationConstant(mTime,"u_Time");
+
+
+}
+
+
 GLulong GPUSimulation::getSpringState(GLuint x,GLuint y){
 
         GLint springIndices[] = {
@@ -276,9 +292,12 @@ void GPUSimulation::uploadBufferCoordinates(ModelObject * modelObj,GLuint shader
 
     GLuint GRID_DIM       = mSimulationData.GridDimension;
     GLuint GRID_RES       = mSimulationData.GridDimension-1;
-    GLuint GRID_SIZE      = mSimulationData.GridSize;
+    GLfloat GRID_SIZE      = mSimulationData.GridSize/2.0;
 
-    GLfloat * GRID_OFFSET  = mSimulationData.GridOffset;
+    GLfloat GRID_OFFSET[3];
+	GRID_OFFSET[0]  = mSimulationData.GridOffset[0];
+	GRID_OFFSET[1]  = mSimulationData.GridOffset[1];
+	GRID_OFFSET[2]  = mSimulationData.GridOffset[2];
     bool isUpward = mSimulationData.isUpward;
 
     /** Generate start value for position buffer **/
@@ -287,9 +306,21 @@ void GPUSimulation::uploadBufferCoordinates(ModelObject * modelObj,GLuint shader
     GLfloat len = GRID_RES/2.0;
     for(GLuint y = 0; y < GRID_DIM; ++y)
         for(GLuint x = 0; x < GRID_DIM; ++x){
-        vertexArray[(x + y * GRID_DIM)*GPU_FLOATS_PER_POSITION + 0] = GRID_OFFSET[0] + GRID_SIZE*(GLfloat)(x - len)/len;
-        vertexArray[(x + y * GRID_DIM)*GPU_FLOATS_PER_POSITION + 1] = GRID_OFFSET[1] + (!isUpward)?0:GRID_SIZE*(GLfloat)(y - len)/len;
-        vertexArray[(x + y * GRID_DIM)*GPU_FLOATS_PER_POSITION + 2] = GRID_OFFSET[2] + (isUpward)?0:GRID_SIZE*(GLfloat)(y - len)/len;
+
+		float xPos = GRID_SIZE*(GLfloat)(x - len)/len;
+		float yPos ,zPos;
+
+		if(isUpward){
+			yPos = GRID_SIZE*(GLfloat)(y - len)/len;
+			zPos = 0;
+		}else{
+			yPos = 0;
+			zPos = GRID_SIZE*(GLfloat)(y - len)/len;
+		}
+		
+        vertexArray[(x + y * GRID_DIM)*GPU_FLOATS_PER_POSITION + 0] = GRID_OFFSET[0] + xPos;
+        vertexArray[(x + y * GRID_DIM)*GPU_FLOATS_PER_POSITION + 1] = GRID_OFFSET[1] + yPos;
+        vertexArray[(x + y * GRID_DIM)*GPU_FLOATS_PER_POSITION + 2] = GRID_OFFSET[2] + zPos;
 
         /** Following assignment expecting an interpret cast. Might not be the case on all systems... **/
         vertexArray[(x + y * GRID_DIM)*GPU_FLOATS_PER_POSITION + 3] = getSpringState(x,y);
