@@ -9,8 +9,10 @@ uniform float u_DeltaTime;
 uniform float u_Time;
 uniform float u_SystemDamping;
 uniform float u_TerrainHeight;
-uniform float u_TerrainDim;
-
+uniform float u_TerrainSize;
+uniform float u_RestLength;
+uniform float u_SpringConstant;
+uniform float u_SpringDamping;
 in vec2 f_TexCoord;
 /* Array of spring directions  */
 const float springDirections[] ={
@@ -44,56 +46,49 @@ void readMassData(vec2 textureCoordinate, out vec3 position, out vec3 velocity){
 	velocity 			  = getVerletVelocity(position,previousPosition);
 }
 
-vec4 springContribution(vec3 mass1Position, vec3 mass1Velocity, vec2 textureOffset, float springConstant, float springRestLength){
-	/* Reading position and velocity of the mass on the other end of selected spring */
-	vec2 mass2TextureCoordinate = f_TexCoord+textureOffset;
-	
-	vec3 mass2Position;
-	vec3 mass2Velocity;
-	readMassData(mass2TextureCoordinate,mass2Position,mass2Velocity);
-	/*
-	vec3 deltaPosition = mass1Position-mass2Position;
-	vec3 deltaVelocity = mass1Velocity-mass2Velocity;
-	
-	float springLength = length(deltaPosition);
-	
-	float springForce = -springConstant*(springLength - springRestLength);
-	float dampForce   = u_SpringDamping * (dot(deltaPosition,deltaVelocity)/springLength); // u_SpringDamping 
-	
-	vec3 force = normalize(deltaPosition)*(springForce+dampForce);
-	*/
-	/* Check if spring has breaked */
-	float springHasBreaked = 0.0;
-	/*if(springLength > 4.0*springRestLength){
-		springHasBreaked = 1.0;
-	}*/
-	//suspension = mass2Position.yz
-	
-	vec3 force = 0.001*vec3(0.0,mass2Position.y-mass1Position.y,0.0);
-	/* Force = acceleration since the mass is considered to be 1. */
-	return vec4(force,springHasBreaked);
-}
 
-vec3 applySpringForce(vec3 position, vec3 velocity,highp uint springState,out highp uint outSpringState){
+vec3 applySpringForce(vec3 centerPosition, vec3 velocity,highp uint springState,out highp uint outSpringState){
 	
 	vec3 force = vec3(0.0);
 	/* Step in texture to read near by mass */
-	float stepSize = 1.0/(u_Meta.x); // OR .y
-
-	/* Loop through all 12 possible spring connectivities */
-	/* Add force contribution from each spring that is currently 
-	   to the mass at position */ 
-	outSpringState = springState;
-	for(int i = 0; i < 4; ++i){
-			/*Read spring contribution*/
-			vec2 step = vec2(springDirections[2*i],springDirections[2*i+1]);
-			vec2 textureOffset = stepSize*step;
-			vec4 result = springContribution(position,velocity,textureOffset,0.25,1.0);
+	float stepSize = 1.0/(u_Meta.x-1.0); // OR .y
 	
-			float springHasBreaked = result.w;
-			vec3 forceAddition = result.xyz;
-			force += forceAddition;
+	vec3 neighbourPosition[4];
+	vec4 heightDiffs;
+	/* Do not update  elements on the border of the grid */
+	if(  (f_TexCoord.x <  stepSize || f_TexCoord.x  > 1.0-stepSize) ||
+		 (f_TexCoord.y <  stepSize || f_TexCoord.y  > 1.0-stepSize)){
+		return vec3(0.0);	 
 	}
+		
+	
+	for(int i = 0; i < 4; ++i){
+			
+			/*Determine neighbour texture coordinate */
+			vec2 step = stepSize*vec2(springDirections[2*i],springDirections[2*i+1]);
+			vec2 texCoord = f_TexCoord+step;
+			texCoord = clamp(texCoord,0.0,0.999);
+		
+			/* Read neighbour position */
+			neighbourPosition[i] = texture(u_CurrentPosition,texCoord).xyz;
+		
+			/* asd */
+			heightDiffs[i] = clamp(abs(neighbourPosition[i].y - centerPosition.y),0.0,1.0);
+			
+	}
+	
+	vec3 sumNeighbours = vec3(0.0);
+	//if(length(heightDiffs) > 0.0){
+		//heightDiffs = normalize(heightDiffs);
+	for(int i = 0; i < 4; i++){
+		sumNeighbours += neighbourPosition[i]*(1.0+0.1*heightDiffs[i]);
+	}
+	/*}else{
+		sumNeighbours = 4.0*centerPosition;
+	}*/
+
+	force = (sumNeighbours - 4.0*centerPosition)*0.005;
+	
 	/* Force = acceleration since the mass is considered to be 1. */
 	return  force;
 }
@@ -115,11 +110,12 @@ vec3 applyForces(vec3 position, vec3 velocity,highp uint springState,out highp u
 	vec3 acceleration = vec3(0.0);
 
 	/* Apply gravity force */
-	//acceleration += vec3(0.0,u_Gravity,0.0);
+	acceleration += vec3(0.0,-0.00001,0.0);
 	
 	/* Damping force */
 	acceleration += velocity*u_SystemDamping;
 	
+	//acceleration.xz += velocity.xz*-0.5;
 	/* Add force from springs */
 	acceleration+= applySpringForce(position,velocity,springState,outSpringState);
 	
@@ -133,13 +129,14 @@ vec3 integrate(vec3 position, vec3 previousPosition, vec3 acceleration){
 		return nextPosition;
 }
 
-vec3 groundCollision(vec3 inPosition,out bool colllided){
-	vec2 mapPosition = (inPosition.xz)/u_TerrainDim;
-	float height = texture(u_PreviousPosition, mapPosition).x;
+vec3 groundCollision(vec3 inPosition,out float colllided){
+	vec2 mapPosition = 0.5+(inPosition.xz)/u_TerrainSize;
+	float height = (texture(u_HeightMap, mapPosition).x-0.5)*u_TerrainHeight;
 	vec3 newPosition = inPosition;
-	if(height < inPosition.y){
-			newPosition = height;
-			newPosition = true;
+	colllided  = 0.0;
+	if(height > inPosition.y){
+			newPosition.y = height;
+			colllided = 1.0;
 	}
 	return newPosition;
 }
@@ -156,22 +153,24 @@ void main(void)
 	highp uint springStateBits = uint(springState);
 	highp uint nextSpringStateBits;
 	vec3 acceleration 	  = applyForces(position,velocity,springStateBits,nextSpringStateBits);
-	vec3 outPosition;
-	vec3 outPrevPosition;
+	vec3 outPosition = position;
+	vec3 outPrevPosition = position;
 	
 	/* Let current particle be influenced by an external source */
-	if(waveSource(position,outPrevPosition,outPosition) < 0.1){
+	/*if(waveSource(position,outPrevPosition,outPosition) < 0.1){
 		outPrevPosition = position;
 		outPosition 	= integrate(position,previousPosition,acceleration);
-	}
-	
+	}*/
+	outPrevPosition = position;
+	outPosition 	= integrate(position,previousPosition,acceleration);
 	/* Check ground collision */
-	/*bool hasCollidied;
-	vec3 adjustedPosition = groundCollision(outPosition,hasCollided);
-	if(hasCollided){
+	
+	float hasCollided;
+	vec3 adjustedPosition = groundCollision(position,hasCollided);
+	if(hasCollided != 0.0){
 		outPosition 	= adjustedPosition;
 		outPrevPosition = adjustedPosition;
-	}*/
+	}
 
 	/* Set next position */
 	gl_FragData[0]  = vec4(outPosition,springState); 
