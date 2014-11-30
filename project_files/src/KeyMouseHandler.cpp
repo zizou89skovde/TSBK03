@@ -4,8 +4,8 @@
 KeyMouseHandler::KeyMouseHandler()
 {
 
-    cameraEye = new vec3(0.0f, 2.0f, -5.0f);
-    cameraCenter = new vec3(0.0f, 2.0f, -4.0f);
+    cameraEye = new vec3(0.0f, 8.0f, -5.0f);
+    cameraCenter = new vec3(0.0f, 4.0f, -4.0f);
 
     cameraUp = new vec3(0.0f, 1.0f, 0.0f);
 

@@ -58,7 +58,7 @@ void init(void)
 	glClearDepth(1.0);
 	glEnable(GL_DEPTH_TEST);
 	printError("GL inits");
-	mTerrain = new Terrain();
+	mTerrain = new Terrain(&WIDTH,&HEIGHT);
 /*
     mGrassSimulation = new GrassSimulation();
     mGrassSimulation->setTerrain(mTerrain);

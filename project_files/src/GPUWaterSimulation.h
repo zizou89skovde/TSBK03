@@ -34,13 +34,13 @@ class GPUWaterSimulation:public GPUSimulation
 
 
         static const GLfloat GpuSystemDamping        = -0.00525f;
-        static const GLfloat GpuSystemDeltaTime      = 2.0f/60.0f;
+        static const GLfloat GpuSystemDeltaTime      = 1.0f/60.0f;
 
         static const GLfloat GpuSpringDamping        = -.805f;
         static const GLfloat GpuSpringConstant       = 20.75f;
         static const GLfloat GpuRestLength          = 2.0*GPU_WATER_SIZE/(GPU_WATER_DIM-1.0);
         /** Wind **/
-      
+
 
         /********** GRAPHICS ********/
         ModelObject * mGPUWaterScene;

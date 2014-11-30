@@ -43,6 +43,14 @@ void GPUWaterSimulation::initialize(){
     mGPUWaterScene->setTexture(DUMMY_TEXTURE,GPU_SHADER_WATER,"u_Position_Texture");
     mGPUWaterScene->setTexture(DUMMY_TEXTURE,GPU_SHADER_WATER,"u_Normal_Texture");
 
+    /** Upload Offscreen rendering of the terrain */
+	FBOstruct * terrainFBO = mTerrain->getTerrainFBO();
+    mGPUWaterScene->setTexture(terrainFBO->texid,GPU_SHADER_WATER,"u_TerrainColor");
+    mGPUWaterScene->setTexture(terrainFBO->depth,GPU_SHADER_WATER,"u_TerrainDepth");
+    /** Upload upside down rendering of the terrain  **/
+    FBOstruct * terrainReflectionFBO = mTerrain->getTerrainReflectedFBO();
+    mGPUWaterScene->setTexture(terrainReflectionFBO->texid,GPU_SHADER_WATER,"u_TerrainReflection");
+
     /** Upload grid resolution **/
     GLfloat * meta = (GLfloat*)malloc(sizeof(GLfloat)*2);
 	meta[0] = GPU_WATER_DIM;
@@ -75,23 +83,28 @@ void GPUWaterSimulation::configureSimulation(){
     setSimulationConstant(GpuRestLength,"u_RestLength");
 
     /** Upload wind **/
-	uploadTime(0.019);
+	uploadTime(0.0079);
+
+
 
 }
 
 
 void GPUWaterSimulation::draw(mat4 projectionMatrix, mat4 viewMatrix){
 
- 
+
 
     /** Computing shaders **/
-    FBOstruct * resultFbo = simulate(5);
+    FBOstruct * resultFbo = simulate(1);
 
     /** Render Cloth **/
     mGPUWaterScene->replaceTexture(resultFbo->texids[0],"u_Position_Texture");
     mGPUWaterScene->replaceTexture(resultFbo->texids[1],"u_Normal_Texture");
+    glEnable (GL_BLEND);
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     mGPUWaterScene->draw(projectionMatrix,viewMatrix);
-
+    glBlendFunc (GL_ONE, GL_ZERO);
+    glDisable (GL_BLEND);
     printError("GPU Cloth draw");
 
 }

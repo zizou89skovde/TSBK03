@@ -19,10 +19,12 @@ class Terrain
 
 
     public:
-        Terrain();
+        Terrain(GLuint * w, GLuint * h);
         void draw(mat4 proj, mat4 view);
         TextureData * getTextureData();
         TerrainMetaData * getTerrainMetaData();
+        FBOstruct * getTerrainFBO();
+        FBOstruct * getTerrainReflectedFBO();
         virtual ~Terrain();
     protected:
     private:
@@ -34,6 +36,11 @@ class Terrain
 
         TextureData* mTerrainTextureData;
         ModelObject* mTerrainModel;
+
+        FBOstruct* mTerrainFBO;
+        FBOstruct* mTerrainReflectionFBO;
+        GLuint *mScreenWitdh;
+        GLuint *mScreenHeight;
 };
 
 #endif // TERRAIN_H

@@ -6,6 +6,7 @@ uniform vec2 u_Resolution;
 uniform float u_Gravity;
 uniform vec3 u_Wind;
 uniform vec3 u_SpherePosition;
+uniform float u_SphereRadius;
 uniform float u_DeltaTime;
 uniform float u_SystemDamping;
 
@@ -15,18 +16,13 @@ uniform float u_SpringConstantBend;
 uniform float u_RestLengthStruct; 
 uniform float u_RestLengthShear;
 uniform float u_RestLengthBend;
+uniform float u_FixPointConstant;
 
 out vec4 out1;
 out vec4 out2;
 
 /** DEBUG SPHERE **/
-
-
-
-
-
 in vec2 f_TexCoord;
-//t vec4 out_Position[2];
 
 /* Array of spring directions  */
 const float springDirections[] = float[24](
@@ -133,7 +129,8 @@ vec4 springContribution(vec3 mass1Position, vec3 mass1Velocity, vec2 textureOffs
 	
 	float springLength = length(deltaPosition);
 	
-	float springForce = -springConstant*(springLength - springRestLength);
+	float extra = clamp(springLength/springRestLength,1.0,4.0);
+	float springForce = -extra*springConstant*(springLength - springRestLength);
 	float dampForce   = u_SpringDamping * (dot(deltaPosition,deltaVelocity)/springLength); // u_SpringDamping 
 	
 	vec3 force = normalize(deltaPosition)*(springForce+dampForce);
@@ -187,19 +184,18 @@ vec3 applySpringForce(vec3 position, vec3 velocity,highp uint springState,out hi
 	return  force;
 }
 
-vec4 sphereCollision(vec3 position){
-	float sphereRadius = 1.1;
+vec3 collisionForce(vec3 position){
+	float sphereRadius = u_SphereRadius+0.2;
 	vec3 spherePosition = u_SpherePosition; //vec3(0.0);
 	vec3 delta = position-spherePosition;
 	float distance = length(delta);
-	vec4 adjustedPosition = vec4(position,0.0);
-	
+
+	vec3 collisionForce = vec3(0.0);
 	if(distance < sphereRadius){
 		float adjustDistance = sphereRadius - distance;
-		adjustedPosition.xyz += 0.5*adjustDistance*normalize(delta);
-		adjustedPosition.w = 1.0;
+		collisionForce = 1.1*adjustDistance*normalize(delta);
 	}
-	return adjustedPosition;
+	return collisionForce;
 }
 
 /* GPU implementation of the applyForces in CPUClothsimulation.cpp */
@@ -211,7 +207,11 @@ vec3 applyForces(vec3 position, vec3 velocity,highp uint springState,out highp u
 	acceleration += vec3(0.0,u_Gravity,0.0);
 	
 	/* Apply wind force */
-	acceleration += u_Wind;
+	//acceleration += u_Wind;
+	
+	/* Collision Force */
+	acceleration += collisionForce(position);
+	
 	
 	/* Damping force */
 	acceleration += velocity*u_SystemDamping;
@@ -244,30 +244,18 @@ void main(void)
 	vec3 acceleration 	  = applyForces(position,velocity,springStateBits,nextSpringStateBits);
 	
 	/* Temp hack. Fixed regions should be uploaded as uniform */
-	if(  mod(f_TexCoord.x,0.25) < 0.05  && f_TexCoord.y > P1_Y )
-		acceleration = vec3(0.0);
-		
+	if(  (f_TexCoord.x > 0.95 || mod(f_TexCoord.x,0.25) < 0.05  ) && f_TexCoord.y > P1_Y  ){
+		acceleration = vec3(0.0);	
+	}
+	
 	vec3 nextPosition 	  = integrate(position,previousPosition,acceleration);
 	
-	/*Check collistion with spehere */
-	vec4 ajdustedPosition = sphereCollision(nextPosition);
-	/* If collided .w element is set to 1.0 */
-	if(ajdustedPosition.w != 0.0){
+	
 		
-		/* Adjusting position and previous position */
-		nextPosition = ajdustedPosition.xyz;
-		position 	  = ajdustedPosition.xyz;
-	}
 
 	/* Set next position */
-	/* Set previous position */
-/*
-	gl_FragData[0]  = vec4(nextPosition,float(nextSpringStateBits)); 
-
-	gl_FragData[1]  = vec4(position,float(nextSpringStateBits));
-*/
-
 	out1 = vec4(nextPosition,float(nextSpringStateBits));
+	/* Set previous position */
 	out2 = vec4(position,float(nextSpringStateBits));
 
 }

@@ -20,25 +20,15 @@ out vec4 out1;
 out vec4 out2;
 
 /* Array of spring directions  */
-const float springDirections[24] =float[24](
+const float springDirections[] = float[8](
 	// Struct
 	1.0 ,0.0,
 	0.0 ,1.0,
 	-1.0,0.0,
-	0.0,-1.0,
-	//Shear
-	1.0 ,1.0,
-	-1.0,1.0,
-	-1.0,-1.0,
-	1.0 ,-1.0,
-	//Bend
-	2.0,0.0,
-	0.0,2.0,
-	-2.0,0.0,
-	0.0 ,-2.0
- );
+	0.0,-1.0
+	);
  
-   const uint RIGHT_STRUCTURAL_SPRING   =  0x1;
+
  
 vec3 getVerletVelocity(vec3 position, vec3 previousPosition){
 	return (position-previousPosition)/u_DeltaTime;
@@ -53,12 +43,9 @@ void readMassData(vec2 textureCoordinate, out vec3 position, out vec3 velocity){
 
 
 float heightOverGround(vec3 position){
-
 	vec2 mapPosition = 0.5+(position.xz)/u_TerrainSize;
 	float height = (texture(u_HeightMap, mapPosition).x-0.5)*u_TerrainHeight;
-	
 	return (u_SeaLevel-height);
-
 }
 
 
@@ -101,7 +88,7 @@ vec3 applySpringForce(vec3 centerPosition, vec3 velocity,highp uint springState,
 
 	float hog = heightOverGround(centerPosition);
 	if(hog <= 0.5){	
-		force *= clamp(hog,0.0,1.0);
+		force *= clamp(2.0*hog,0.0,1.0);
 	}
 
 
@@ -112,7 +99,7 @@ vec3 applySpringForce(vec3 centerPosition, vec3 velocity,highp uint springState,
 float waveSource(vec3 position,out vec3 out1,out vec3 out2){
 	float strength = clamp((0.2 - length(position.xz)),0.0,1.0);
 	if(strength >= 0.1){
-		position.y = u_SeaLevel+0.10*sin(2.0*u_Time);
+		position.y = u_SeaLevel+0.50*sin(1.0*u_Time)*sin(0.01*u_Time);
 		out1 = position;
 		out2 = position;
 	}

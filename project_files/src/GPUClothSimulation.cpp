@@ -22,14 +22,15 @@ void GPUClothSimulation::initialize(){
     simulationData->GridOffset[0] = 0;
     simulationData->GridOffset[1] = 0;
     simulationData->GridOffset[2] = 0;
-    simulationData->isUpward       = false;
+    simulationData->isUpward       = true;
     intializeSimulation(simulationData);
     configureSimulation();
 
     mGPUClothScene = new ModelObject();
 
     /** Setting Cloth model shader **/
-    GLuint clothModelShader = loadShadersG("shaders/cloth.vert","shaders/cloth.frag","shaders/cloth.gs");
+    //GLuint clothModelShader = loadShadersG("shaders/cloth.vert","shaders/cloth.frag","shaders/cloth.gs");
+    GLuint clothModelShader = loadShaders("shaders/cloth_phong.vert","shaders/cloth_phong.frag");
     mGPUClothScene->setShader(clothModelShader,GPU_SHADER_CLOTH,VP);
 
     /** Uploading Texture coordinates **/
@@ -47,8 +48,8 @@ void GPUClothSimulation::initialize(){
 
     /** Sphere - For collision **/
     Sphere * sphere = new Sphere();
-    sphere->position = new vec3(0,0,-5);
-    sphere->radius = 1.0;
+    sphere->position = new vec3(mSphereOffsetX,mSphereOffsetY,mSphereOffsetZ);
+    sphere->radius = mSphereRadius;
     mSpheres.push_back(sphere);
 
     /** Sphere Model **/
@@ -60,6 +61,7 @@ void GPUClothSimulation::initialize(){
     mGPUClothScene->setShader(sphereShader,GPU_SHADER_SPHERE);
 
     /** Sphere Transform **/
+    mObjectDirection = 1.0;
     GLfloat r = sphere->radius;
     vec3  pos = *sphere->position;
     mat4 transform2 = T(pos.x,pos.y,pos.z)*S(r,r,r);
@@ -77,6 +79,9 @@ void GPUClothSimulation::configureSimulation(){
     setSimulationConstant(GpuSystemDamping,"u_SystemDamping");
     setSimulationConstant(GpuSystemGravity,"u_Gravity");
 
+    /** Fix points **/
+    setSimulationConstant(0.9,"u_FixPointConstant");
+
     /** Upload spring props **/
     setSimulationConstant(GpuSpringDamping,"u_SpringDamping");
     setSimulationConstant(GpuSpringConstantStruct,"u_SpringConstant");
@@ -93,8 +98,9 @@ void GPUClothSimulation::configureSimulation(){
     setSimulationConstant(mWindVector,3,"u_Wind");
 
     /** Sphere initial position */
-    GLfloat dummyPos[3];
+    GLfloat dummyPos[3] = {0,0,-28};
     setSimulationConstant(dummyPos,3,"u_SpherePosition");
+    setSimulationConstant(mSphereRadius,"u_SphereRadius");
 
 }
 
@@ -108,12 +114,25 @@ void GPUClothSimulation::updateWind(){
 
 }
 
+void GPUClothSimulation::updateCollisionObject(){
+
+    Sphere* s = mSpheres.at(0);
+    if(abs(s->position->z) >mSphereRouteLength){
+       mObjectDirection*= -1.0;
+    }
+    vec3 deltaPos = vec3(0.0,0.0,mObjectDirection*mSphereSpeed);
+    updateSpherePosition(deltaPos);
+}
+
 void GPUClothSimulation::draw(mat4 projectionMatrix, mat4 viewMatrix){
 
     updateWind();
 
     /** Computing shaders **/
     FBOstruct * resultFbo = simulate(20);
+
+    /** Update update sphere */
+    updateCollisionObject();
 
     /** Render Cloth **/
     mGPUClothScene->replaceTexture(resultFbo->texids[0],(const char *)"u_MassPos_Tex");
@@ -131,9 +150,10 @@ void GPUClothSimulation::updateSpherePosition(vec3 deltaPos){
     replaceSimulationConstant((GLfloat*)s->position,(const char*)"u_SpherePosition");
     /** Update model transform **/
     mat4 * transf = mGPUClothScene->getTransform(GPU_SHADER_SPHERE);
-   // GLfloat r = s->radius;
+    GLfloat r = s->radius;
     vec3  pos = *s->position;
-    *transf = T(pos.x,pos.y,pos.z); //*S(r,r,r);
+
+    *transf = T(pos.x,pos.y,pos.z)*S(r,r,r);
 
 }
 

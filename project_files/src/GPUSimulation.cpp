@@ -86,7 +86,7 @@ void GPUSimulation::enableFbo(FBOstruct * fbo){
     if(fbo == NULL){
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glDrawBuffer(GL_BACK);
-        glViewport(0, 0, *mScreenWidth, *mScreenWidth);
+        glViewport(0, 0, *mScreenWidth, *mScreenHeight);
     }else{
         glBindFramebuffer(GL_FRAMEBUFFER, fbo->fb);
         glDrawBuffers(2,FRAME_ATTACHMENT);
@@ -291,7 +291,7 @@ void GPUSimulation::uploadBufferCoordinates(ModelObject * modelObj,GLuint shader
  void GPUSimulation::generatePositionBuffer(FBOstruct* fbo){
 
     GLuint GRID_DIM       = mSimulationData.GridDimension;
-    GLuint GRID_RES       = mSimulationData.GridDimension-1;
+    GLfloat GRID_RES       = mSimulationData.GridDimension-1;
     GLfloat GRID_SIZE      = mSimulationData.GridSize/2.0;
 
     GLfloat GRID_OFFSET[3];
@@ -307,17 +307,17 @@ void GPUSimulation::uploadBufferCoordinates(ModelObject * modelObj,GLuint shader
     for(GLuint y = 0; y < GRID_DIM; ++y)
         for(GLuint x = 0; x < GRID_DIM; ++x){
 
-		float xPos = GRID_SIZE*(GLfloat)(x - len)/len;
+		float xPos = 2.0*GRID_SIZE*((GLfloat)x/GRID_RES - 0.5);
 		float yPos ,zPos;
 
 		if(isUpward){
-			yPos = GRID_SIZE*(GLfloat)(y - len)/len;
+			yPos = 2.0*GRID_SIZE*((GLfloat)y/GRID_RES - 0.5);
 			zPos = 0;
 		}else{
 			yPos = 0;
-			zPos = GRID_SIZE*(GLfloat)(y - len)/len;
+			zPos = 2.0*GRID_SIZE*((GLfloat)y/GRID_RES - 0.5);
 		}
-		
+
         vertexArray[(x + y * GRID_DIM)*GPU_FLOATS_PER_POSITION + 0] = GRID_OFFSET[0] + xPos;
         vertexArray[(x + y * GRID_DIM)*GPU_FLOATS_PER_POSITION + 1] = GRID_OFFSET[1] + yPos;
         vertexArray[(x + y * GRID_DIM)*GPU_FLOATS_PER_POSITION + 2] = GRID_OFFSET[2] + zPos;

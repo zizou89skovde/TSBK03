@@ -12,8 +12,8 @@
 
 
 /** SIMULATION CONSTANTS **/
-#define GPU_CLOTH_DIM 255
-#define GPU_CLOTH_SIZE 4
+#define GPU_CLOTH_DIM 512
+#define GPU_CLOTH_SIZE 8
 
 /** SHADER ID'S **/
 #define GPU_SHADER_CLOTH 0
@@ -32,18 +32,20 @@ class GPUClothSimulation:public GPUSimulation
 
     protected:
 
-        /********** PHYSICS CONSTANTS *****************/
+
+    private:
+             /********** PHYSICS CONSTANTS *****************/
         static const GLfloat GpuSpringDamping        = -.25f;
         static const GLfloat GpuSpringConstantStruct = 80.75f;
         static const GLfloat GpuSpringConstantBend   = 60.25f;
         static const GLfloat GpuSpringBreakFactor    = 3.2f;
 
         static const GLfloat GpuSystemDamping        = -0.0225f;
-        static const GLfloat GpuSystemDeltaTime      = 2.0f/60.0f;
+        static const GLfloat GpuSystemDeltaTime      = 1.0f/60.0f;
         static const GLfloat GpuSystemGravity        = -0.00981f;
 
-        static const GLfloat GpuRestLengthStruct     = 2.0*GPU_CLOTH_SIZE/(GPU_CLOTH_DIM-1.0);
-        static const GLfloat GpuRestLengthBend       = 4.0*GPU_CLOTH_SIZE/(GPU_CLOTH_DIM-1.0);
+        static const GLfloat GpuRestLengthStruct     = 1.0*GPU_CLOTH_SIZE/(GPU_CLOTH_DIM-1.0);
+        static const GLfloat GpuRestLengthBend       = 2.0*GPU_CLOTH_SIZE/(GPU_CLOTH_DIM-1.0);
 
         /** Wind **/
         void updateWind();
@@ -53,8 +55,16 @@ class GPUClothSimulation:public GPUSimulation
         /********** GRAPHICS ********/
         ModelObject * mGPUClothScene;
 
-    private:
+        static const GLfloat mSphereRadius = 2.0;
+        static const GLfloat mSphereSpeed = 0.01;
+        static const GLfloat mSphereRouteLength = 5.0;
+        static const GLfloat mSphereOffsetX = 0.0;
+        static const GLfloat mSphereOffsetY = 0.0;
+        static const GLfloat mSphereOffsetZ = -4.0;
+
+        GLfloat mObjectDirection;
         void configureSimulation();
+        void updateCollisionObject();
 };
 
 #endif // CLOTHSIMULATIONGPU_H

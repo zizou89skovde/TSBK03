@@ -23,14 +23,14 @@ vec3 readPositionWorld(vec2 tcoord,vec2 offset){
 vec3 getNormalWorld(vec2 texCoord,vec3 centerPos){
 	int numTriangles = 6;
 	vec2 resolution = u_Resolution;
-	float step = 1.0/(resolution.x+1.0);
+	float step = 1.0/(resolution.x);
 	vec3 deltaVec[6];
 	deltaVec[0] = readPositionWorld(texCoord,vec2(step,0.0)) - centerPos; // EAST
-	deltaVec[1] = readPositionWorld(texCoord,vec2(step,step)) - centerPos; // North East
-	deltaVec[2] = readPositionWorld(texCoord,vec2(0.0,step)) - centerPos; // North 
+	deltaVec[1] = readPositionWorld(texCoord,vec2(0.0,step)) - centerPos; // North
+	deltaVec[2] = readPositionWorld(texCoord,vec2(-step,step)) - centerPos; // North 
 	deltaVec[3] = readPositionWorld(texCoord,vec2(-step,0.0)) - centerPos; // West 
-	deltaVec[4] = readPositionWorld(texCoord,vec2(-step,-step)) - centerPos; // South West 
-	deltaVec[5] = readPositionWorld(texCoord,vec2(0.0,-step)) - centerPos; // South  
+	deltaVec[4] = readPositionWorld(texCoord,vec2(0.0,-step)) - centerPos; // South West 
+	deltaVec[5] = readPositionWorld(texCoord,vec2(step,-step)) - centerPos; // South  
 
 	vec3 normal = vec3(0.0);
 	
@@ -54,7 +54,7 @@ void main(void)
 	vec2 texCoord = in_Position.xy;	
 	
 	/* Hard coded light position, To be uniform */
-	vec4 light = vec4(0.0, 2.0, -8.0,1.0); 	
+	vec4 light = vec4(0.0, 8.0, -8.0,1.0); 	
 	
 	/* Read data for current vertex */
 	vec4 centerElement =  texture(texUnit, clamp(texCoord,0.0,0.99));
@@ -67,7 +67,7 @@ void main(void)
 	g_LightPos 		= vec3(V_Matrix*light);
 	
 	/* Quick fix */
-	centerPos 		+= vec3(0.0,3.5,0.0);
+	centerPos 		+= vec3(0.0,7.0,0.0);
 	g_Position 		= vec3(V_Matrix*vec4(centerPos,1.0));
 	gl_Position 	= vec4(centerPos, 1.0); 	
 }

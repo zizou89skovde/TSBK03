@@ -9,7 +9,7 @@ uniform mat4 MVP_Matrix;
 uniform mat4 MV_Matrix;
 uniform mat4 VP_Matrix;
 uniform sampler2D u_MassPos_Tex;
-uniform vec2 u_Vec2; // Resolution X & Y
+uniform vec2 u_Resolution;
 
 in vec3 g_Position[3];
 in vec3 g_Normal[3];
@@ -20,8 +20,28 @@ in highp uint g_SpringState[3];
 out vec3 f_Normal;
 out vec3 f_Position;
 out vec3 f_LightPos;
+/*
+const highp uint[] = uint[](
+	0000,0x1,0x100, 0x2, 0x20
+	0000,0x200  0x8
+	0x10, , 0x40, 0x80,
+	,,0x400,0x800
+);
 
-bool checkVertexConnectivity(){
+highp uint parseConnection(vec2 deltaVec){
+vec2 resolution = u_Resolution;
+	float step = 1.0/(resolution.x);
+	vec2 v = deltaVec/step;
+	int i = int(v.x);
+	int j = int(v.y);
+	int index = i+2*j;
+}*/
+
+bool checkVertexConnectivity(highp uint springState,int i){
+	int index1 = int(mod(i+1,3));
+	int index2 = int(mod(i+2,3));
+	vec2 delta1 = g_Texcoord[index1]  - g_Texcoord[i];  
+	vec2 delta2 = g_Texcoord[index2]  - g_Texcoord[i];
 	return true;
 }
 

@@ -263,6 +263,7 @@ void ModelObject::setTexture(GLuint handle,GLuint shaderId,const char* uniformNa
     newTexture->sTextureId    = handle;
     memset(newTexture->sUniformName,0,newTexture->CHAR_LEN*sizeof(char));
     strcpy(newTexture->sUniformName,uniformName);
+    mTextureList.reserve(sizeof(Texture_Type)*4);
     mTextureList.push_back(newTexture);
 
 

@@ -1,8 +1,9 @@
 #include "Terrain.h"
 
-Terrain::Terrain()
+Terrain::Terrain(GLuint * w, GLuint * h)
 {
-
+    mScreenWitdh = w;
+    mScreenHeight = h;
     mTerrainModel = new ModelObject();
     // Load model
     mTerrainTextureData = new TextureData;
@@ -38,6 +39,9 @@ Terrain::Terrain()
     mat4 transformMatrix = IdentityMatrix();
     mTerrainModel->setTransform(transformMatrix,TERRAIN_SHADER);
 
+    mTerrainReflectionFBO = initFBO(512,512,0);
+   mTerrainFBO = initFBO2(512, 512, 0, 1);
+
 
 }
 
@@ -48,6 +52,14 @@ TerrainMetaData * Terrain::getTerrainMetaData(){
 TextureData * Terrain::getTextureData()
 {
     return mTerrainTextureData;
+}
+
+FBOstruct * Terrain::getTerrainReflectedFBO(){
+    return mTerrainReflectionFBO;
+}
+
+FBOstruct * Terrain::getTerrainFBO(){
+    return mTerrainFBO;
 }
 
 void Terrain::GenerateTerrain(TextureData *tex){
@@ -180,6 +192,32 @@ Terrain::~Terrain()
 }
 
 void Terrain::draw(mat4 proj, mat4 view){
+
+    /** Draw reflected ***/
+    useFBO(mTerrainReflectionFBO,NULL,NULL);
+    glClearColor(0.0, 0.0, 0.0, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    mat4* transf = mTerrainModel->getTransform(TERRAIN_SHADER);
+    /** Draw scene upside down **/
+    *transf = S(1,-1,1);
+    glEnable(GL_CLIP_PLANE0);
+    double plane[4] = {0.0, -1.0, 0.0, 0.0};
+    glClipPlane(GL_CLIP_PLANE0, plane);
     mTerrainModel->draw(proj,view);
+    glDisable(GL_CLIP_PLANE0);
+
+
+    /** Draw to Offscreen fbo */
+    useFBO(mTerrainFBO,NULL,NULL);
+    glClearColor(0.0, 0.0, 0.0, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    *transf = S(1,1,1);
+    mTerrainModel->draw(proj,view);
+
+    /** Draw to screen **/
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, *mScreenWitdh, *mScreenHeight);
+    mTerrainModel->draw(proj,view);
+
 }
 

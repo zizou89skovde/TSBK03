@@ -8,7 +8,7 @@ in vec3 v_LightPos;
 in float v_Height;
 void main(void)
 {
-	vec4 color = vec4(0.0,0.0,1.0,1.0);
+	vec4 color = vec4(0.0,1.0,1.0,1.0);
     
 	vec3 normal = v_Normal;
 	
