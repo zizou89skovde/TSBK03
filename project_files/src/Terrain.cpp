@@ -5,9 +5,53 @@ Terrain::Terrain(GLuint * w, GLuint * h)
     mScreenWitdh = w;
     mScreenHeight = h;
     mTerrainModel = new ModelObject();
-    // Load model
+
+    initializeTerrain();
+    //initializeSkyBox();
+
+}
+
+TerrainMetaData * Terrain::getTerrainMetaData(){
+    return mTerrainMetaData;
+}
+
+TextureData * Terrain::getTextureData()
+{
+    return mTerrainTextureData;
+}
+
+FBOstruct * Terrain::getTerrainReflectedFBO(){
+    return mTerrainReflectionFBO;
+}
+
+FBOstruct * Terrain::getTerrainFBO(){
+    return mTerrainFBO;
+}
+
+void Terrain::initializeSkyBox(){
+    /** Setting Sky dome shader **/
+    GLuint skyDomeShader = loadShaders("shaders/skydome.vert","shaders/skydome.frag");
+    mTerrainModel->setShader(skyDomeShader,SKYBOX_SHADER,VP);
+
+    /** Set sky dome texture **/
+    GLuint skyDomeTexture;
+    LoadTGATextureSimple((char *)"textures/skydome.tga",&skyDomeTexture);
+    mTerrainModel->setTexture(skyDomeTexture,SKYBOX_SHADER,"u_Texture");
+
+    /** Upload sky dome model **/
+    Model* modelSkyDome = LoadModelPlus((char *)"models/sphere.obj");
+    mTerrainModel->setModel(modelSkyDome,SKYBOX_SHADER);
+
+    /** Set flip **/
+    mTerrainModel->setUniform(1,SKYBOX_SHADER,"u_Flip");
+
+
+}
+
+void Terrain::initializeTerrain(){
+  // Load model
     mTerrainTextureData = new TextureData;
-    LoadTGATextureData((char*)"textures/fft-terrain2.tga", mTerrainTextureData);
+    LoadTGATextureData((char*)"textures/fft-terrain3.tga", mTerrainTextureData);
     GenerateTerrain(mTerrainTextureData);
 
     GLuint type = GL_RGBA;
@@ -29,37 +73,21 @@ Terrain::Terrain(GLuint * w, GLuint * h)
     glGenerateMipmap(GL_TEXTURE_2D);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);	// Linear Filtered
     /***************************/
+    free(mTerrainTextureData->imageData);
+    mTerrainTextureData->imageData = NULL;
 
-	//Load shader-kun
+
+
+    	//Load shader-kun
     GLuint shader = loadShaders("shaders/phong.vert", "shaders/phong.frag");
 	mTerrainModel->setShader(shader,TERRAIN_SHADER);
-
-
+    mTerrainModel->setUniform(0.0,TERRAIN_SHADER,"u_Clip");
 
     mat4 transformMatrix = IdentityMatrix();
     mTerrainModel->setTransform(transformMatrix,TERRAIN_SHADER);
 
-    mTerrainReflectionFBO = initFBO(512,512,0);
-   mTerrainFBO = initFBO2(512, 512, 0, 1);
-
-
-}
-
-TerrainMetaData * Terrain::getTerrainMetaData(){
-    return mTerrainMetaData;
-}
-
-TextureData * Terrain::getTextureData()
-{
-    return mTerrainTextureData;
-}
-
-FBOstruct * Terrain::getTerrainReflectedFBO(){
-    return mTerrainReflectionFBO;
-}
-
-FBOstruct * Terrain::getTerrainFBO(){
-    return mTerrainFBO;
+    mTerrainReflectionFBO = initFBO(FBOSize,FBOSize,0);
+    mTerrainFBO = initFBO(FBOSize, FBOSize, 0);
 }
 
 void Terrain::GenerateTerrain(TextureData *tex){
@@ -70,12 +98,12 @@ void Terrain::GenerateTerrain(TextureData *tex){
 	GLfloat *normalArray = (GLfloat*)malloc(sizeof(GLfloat) * 3 * vertexCount);
 	GLuint *indexArray = (GLuint*)malloc(sizeof(GLuint) * triangleCount*3);
 
-    float heightScale = 10.0;
+    float heightScale = TerrainHeightScale;
     float heightConversion = heightScale/255.0;
-    float heightOffset = heightScale/2.0;
+    float heightOffset = heightScale/2.0 + TerrainHeightOffset;
 
-    float gridSize = 40.0;
-    float gridRes  = gridSize/(tex->width-1);
+    float gridSize    = TerrainPlaneScale;
+    float gridRes     = gridSize/(tex->width-1);
     float gridOffset  = gridSize/2.0;
 
 
@@ -84,6 +112,7 @@ void Terrain::GenerateTerrain(TextureData *tex){
     mTerrainMetaData->TerrainDimension  = tex->width-1;
     mTerrainMetaData->TerrainSize       = gridSize;
     mTerrainMetaData->TerrainResolution = gridRes;
+    mTerrainMetaData->TerrainHeightOffset = TerrainHeightOffset;
 
 	for (x = 0; x < tex->width; x++)
 		for (z = 0; z < tex->height; z++)
@@ -132,13 +161,14 @@ void Terrain::GenerateTerrain(TextureData *tex){
 			triangleCount*3,
 			TERRAIN_SHADER
 			);
-   printf("ALLAN");
-    delete[] vertexArray;
-    delete[] normalArray;
-    delete[] indexArray;
+
+    /** Clean up **/
+    free(vertexArray);
+    free(normalArray);
+    free(indexArray);
 
 
-  printError("Terrain BUffer");
+  printError("Terrain Buffer");
 
 }
 
@@ -191,6 +221,18 @@ Terrain::~Terrain()
     //dtor
 }
 
+void Terrain::setClip(bool enabled){
+    GLfloat flip = -1.0;
+    if(enabled){
+        GLfloat clip = 1.0;
+        mTerrainModel->replaceUniform(&clip,"u_Clip");
+        mTerrainModel->replaceUniform(&flip,"u_Flip");
+    }else{
+        flip = 1.0;
+        mTerrainModel->replaceUniform(&flip,"u_Flip");
+    }
+}
+
 void Terrain::draw(mat4 proj, mat4 view){
 
     /** Draw reflected ***/
@@ -198,16 +240,16 @@ void Terrain::draw(mat4 proj, mat4 view){
     glClearColor(0.0, 0.0, 0.0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     mat4* transf = mTerrainModel->getTransform(TERRAIN_SHADER);
+
     /** Draw scene upside down **/
     *transf = S(1,-1,1);
-    glEnable(GL_CLIP_PLANE0);
-    double plane[4] = {0.0, -1.0, 0.0, 0.0};
-    glClipPlane(GL_CLIP_PLANE0, plane);
+    glEnable(GL_CLIP_DISTANCE0);
+    setClip(true);
     mTerrainModel->draw(proj,view);
-    glDisable(GL_CLIP_PLANE0);
-
+    glDisable(GL_CLIP_DISTANCE0);
 
     /** Draw to Offscreen fbo */
+    setClip(false);
     useFBO(mTerrainFBO,NULL,NULL);
     glClearColor(0.0, 0.0, 0.0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -218,6 +260,7 @@ void Terrain::draw(mat4 proj, mat4 view){
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, *mScreenWitdh, *mScreenHeight);
     mTerrainModel->draw(proj,view);
+
 
 }
 

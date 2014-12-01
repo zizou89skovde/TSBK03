@@ -2,8 +2,6 @@
 #version 150// core   
 
 uniform sampler2D u_Position_Texture;
-uniform sampler2D u_Normal_Texture;
-
 in  vec3 in_Position;
 
 out vec3 f_Normal;

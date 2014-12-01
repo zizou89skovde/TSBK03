@@ -85,8 +85,8 @@ void KeyMouseHandler::mouseHandle(int x, int y)
     }
     xPrev = x;
     yPrev = y;
-    print2Vec3((char*)"CAM EYE: ", *cameraEye);
-    print2Vec3((char*)"CAM CENTER: ", *cameraCenter);
+   // print2Vec3((char*)"CAM EYE: ", *cameraEye);
+   // print2Vec3((char*)"CAM CENTER: ", *cameraCenter);
 }
 
 mat4 KeyMouseHandler::getViewMatrix()

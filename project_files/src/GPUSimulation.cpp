@@ -46,12 +46,6 @@ void GPUSimulation::intializeSimulation(SimulationData_Type * simulationData){
 
     /** Index of the FBO contains the most recent position of the cloth masses **/
     mActiveFBOIndex = 0;
-/*
-    GLfloat * meta = (GLfloat*)malloc(sizeof(GLfloat)*2);
-	meta[0] = mSimulationData.GridDimension;
-	meta[1] = mSimulationData.GridSize;
-
-	*/
 
 }
 
@@ -303,7 +297,6 @@ void GPUSimulation::uploadBufferCoordinates(ModelObject * modelObj,GLuint shader
     /** Generate start value for position buffer **/
     int vertexCount = GRID_DIM*GRID_DIM;
     GLfloat *vertexArray = (GLfloat *) malloc(sizeof(GLfloat) * (GPU_FLOATS_PER_POSITION) * vertexCount);
-    GLfloat len = GRID_RES/2.0;
     for(GLuint y = 0; y < GRID_DIM; ++y)
         for(GLuint x = 0; x < GRID_DIM; ++x){
 
