@@ -90,8 +90,14 @@ void ModelObject::draw(mat4 projectionMatrix, mat4 viewMatrix){
         uploadTexture(shader->sShaderId,program);
 
      //   uploadUniformFloat(shader->sShaderId,program);
-
+        uploadTexture(shader->sShaderId,program);
+        if(shader->sDepthTest == NO_DEPTH_TEST){
+            glDisable(GL_DEPTH_TEST);
+        }
         drawModel(shader->sShaderId,program);
+        if(shader->sDepthTest == NO_DEPTH_TEST){
+            glEnable(GL_DEPTH_TEST);
+        }
     }
 
 }
@@ -128,7 +134,6 @@ void ModelObject::drawBuffers(GLuint shaderId,GLuint numBuffers,GLuint * attachm
             int program = shader->sShaderHandleGPU;
             glUseProgram(program);
          //
-            uploadTexture(shader->sShaderId,program);
 
             drawModel(shader->sShaderId,program);
 
@@ -220,7 +225,10 @@ void ModelObject::uploadUniformFloat(Uniform_Type* uniform){
 
 void ModelObject::setUniform(GLfloat * data, GLuint sizeData, GLuint shaderId, const char * uniformName){
     Uniform_Type * uniform = new Uniform_Type();
-    uniform->sData = data;
+
+    size_t numBytes = sizeof(GLfloat) * sizeData;
+    uniform->sData = (GLfloat * ) malloc(numBytes);
+    memcpy(uniform->sData,data,numBytes);
     uniform->sSize = sizeData;
     uniform->sShaderId = shaderId;
     memset(uniform->sUniformName,0,uniform->CHAR_LEN*sizeof(char));
@@ -247,13 +255,27 @@ void ModelObject::setShader(GLuint handleGPU, GLuint shaderId,Tranform_Compositi
     shader->sShaderHandleGPU = handleGPU;
     shader->sShaderId        = shaderId;
     shader->sComposition     = composition;
+    shader->sDepthTest       = DEPTH_TEST;
+    mShaderList.push_back(shader);
+
+
+}
+
+void ModelObject::setShader(GLuint handleGPU, GLuint shaderId,Tranform_Composition_Type  composition,DepthTest_Type depthTest){
+    Shader_Type * shader = new Shader_Type();
+    shader->sShaderHandleGPU = handleGPU;
+    shader->sShaderId        = shaderId;
+    shader->sComposition     = composition;
+    shader->sDepthTest       = depthTest;
     mShaderList.push_back(shader);
 }
+
 void ModelObject::setShader(GLuint handleGPU, GLuint shaderId){
     Shader_Type * shader = new Shader_Type();
     shader->sShaderHandleGPU = handleGPU;
     shader->sShaderId        = shaderId;
     shader->sComposition     = MVP;
+    shader->sDepthTest       = DEPTH_TEST;
     mShaderList.push_back(shader);
 }
 void ModelObject::setTexture(GLuint handle,GLuint shaderId,const char* uniformName){
@@ -263,6 +285,7 @@ void ModelObject::setTexture(GLuint handle,GLuint shaderId,const char* uniformNa
     newTexture->sTextureId    = handle;
     memset(newTexture->sUniformName,0,newTexture->CHAR_LEN*sizeof(char));
     strcpy(newTexture->sUniformName,uniformName);
+    mTextureList.reserve(sizeof(Texture_Type)*4);
     mTextureList.push_back(newTexture);
 
 
@@ -296,7 +319,8 @@ void ModelObject::replaceUniform(GLfloat* data,const char* uniformName){
     for(std::vector<Uniform_Type*>::iterator it = mUniformList.begin(); it != mUniformList.end(); ++it) {
             uniform = *it;
             if(strcmp(uniform->sUniformName,uniformName) == 0){
-                    uniform->sData = data;
+                    for(int i = 0;i < uniform->sSize; i++)
+                        uniform->sData[i] = data[i];
                     uploadUniformFloat(uniform);
                     return;
             }
@@ -314,6 +338,8 @@ void ModelObject::drawModel(GLuint shaderId,GLuint activeShaderHandle){
 
             char* textureAttributeString = NULL;
             if(m->sModel->texCoordArray != NULL) textureAttributeString = (char *)"in_TextureCoord";
+
+
             DrawModel(m->sModel, activeShaderHandle,(char *)"in_Position" ,normalAttributeString , textureAttributeString);
 
             return;
@@ -403,11 +429,31 @@ void ModelObject::LoadDataToModel(
 	m->numIndices = numInd;
 
 	BuildModelVAO2(m);
-
+    //freeModelData(m);
     Model_Type * model = new Model_Type();
     model->sModel      = m;
     model->sShaderId   = shaderId;
 
 	this->mModelList.push_back(model);
 }
+
+void ModelObject::freeModelData(Model * m){
+        if(m->vertexArray!= NULL){
+            free(m->vertexArray);
+
+        }
+        if(m->indexArray != NULL){
+            free(m->indexArray);
+
+        }
+        if(m->texCoordArray != NULL){
+            free(m->texCoordArray);
+
+        }
+        if(m->normalArray != NULL){
+            free(m->normalArray);
+
+        }
+}
+
 

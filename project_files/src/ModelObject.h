@@ -22,6 +22,12 @@ typedef enum{
     P,
     NONE
 }Tranform_Composition_Type;
+
+typedef enum{
+    DEPTH_TEST,
+    NO_DEPTH_TEST
+}DepthTest_Type;
+
 typedef struct{
     char sUniformName[40];
     static const GLuint CHAR_LEN = 40;
@@ -41,6 +47,7 @@ typedef struct{
     GLuint sShaderId;
     GLuint sShaderHandleGPU;
     Tranform_Composition_Type sComposition;
+    DepthTest_Type sDepthTest;
 }Shader_Type;
 
 typedef struct{
@@ -84,6 +91,7 @@ class ModelObject
         /** Set functions **/
         void setModel(Model * m,GLuint shaderId);
         void setShader(GLuint handle,GLuint id,Tranform_Composition_Type  composition);
+        void setShader(GLuint handle,GLuint id,Tranform_Composition_Type  composition,DepthTest_Type depthTest);
         void setShader(GLuint handle,GLuint id);
         void setTexture(GLuint handle,GLuint shaderId,const char* uniformName);
         void setUniform(GLfloat* data, GLuint sizeData, GLuint shaderId, const char* uniformName);
@@ -115,7 +123,7 @@ class ModelObject
 
         /** Private GetFunctions **/
         void drawModel(GLuint shaderId,GLuint activeShaderHandle);
-
+        void freeModelData(Model * m);
 
 
 };

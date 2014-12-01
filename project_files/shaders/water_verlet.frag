@@ -10,59 +10,38 @@ uniform float u_Time;
 uniform float u_SystemDamping;
 uniform float u_TerrainHeight;
 uniform float u_TerrainSize;
-uniform float u_RestLength;
-uniform float u_SpringConstant;
-uniform float u_SpringDamping;
 uniform float u_SeaLevel;
+uniform float u_TerrainHeightOffset;
+uniform vec4 u_RainDrop;
 in vec2 f_TexCoord;
 
 out vec4 out1;
 out vec4 out2;
 
 /* Array of spring directions  */
-const float springDirections[24] =float[24](
+const float springDirections[] = float[8](
 	// Struct
 	1.0 ,0.0,
 	0.0 ,1.0,
 	-1.0,0.0,
-	0.0,-1.0,
-	//Shear
-	1.0 ,1.0,
-	-1.0,1.0,
-	-1.0,-1.0,
-	1.0 ,-1.0,
-	//Bend
-	2.0,0.0,
-	0.0,2.0,
-	-2.0,0.0,
-	0.0 ,-2.0
- );
+	0.0,-1.0
+	);
  
-   const uint RIGHT_STRUCTURAL_SPRING   =  0x1;
+
  
 vec3 getVerletVelocity(vec3 position, vec3 previousPosition){
 	return (position-previousPosition)/u_DeltaTime;
 }
 
-/* Return position and velocity for the mass at a coordinate*/
-void readMassData(vec2 textureCoordinate, out vec3 position, out vec3 velocity){
-	position 			  = texture(u_CurrentPosition,textureCoordinate).xyz;
-	vec3 previousPosition = texture(u_PreviousPosition,textureCoordinate).xyz;
-	velocity 			  = getVerletVelocity(position,previousPosition);
-}
-
 
 float heightOverGround(vec3 position){
-
 	vec2 mapPosition = 0.5+(position.xz)/u_TerrainSize;
-	float height = (texture(u_HeightMap, mapPosition).x-0.5)*u_TerrainHeight;
-	
+	float height = (texture(u_HeightMap, mapPosition).x-0.5)*u_TerrainHeight;//-u_TerrainHeightOffset;
 	return (u_SeaLevel-height);
-
 }
 
 
-vec3 applySpringForce(vec3 centerPosition, vec3 velocity,highp uint springState,out highp uint outSpringState){
+vec3 applyNeighbourForce(vec3 centerPosition, vec3 velocity,float height){
 	
 	vec3 force = vec3(0.0);
 	/* Step in texture to read near by mass */
@@ -91,28 +70,39 @@ vec3 applySpringForce(vec3 centerPosition, vec3 velocity,highp uint springState,
 			
 	}
 
-	
-
 	force = (sumNeighbours - 4.0*centerPosition)*0.5;
+	
 	/* FAKE #1337 */
 	float deltaHeight =  u_SeaLevel - centerPosition.y;
 	force.y += 0.004 * deltaHeight;
 
-
-	float hog = heightOverGround(centerPosition);
-	if(hog <= 0.5){	
-		force *= clamp(hog,0.0,1.0);
+	if(height <= 1.5){	
+		force *= clamp(0.5*height,0.0,1.0);
 	}
-
 
 	/* Force = acceleration since the mass is considered to be 1. */
 	return  force;
 }
 
+int rainDrop(vec3 position,float height,out vec3 out1,out vec3 out2){
+	int afftected = 0;
+	if(height > 0.2){
+		float radius = u_RainDrop.z;
+		float distance = length(u_RainDrop.xy - position.xz);	
+		if(distance < radius ){
+			afftected = 1;
+			float amplitude = min(u_RainDrop.w,abs(height));
+			out1 = position - vec3(0.0,amplitude,0.0);
+			out2 = position - vec3(0.0,amplitude,0.0);
+		}
+	}
+	return afftected;
+}
+
 float waveSource(vec3 position,out vec3 out1,out vec3 out2){
 	float strength = clamp((0.2 - length(position.xz)),0.0,1.0);
 	if(strength >= 0.1){
-		position.y = u_SeaLevel+0.10*sin(2.0*u_Time);
+		position.y = u_SeaLevel+0.1*sin(2.0*u_Time)*sin(0.05*u_Time)*cos(0.5*u_Time) ;
 		out1 = position;
 		out2 = position;
 	}
@@ -121,7 +111,7 @@ float waveSource(vec3 position,out vec3 out1,out vec3 out2){
 
 
 /* GPU implementation of the applyForces in CPUClothsimulation.cpp */
-vec3 applyForces(vec3 position, vec3 velocity,highp uint springState,out highp uint outSpringState){
+vec3 applyForces(vec3 position, vec3 velocity,float height){
 	
 	vec3 acceleration = vec3(0.0);
 
@@ -133,7 +123,7 @@ vec3 applyForces(vec3 position, vec3 velocity,highp uint springState,out highp u
 	
 	//acceleration.xz += velocity.xz*-0.5;
 	/* Add force from springs */
-	acceleration+= applySpringForce(position,velocity,springState,outSpringState);
+	acceleration+= applyNeighbourForce(position,velocity,height);
 	
 	/* return force=acceleration, due mass is set to 1.0 */
 	return acceleration;
@@ -164,28 +154,19 @@ void main(void)
 	vec3 position		  = massData.xyz;
 	vec3 previousPosition = texture(u_PreviousPosition, f_TexCoord).xyz;
 	vec3 velocity 		  = getVerletVelocity(position,previousPosition);
+	float height 		  = heightOverGround(position);
+	vec3 acceleration 	  = applyForces(position,velocity,height);
 	
-	highp uint springStateBits = uint(springState);
-	highp uint nextSpringStateBits;
-	vec3 acceleration 	  = applyForces(position,velocity,springStateBits,nextSpringStateBits);
-	vec3 outPosition = position;
+	/* Output positions */
+	vec3 outPosition 	= position;
 	vec3 outPrevPosition = position;
 	
 	/* Let current particle be influenced by an external source */
-	if(waveSource(position,outPrevPosition,outPosition) < 0.1){
+	if(rainDrop(position,height,outPrevPosition,outPosition) == 0){
 		outPrevPosition = position;
 		outPosition 	= integrate(position,previousPosition,acceleration);
 	}
-	//outPrevPosition = position;
-	//outPosition 	= integrate(position,previousPosition,acceleration);
-	/* Check ground collision */
-	
-/*	float hasCollided;
-	vec3 adjustedPosition = groundCollision(position,hasCollided);
-	if(hasCollided != 0.0){
-		outPosition 	= adjustedPosition;
-		outPrevPosition = adjustedPosition;
-	}*/
+
 
 	/* Set next position */
 	out1  = vec4(outPosition,springState); 	//gl_FragData[0]  = vec4(outPosition,springState); 

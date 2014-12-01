@@ -59,6 +59,8 @@ void init(void)
 	glEnable(GL_DEPTH_TEST);
 	printError("GL inits");
 	mTerrain = new Terrain();
+	//mTerrain = new Terrain(&WIDTH,&HEIGHT); //Oklart vilken som är ny /JL
+/*
 
     mGrassSimulation = new GrassSimulation();
     mGrassSimulation->setTerrain(mTerrain);
