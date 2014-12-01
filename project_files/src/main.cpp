@@ -59,17 +59,18 @@ void init(void)
 	glEnable(GL_DEPTH_TEST);
 	printError("GL inits");
 	mTerrain = new Terrain();
-/*
+
     mGrassSimulation = new GrassSimulation();
     mGrassSimulation->setTerrain(mTerrain);
     mGrassSimulation->initialize();
-*/
+	printError("init grass simulation");
+
+/*
     clothSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
     clothSimulation->setTerrain(mTerrain);
     clothSimulation->initialize();
-
     printError("init cloth simulation");
-
+*/
 
     mKeyMouseHandler.mClothSimulation = clothSimulation;
  //   mTerrain = new Terrain();
@@ -110,8 +111,8 @@ void display(void)
 
     viewMatrix = mKeyMouseHandler.getViewMatrix();
     mTerrain->draw(projectionMatrix,viewMatrix);
-   // mGrassSimulation->draw(projectionMatrix,viewMatrix);
-    clothSimulation->draw(projectionMatrix,viewMatrix);
+    mGrassSimulation->draw(projectionMatrix,viewMatrix);
+    //clothSimulation->draw(projectionMatrix,viewMatrix);
 	glutSwapBuffers();
 }
 
@@ -138,8 +139,10 @@ void reshape(GLsizei w, GLsizei h)
 // frame
 void idle()
 {
+	/* Run update functions */
 
  //   clothSimulation->update();
+	mGrassSimulation->update();
 
 	glutPostRedisplay();
 }

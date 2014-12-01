@@ -1,8 +1,6 @@
 #ifndef GRASSSIMULATION_H
 #define GRASSSIMULATION_H
 
-
-
 #include "GL_utilities.h"
 #include "ModelObject.h"
 #include "LoadTGA.h"
@@ -10,7 +8,6 @@
 
 #define GRASS_SPHERE_SHADER_ID 0
 #define GRASS_SHADER_ID 1
-
 
 #define FLOATS_PER_VERTEX 3
 #define FLOATS_PER_TEXEL 4
@@ -31,6 +28,7 @@ class GrassSimulation
     private:
         Terrain * mTerrain;
     	ModelObject * mGrassScene;
+        GLfloat previousTime;
 
     	void uploadBufferCoordinates(ModelObject * modelobject,GLuint shaderId);
 };

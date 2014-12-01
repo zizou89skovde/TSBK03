@@ -6,6 +6,9 @@ GrassSimulation::GrassSimulation()
 
 void GrassSimulation::initialize(){
 
+    /** Assign default values **/
+    previousTime = -1;
+
 	/** Initalize grass model object **/
     mGrassScene = new ModelObject(); //Notera: ModelObject är lite feldöpt. Den borde heta Scene object. Eftersom den kan hålla flera olika modeller/shaders osv.
 
@@ -18,7 +21,7 @@ void GrassSimulation::initialize(){
 
     /** Upload terrain parameters **/
     TerrainMetaData* terrainData = mTerrain->getTerrainMetaData();
-    mGrassScene->setUniform(1.0f,GRASS_SHADER_ID,"u_Wind");
+    mGrassScene->setUniform(1.0f, GRASS_SHADER_ID, "u_Wind");
 
 	/***** START WATCH OUT **********************************************************************************/
 
@@ -53,7 +56,7 @@ void GrassSimulation::setTerrain(Terrain * terrain){
 
 void GrassSimulation::uploadBufferCoordinates(ModelObject * modelobject,GLuint shaderId){
 
-    GLuint DIM = 5; /* Antal vertices per rad*/
+    GLuint DIM = 300; /* Antal vertices per rad*/
 
     GLuint vertexCount = DIM*DIM;
 	GLuint triangleCount = (DIM-1) * (DIM-1)* 2;
@@ -98,9 +101,39 @@ void GrassSimulation::draw(mat4 projectionMatrix,mat4 viewMatrix){
 }
 
 void GrassSimulation::update(){
-      GLfloat temp = 2.0f;
-      mGrassScene->replaceUniform(&temp,"u_Wind");
+	
+	//GLfloat temp = 2.0f;
+	//mGrassScene->replaceUniform(&temp,"u_Wind");
+	
 
+   /* if(previousTime < 0){
+        previousTime = glutGet(GLUT_ELAPSED_TIME);
+        return;
+    }
+
+    GLfloat newTime = (GLfloat) glutGet(GLUT_ELAPSED_TIME);
+    GLfloat elapsedTime = newTime-previousTime;
+	*/
+	GLfloat angle = 0.0f;
+	GLfloat dt = 0.1f;
+	GLfloat pi = 3.141592653589793;
+	
+	angle += dt;
+	if (angle >= 2*pi) {
+		angle = 0;
+	}
+
+	mGrassScene->replaceUniform(&angle,"u_Wind");
+/*
+    GLuint numIterations = (GLuint)(elapsedTime/(dt*1.0f));
+    if(numIterations > 0){
+        previousTime = newTime;
+        applyForces();
+        integrate();
+        checkCollision();
+
+    }
+*/
 }
 
 GrassSimulation::~GrassSimulation()
