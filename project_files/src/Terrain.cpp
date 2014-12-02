@@ -6,8 +6,9 @@ Terrain::Terrain(GLuint * w, GLuint * h)
     mScreenHeight = h;
     mTerrainModel = new ModelObject();
 
+    initializeSkyBox();
     initializeTerrain();
-    //initializeSkyBox();
+
 
 }
 
@@ -31,7 +32,7 @@ FBOstruct * Terrain::getTerrainFBO(){
 void Terrain::initializeSkyBox(){
     /** Setting Sky dome shader **/
     GLuint skyDomeShader = loadShaders("shaders/skydome.vert","shaders/skydome.frag");
-    mTerrainModel->setShader(skyDomeShader,SKYBOX_SHADER,VP);
+    mTerrainModel->setShader(skyDomeShader,SKYBOX_SHADER,VP,NO_DEPTH_TEST);
 
     /** Set sky dome texture **/
     GLuint skyDomeTexture;
@@ -39,7 +40,7 @@ void Terrain::initializeSkyBox(){
     mTerrainModel->setTexture(skyDomeTexture,SKYBOX_SHADER,"u_Texture");
 
     /** Upload sky dome model **/
-    Model* modelSkyDome = LoadModelPlus((char *)"models/sphere.obj");
+    Model* modelSkyDome = LoadModelPlus((char *)"models/skydome.obj");
     mTerrainModel->setModel(modelSkyDome,SKYBOX_SHADER);
 
     /** Set flip **/
@@ -52,7 +53,7 @@ void Terrain::initializeTerrain(){
   // Load model
     mTerrainTextureData = new TextureData;
 
-    LoadTGATextureData((char*)"textures/fft-terrain.tga", mTerrainTextureData);
+    LoadTGATextureData((char*)"textures/fft-terrain3.tga", mTerrainTextureData);
 
    // LoadTGATextureData((char*)"textures/fft-terrain3.tga", mTerrainTextureData);
 
@@ -257,7 +258,8 @@ void Terrain::draw(mat4 proj, mat4 view){
     useFBO(mTerrainFBO,NULL,NULL);
     glClearColor(0.0, 0.0, 0.0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    *transf = S(1,1,1);
+	GLfloat sizeTerrain = 1.00;
+    *transf = S(sizeTerrain,sizeTerrain,sizeTerrain);
     mTerrainModel->draw(proj,view);
 
     /** Draw to screen **/

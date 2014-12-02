@@ -39,7 +39,7 @@ typedef struct{
     char sUniformName[40];
     static const GLuint CHAR_LEN = 40;
     GLuint sSize;
-    GLfloat * sData;
+    GLfloat sData[4];
     GLuint sShaderId;
 }Uniform_Type;
 

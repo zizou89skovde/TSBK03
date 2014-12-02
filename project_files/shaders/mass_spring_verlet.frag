@@ -129,7 +129,7 @@ vec4 springContribution(vec3 mass1Position, vec3 mass1Velocity, vec2 textureOffs
 	
 	float springLength = length(deltaPosition);
 	
-	float extra = clamp(springLength/springRestLength,1.0,4.0);
+	float extra = 1.0 ;//clamp(springLength/springRestLength,1.0,4.0);
 	float springForce = -extra*springConstant*(springLength - springRestLength);
 	float dampForce   = u_SpringDamping * (dot(deltaPosition,deltaVelocity)/springLength); // u_SpringDamping 
 	

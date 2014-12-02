@@ -225,10 +225,9 @@ void ModelObject::uploadUniformFloat(Uniform_Type* uniform){
 
 void ModelObject::setUniform(GLfloat * data, GLuint sizeData, GLuint shaderId, const char * uniformName){
     Uniform_Type * uniform = new Uniform_Type();
-
-    size_t numBytes = sizeof(GLfloat) * sizeData;
-    uniform->sData = (GLfloat * ) malloc(numBytes);
-    memcpy(uniform->sData,data,numBytes);
+    for(GLuint i=0;i < sizeData; i++){
+        uniform->sData[i] = data[i];
+    }
     uniform->sSize = sizeData;
     uniform->sShaderId = shaderId;
     memset(uniform->sUniformName,0,uniform->CHAR_LEN*sizeof(char));
@@ -240,7 +239,6 @@ void ModelObject::setUniform(GLfloat * data, GLuint sizeData, GLuint shaderId, c
 
 void ModelObject::setUniform(const GLfloat data,GLuint shaderId, const char * uniformName){
     Uniform_Type * uniform = new Uniform_Type();
-    uniform->sData = (GLfloat* ) malloc(sizeof(GLfloat));
     uniform->sData[0] = data;
     uniform->sSize = 1;
     uniform->sShaderId = shaderId;
@@ -319,7 +317,7 @@ void ModelObject::replaceUniform(GLfloat* data,const char* uniformName){
     for(std::vector<Uniform_Type*>::iterator it = mUniformList.begin(); it != mUniformList.end(); ++it) {
             uniform = *it;
             if(strcmp(uniform->sUniformName,uniformName) == 0){
-                    for(int i = 0;i < uniform->sSize; i++)
+                    for(GLuint i = 0;i < uniform->sSize; i++)
                         uniform->sData[i] = data[i];
                     uploadUniformFloat(uniform);
                     return;

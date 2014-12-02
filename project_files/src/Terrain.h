@@ -54,7 +54,7 @@ class Terrain
         GLuint *mScreenWitdh;
         GLuint *mScreenHeight;
 
-        static const GLfloat TerrainHeightOffset = -2.0;
+        static const GLfloat TerrainHeightOffset = 0.0;
         static const GLfloat TerrainHeightScale =  10.0;
         static const GLfloat TerrainPlaneScale =  40.0;
 

@@ -3,14 +3,13 @@
 uniform sampler2D u_CurrentPosition;
 uniform sampler2D u_PreviousPosition;
 uniform sampler2D u_HeightMap;
+uniform float u_SeaLevel;
 uniform vec2  u_Meta;
 uniform float u_Gravity;
 uniform float u_DeltaTime;
-uniform float u_Time;
 uniform float u_SystemDamping;
 uniform float u_TerrainHeight;
 uniform float u_TerrainSize;
-uniform float u_SeaLevel;
 uniform float u_TerrainHeightOffset;
 uniform vec4 u_RainDrop;
 in vec2 f_TexCoord;
@@ -98,7 +97,7 @@ int rainDrop(vec3 position,float height,out vec3 out1,out vec3 out2){
 	}
 	return afftected;
 }
-
+/*
 float waveSource(vec3 position,out vec3 out1,out vec3 out2){
 	float strength = clamp((0.2 - length(position.xz)),0.0,1.0);
 	if(strength >= 0.1){
@@ -107,7 +106,7 @@ float waveSource(vec3 position,out vec3 out1,out vec3 out2){
 		out2 = position;
 	}
 	return strength;
-}
+}*/
 
 
 /* GPU implementation of the applyForces in CPUClothsimulation.cpp */

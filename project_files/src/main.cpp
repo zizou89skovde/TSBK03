@@ -58,9 +58,9 @@ void init(void)
 	glClearDepth(1.0);
 	glEnable(GL_DEPTH_TEST);
 	printError("GL inits");
-	mTerrain = new Terrain();
-	//mTerrain = new Terrain(&WIDTH,&HEIGHT); //Oklart vilken som är ny /JL
-/*
+	//mTerrain = new Terrain();
+	mTerrain = new Terrain(&WIDTH,&HEIGHT); //Oklart vilken som är ny /JL
+
 
     mGrassSimulation = new GrassSimulation();
     mGrassSimulation->setTerrain(mTerrain);
@@ -71,6 +71,7 @@ void init(void)
     clothSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
     clothSimulation->setTerrain(mTerrain);
     clothSimulation->initialize();
+    printf("ALLAN");
     printError("init cloth simulation");
 */
 
@@ -143,7 +144,7 @@ void idle()
 {
 	/* Run update functions */
 
- //   clothSimulation->update();
+ //  clothSimulation->update();
 	mGrassSimulation->update();
 
 	glutPostRedisplay();

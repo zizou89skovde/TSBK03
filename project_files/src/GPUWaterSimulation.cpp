@@ -51,7 +51,7 @@ void GPUWaterSimulation::initialize(){
     mGPUWaterScene->setTexture(terrainReflectionFBO->texid,GPU_SHADER_WATER,"u_TerrainReflection");
 
     /** Upload grid resolution **/
-    GLfloat meta[2]; // = (GLfloat*)malloc(sizeof(GLfloat)*2);
+    GLfloat *meta = (GLfloat*)malloc(sizeof(GLfloat)*2);
 	meta[0] = GPU_WATER_DIM;
 	meta[1] = GPU_WATER_SIZE;
     mGPUWaterScene->setUniform(meta,2,GPU_SHADER_WATER,"u_Resolution");
@@ -69,18 +69,16 @@ void GPUWaterSimulation::configureSimulation(){
     TextureData* textureData = mTerrain->getTextureData();
     setSimulationTexture(textureData->texID,"u_HeightMap");
 
+        /** Upload system props **/
+    setSimulationConstant(GpuSystemDeltaTime,"u_DeltaTime");
+    setSimulationConstant(GpuSystemDamping,"u_SystemDamping");
+
     TerrainMetaData* terrainMeta = mTerrain->getTerrainMetaData();
     setSimulationConstant(terrainMeta->HeightScale, "u_TerrainHeight");
     setSimulationConstant(terrainMeta->TerrainSize, "u_TerrainSize");
     setSimulationConstant(terrainMeta->TerrainHeightOffset, "u_TerrainHeightOffset");
 
-    /** Upload system props **/
-    setSimulationConstant(GpuSystemDeltaTime,"u_DeltaTime");
-    setSimulationConstant(GpuSystemDamping,"u_SystemDamping");
 
-    setSimulationConstant(GpuSpringDamping,"u_SpringDamping");
-    setSimulationConstant(GpuSpringConstant,"u_SpringConstant");
-    setSimulationConstant(GpuRestLength,"u_RestLength");
 
     /** Upload wind **/
 	//uploadTime(0.0079);
@@ -99,7 +97,7 @@ void GPUWaterSimulation::raindrops(){
         GLfloat x = (rand() % GPU_WATER_SIZE) - GPU_WATER_SIZE/2;
         GLfloat z = (rand() % GPU_WATER_SIZE) - GPU_WATER_SIZE/2;
         //printf("NEW DROP x:%d  y:%d\n",x,z);
-        vec4 rain = vec4(x,z,0.05,0.0040);
+        vec4 rain = vec4(x,z,0.03,0.0030);
         replaceSimulationConstant(&rain.x,"u_RainDrop");
         mPreviousTime = newTime;
     }else{

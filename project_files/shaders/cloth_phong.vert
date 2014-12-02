@@ -53,7 +53,7 @@ void main(void)
 	vec2 texCoord = in_Position.xy;	
 	
 	/* Hard coded light position, To be uniform */
-	vec4 light = vec4(0.0, 8.0, -8.0,1.0); 	
+	vec4 light = vec4(0.0, 12.0, -8.0,1.0); 	
 	
 	/* Read data for current vertex */
 	vec4 centerElement =  texture(texUnit, clamp(texCoord,0.0,0.99));

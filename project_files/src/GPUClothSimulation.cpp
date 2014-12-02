@@ -129,7 +129,7 @@ void GPUClothSimulation::draw(mat4 projectionMatrix, mat4 viewMatrix){
     updateWind();
 
     /** Computing shaders **/
-    FBOstruct * resultFbo = simulate(20);
+    FBOstruct * resultFbo = simulate(4);
 
     /** Update update sphere */
     updateCollisionObject();
