@@ -36,7 +36,6 @@
 void OnTimer(int value);
 KeyMouseHandler mKeyMouseHandler;
 //----------------------Globals-------------------------------------------------
-GLuint phongshader = 0;
 mat4 projectionMatrix;
 mat4 viewMatrix;
 //-------------------------------------------------------------------------------------
@@ -112,10 +111,11 @@ void display(void)
 
 
     viewMatrix = mKeyMouseHandler.getViewMatrix();
-   // mTerrain->draw(projectionMatrix,viewMatrix);
-   // mGrassSimulation->draw(projectionMatrix,viewMatrix);
-	//mGrassSimulation->update();
-   clothSimulation->draw(projectionMatrix,viewMatrix);
+
+    mTerrain->draw(projectionMatrix,viewMatrix);
+    mGrassSimulation->draw(projectionMatrix,viewMatrix);
+	mGrassSimulation->update();
+    //clothSimulation->draw(projectionMatrix,viewMatrix);
 	glutSwapBuffers();
 }
 
@@ -145,7 +145,6 @@ void idle()
 	/* Run update functions */
 
  //  clothSimulation->update();
-	
 
 	glutPostRedisplay();
 }

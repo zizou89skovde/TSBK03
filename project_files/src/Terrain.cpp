@@ -55,7 +55,7 @@ void Terrain::initializeTerrain(){
   // Load model
     mTerrainTextureData = new TextureData;
 
-    LoadTGATextureData((char*)"textures/fft-terrain3.tga", mTerrainTextureData);
+    LoadTGATextureData((char*)"textures/fft-terrain.tga", mTerrainTextureData);
 
    // LoadTGATextureData((char*)"textures/fft-terrain3.tga", mTerrainTextureData);
 

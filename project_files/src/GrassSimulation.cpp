@@ -23,6 +23,8 @@ void GrassSimulation::initialize(){
     TerrainMetaData* terrainData = mTerrain->getTerrainMetaData();
     mGrassScene->setUniform(1.0f, GRASS_SHADER_ID, "u_Wind");
 
+	angle = 0.0f;
+
 	/***** START WATCH OUT **********************************************************************************/
 
     GLfloat * gridOffset = (GLfloat*)malloc(sizeof(GLfloat)*3);
@@ -114,15 +116,15 @@ void GrassSimulation::update(){
     GLfloat newTime = (GLfloat) glutGet(GLUT_ELAPSED_TIME);
     GLfloat elapsedTime = newTime-previousTime;
 	*/
-	GLfloat angle = 0.0f;
-	GLfloat dt = 0.1f;
+
+	GLfloat dt = 0.005f;
 	GLfloat pi = 3.141592653589793;
 	
 	angle += dt;
 	if (angle >= 2*pi) {
 		angle = 0;
 	}
-
+	printf("Vind: %f \n", angle);
 	mGrassScene->replaceUniform(&angle,"u_Wind");
 /*
     GLuint numIterations = (GLuint)(elapsedTime/(dt*1.0f));
