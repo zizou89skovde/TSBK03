@@ -41,6 +41,8 @@ void Terrain::initializeSkyBox(){
 
     /** Upload sky dome model **/
     Model* modelSkyDome = LoadModelPlus((char *)"models/skydome.obj");
+	free(modelSkyDome->normalArray);
+	modelSkyDome->normalArray = NULL;
     mTerrainModel->setModel(modelSkyDome,SKYBOX_SHADER);
 
     /** Set flip **/

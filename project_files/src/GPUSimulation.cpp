@@ -194,6 +194,18 @@ GLulong GPUSimulation::getSpringState(GLuint x,GLuint y){
                 GLulong temp = (GLulong)pow(2,state);
                 springState |= temp;
             }
+			GLfloat res = mSimulationData.GridDimension-1;
+			GLfloat sub = 0.5;
+			GLfloat tempX = ((GLfloat)x)/res - sub;
+			if(tempX  < 0.0)
+				tempX *=-1.0;
+			GLfloat tempY = ((GLfloat)y)/res - sub;
+			GLfloat diff = 0.01;
+			GLfloat zero = 1.0;
+			if( tempX < diff && tempY < zero){
+				printf("tempX : %f , tempY: %f \n",tempX,tempY);
+				springState = 0x0;
+			}
         }
         return springState;
 

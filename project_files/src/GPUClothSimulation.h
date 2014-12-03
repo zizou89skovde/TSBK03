@@ -12,7 +12,7 @@
 
 
 /** SIMULATION CONSTANTS **/
-#define GPU_CLOTH_DIM 320
+#define GPU_CLOTH_DIM 64
 #define GPU_CLOTH_SIZE 8
 
 /** SHADER ID'S **/
@@ -56,7 +56,7 @@ class GPUClothSimulation:public GPUSimulation
         ModelObject * mGPUClothScene;
 
         static const GLfloat mSphereRadius = 2.0;
-        static const GLfloat mSphereSpeed = 0.006;
+        static const GLfloat mSphereSpeed = 0.000;
         static const GLfloat mSphereRouteLength = 7.0;
         static const GLfloat mSphereOffsetX = 0.0;
         static const GLfloat mSphereOffsetY = -1.0;

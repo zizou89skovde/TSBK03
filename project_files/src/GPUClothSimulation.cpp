@@ -29,8 +29,8 @@ void GPUClothSimulation::initialize(){
     mGPUClothScene = new ModelObject();
 
     /** Setting Cloth model shader **/
-    //GLuint clothModelShader = loadShadersG("shaders/cloth.vert","shaders/cloth.frag","shaders/cloth.gs");
-    GLuint clothModelShader = loadShaders("shaders/cloth_phong.vert","shaders/cloth_phong.frag");
+    GLuint clothModelShader = loadShadersG("shaders/cloth.vert","shaders/cloth.frag","shaders/cloth.gs");
+    //GLuint clothModelShader = loadShaders("shaders/cloth_phong.vert","shaders/cloth_phong.frag");
     mGPUClothScene->setShader(clothModelShader,GPU_SHADER_CLOTH,VP);
 
     /** Uploading Texture coordinates **/

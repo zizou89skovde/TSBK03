@@ -15,7 +15,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-
+#include <AntTweakBar.h>
 
 #include "GL_utilities.h"
 
@@ -59,21 +59,20 @@ void init(void)
 	glEnable(GL_DEPTH_TEST);
 	printError("GL inits");
 	//mTerrain = new Terrain();
-	mTerrain = new Terrain(&WIDTH,&HEIGHT); //Oklart vilken som är ny /JL
+//	mTerrain = new Terrain(&WIDTH,&HEIGHT); //Oklart vilken som är ny /JL
 
-
+/*
     mGrassSimulation = new GrassSimulation();
     mGrassSimulation->setTerrain(mTerrain);
     mGrassSimulation->initialize();
 	printError("init grass simulation");
+*/
 
-/*
-    clothSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
-    clothSimulation->setTerrain(mTerrain);
+    clothSimulation =  new GPUClothSimulation(&WIDTH,&HEIGHT);
+ //   clothSimulation->setTerrain(mTerrain);
     clothSimulation->initialize();
     printf("ALLAN");
     printError("init cloth simulation");
-*/
 
     mKeyMouseHandler.mClothSimulation = clothSimulation;
  //   mTerrain = new Terrain();
@@ -113,9 +112,10 @@ void display(void)
 
 
     viewMatrix = mKeyMouseHandler.getViewMatrix();
-    mTerrain->draw(projectionMatrix,viewMatrix);
-    mGrassSimulation->draw(projectionMatrix,viewMatrix);
-    //clothSimulation->draw(projectionMatrix,viewMatrix);
+   // mTerrain->draw(projectionMatrix,viewMatrix);
+   // mGrassSimulation->draw(projectionMatrix,viewMatrix);
+	//mGrassSimulation->update();
+   clothSimulation->draw(projectionMatrix,viewMatrix);
 	glutSwapBuffers();
 }
 
@@ -145,7 +145,7 @@ void idle()
 	/* Run update functions */
 
  //  clothSimulation->update();
-	mGrassSimulation->update();
+	
 
 	glutPostRedisplay();
 }
@@ -192,6 +192,9 @@ int main(int argc, char *argv[])
     fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
     printError ("pre init");
 #endif
+    // Initialize AntTweakBar
+    TwInit(TW_OPENGL, NULL);
+
 	init();
 	glutKeyboardFunc(keyboard);
 	glutMouseFunc(mouseClick);
