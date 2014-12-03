@@ -115,6 +115,7 @@ void display(void)
     viewMatrix = mKeyMouseHandler.getViewMatrix();
     mTerrain->draw(projectionMatrix,viewMatrix);
     mGrassSimulation->draw(projectionMatrix,viewMatrix);
+	mGrassSimulation->update();
     //clothSimulation->draw(projectionMatrix,viewMatrix);
 	glutSwapBuffers();
 }
@@ -145,7 +146,7 @@ void idle()
 	/* Run update functions */
 
  //  clothSimulation->update();
-	mGrassSimulation->update();
+
 
 	glutPostRedisplay();
 }

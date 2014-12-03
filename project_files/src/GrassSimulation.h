@@ -29,6 +29,7 @@ class GrassSimulation
         Terrain * mTerrain;
     	ModelObject * mGrassScene;
         GLfloat previousTime;
+		GLfloat angle;
 
     	void uploadBufferCoordinates(ModelObject * modelobject,GLuint shaderId);
 };
