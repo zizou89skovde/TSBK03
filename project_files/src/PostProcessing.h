@@ -1,64 +1,47 @@
-#ifndef TERRAIN_H
-#define TERRAIN_H
+#ifndef PostProcessing_H
+#define PostProcessing_H
 
 #include "ModelObject.h"
 #include "GL_utilities.h"
 #include "VectorUtils3.h"
 #include "LoadTGA.h"
 
-//#include "LoadTGA.h"
-typedef struct{
-        float TerrainSize;
-        float TerrainDimension; /*Number of elements per size*/
-        float TerrainResolution; /* size divided by dimension */
-        float HeightScale;
-        float TerrainHeightOffset;
-    }TerrainMetaData;
-#define TERRAIN_SHADER 0
-#define SKYBOX_SHADER 1
-class Terrain
+#define SHADER_LIGHT_VOLUME 0
+#define SHADER_SPHERE 1
+class PostProcessing
 {
 
 
     public:
-        Terrain(GLuint * w, GLuint * h);
+        PostProcessing(GLuint * w, GLuint * h);
         void draw(mat4 proj, mat4 view);
-        TextureData * getTextureData();
-        TerrainMetaData * getTerrainMetaData();
-        FBOstruct * getTerrainFBO();
-        FBOstruct * getTerrainReflectedFBO();
-        virtual ~Terrain();
+        virtual ~PostProcessing();
     protected:
     private:
-        void initializeTerrain();
-        void initializeSkyBox();
-        void GenerateTerrain(TextureData *tex);
-        vec3 calcNormal(GLuint x,GLuint z,GLfloat planeRes,GLfloat heightRes, TextureData * tex);
-        void uploadBufferCoordinates(ModelObject * modelObj,GLuint shaderId);
-        void setClip(bool enabled);
+		void drawLightDepth();
+        void initializePostProcessing();
+		void generateFrustumMesh(GLfloat far, GLfloat near, GLuint dimension);
 
-        /** Terrain model object for rendering **/
-        ModelObject* mTerrainModel;
+		/* Shortcut to light volume shader handle */
+		GLuint mLightShaderHandle;
 
-        /** Two types of terrain data containers **/
-        TerrainMetaData * mTerrainMetaData;
-        TextureData* mTerrainTextureData;
+		GLuint* mScreenHeight;
+		GLuint* mScreenWidth;
+		/* FBO light depth buffer */
+		FBOstruct * mLightDepthFBO;
+		static const GLuint mFBOSize = 512;		
 
+		mat4 mLightProjectionMatrix;
+		mat4 mLightViewMatrix;
+		mat4 mVPLightMatrix;
 
-        /** Render targets. Used for reflecting and refracting the water **/
-        const static GLuint FBOSize =  512;
-        FBOstruct* mTerrainFBO;
-        FBOstruct* mTerrainReflectionFBO;
+		/* Light frustum */
+		static const GLfloat mFar = 20.0f;
+		static const GLfloat mNear = 1.0f;
+		static const GLfloat mRatio = 1.0f;
 
-        /** Pointers to screen dimension known by the main **/
-        GLuint *mScreenWitdh;
-        GLuint *mScreenHeight;
-
-        static const GLfloat TerrainHeightOffset = 0.0;
-        static const GLfloat TerrainHeightScale =  10.0;
-        static const GLfloat TerrainPlaneScale =  40.0;
-
-
+		ModelObject * mPostProcessingModel;
+		
 };
 
-#endif // TERRAIN_H
+#endif // PostProcessing_H

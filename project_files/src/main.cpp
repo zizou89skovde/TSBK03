@@ -15,7 +15,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include <AntTweakBar.h>
 
 #include "GL_utilities.h"
 
@@ -24,6 +23,7 @@
 #include "CPUClothSimulation.h"
 #include "GPUClothSimulation.h"
 #include "GPUWaterSimulation.h"
+#include "PostProcessing.h"
 
 #include "GrassSimulation.h"
 #include "Terrain.h"
@@ -47,6 +47,7 @@ GLuint HEIGHT;
 GPUSimulation * clothSimulation;
 GrassSimulation * mGrassSimulation;
 GPUWaterSimulation * waterSimulation;
+PostProcessing * postProcessing;
 Terrain *mTerrain;
 void init(void)
 {
@@ -57,8 +58,11 @@ void init(void)
 	glClearDepth(1.0);
 	glEnable(GL_DEPTH_TEST);
 	printError("GL inits");
+
+	postProcessing = new PostProcessing(&WIDTH,&HEIGHT);
+
 	//mTerrain = new Terrain();
-	mTerrain = new Terrain(&WIDTH,&HEIGHT); //Oklart vilken som är ny /JL
+//	mTerrain = new Terrain(&WIDTH,&HEIGHT); //Oklart vilken som är ny /JL
 
 /*
     mGrassSimulation = new GrassSimulation();
@@ -67,9 +71,9 @@ void init(void)
 	printError("init grass simulation");
 */
 
-    clothSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
-    clothSimulation->setTerrain(mTerrain);
-    clothSimulation->initialize();
+ //   clothSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
+   // clothSimulation->setTerrain(mTerrain);
+   // clothSimulation->initialize();
     printf("ALLAN");
     printError("init cloth simulation");
 
@@ -112,10 +116,12 @@ void display(void)
 
     viewMatrix = mKeyMouseHandler.getViewMatrix();
 
-    mTerrain->draw(projectionMatrix,viewMatrix);
+   // mTerrain->draw(projectionMatrix,viewMatrix);
    // mGrassSimulation->draw(projectionMatrix,viewMatrix);
 //	mGrassSimulation->update();
-    clothSimulation->draw(projectionMatrix,viewMatrix);
+   // clothSimulation->draw(projectionMatrix,viewMatrix);
+	postProcessing->draw(projectionMatrix,viewMatrix);
+	
 
 
 	glutSwapBuffers();
