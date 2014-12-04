@@ -58,7 +58,7 @@ void init(void)
 	glEnable(GL_DEPTH_TEST);
 	printError("GL inits");
 	//mTerrain = new Terrain();
-//	mTerrain = new Terrain(&WIDTH,&HEIGHT); //Oklart vilken som är ny /JL
+	mTerrain = new Terrain(&WIDTH,&HEIGHT); //Oklart vilken som är ny /JL
 
 /*
     mGrassSimulation = new GrassSimulation();
@@ -67,8 +67,8 @@ void init(void)
 	printError("init grass simulation");
 */
 
-    clothSimulation =  new GPUClothSimulation(&WIDTH,&HEIGHT);
- //   clothSimulation->setTerrain(mTerrain);
+    clothSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
+    clothSimulation->setTerrain(mTerrain);
     clothSimulation->initialize();
     printf("ALLAN");
     printError("init cloth simulation");
@@ -113,9 +113,11 @@ void display(void)
     viewMatrix = mKeyMouseHandler.getViewMatrix();
 
     mTerrain->draw(projectionMatrix,viewMatrix);
-    mGrassSimulation->draw(projectionMatrix,viewMatrix);
-	mGrassSimulation->update();
-    //clothSimulation->draw(projectionMatrix,viewMatrix);
+   // mGrassSimulation->draw(projectionMatrix,viewMatrix);
+//	mGrassSimulation->update();
+    clothSimulation->draw(projectionMatrix,viewMatrix);
+
+
 	glutSwapBuffers();
 }
 
@@ -131,7 +133,8 @@ void reshape(GLsizei w, GLsizei h)
 
 	GLfloat ratio = (GLfloat)w / (GLfloat)h;
 
-
+    // Send the new window size to AntTweakBar
+    //TwWindowSize(w, h);
 	projectionMatrix = perspective(90, ratio, 1.0, 800);
 	printError("Reshape");
 }
@@ -192,7 +195,6 @@ int main(int argc, char *argv[])
     printError ("pre init");
 #endif
     // Initialize AntTweakBar
-    TwInit(TW_OPENGL, NULL);
 
 	init();
 	glutKeyboardFunc(keyboard);
