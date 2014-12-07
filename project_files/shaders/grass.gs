@@ -11,8 +11,8 @@ layout (triangle_strip, max_vertices = NUM_OF_GRASS_VERTICES) out;
 uniform sampler2D u_GrassMask;
 uniform sampler2D u_GrassNoise;
 
-uniform mat4 VP_Matrix;
-uniform mat4 V_Matrix;
+uniform mat4 MVP_Matrix;
+uniform mat4 MV_Matrix;
 uniform mat4 P_Matrix;
 
 uniform float u_Wind;
@@ -82,7 +82,7 @@ void main()
 
 	/* Transform grass to screen */
 	for (int i = 0; i < NUM_OF_GRASS_VERTICES; ++i) {
-		vec4 fragPos = VP_Matrix*vec4(grassVertices[i], 1.0); 
+		vec4 fragPos = MVP_Matrix*vec4(grassVertices[i], 1.0); 
 	
 		f_Normal = grassNormals[i];
 		if (grassMask < 0.5) {

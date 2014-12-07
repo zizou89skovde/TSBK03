@@ -77,8 +77,8 @@ void passSolidTriangle(){
 		f_Position = g_Position[i];
 		f_LightPos = g_LightPos[i];
 		f_Normal   = g_Normal[i];
-		if(g_SpringState[i] == uint(0)){
-//		if(!checkVertexConnectivity(g_SpringState[i],i)){
+/*7		if(g_SpringState[i] == uint(0)){
+		if(!checkVertexConnectivity(g_SpringState[i],i)){
 			// cheap ass way to hide vertex?!
 			vec4 tmp = gl_in[i].gl_Position;
 			tmp.w = -1.0;
@@ -86,7 +86,7 @@ void passSolidTriangle(){
 			EndPrimitive();			
 			return;
 		}
-
+*/
 		//Set gl_Position
 		gl_Position = VP_Matrix*gl_in[i].gl_Position;
 		EmitVertex();

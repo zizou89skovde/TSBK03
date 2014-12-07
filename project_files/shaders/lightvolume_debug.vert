@@ -11,8 +11,6 @@ uniform float u_LightFar;
 
 uniform sampler2D u_LightDepthMap;
 
-out vec3 f_LightPosition;
-out vec3 f_Position;
 
 /* From TSBK03 literature*/
 float readDepth( in vec2 coord )
@@ -58,9 +56,7 @@ void main(void)
 			position.xyz -= vertToLight*(depth-u_LightFar);
 		}
 	}
-	/* Pass vertex position and light position in view space */
-	f_Position = vec3(MV_Matrix * position);
-	f_LightPosition = vec3(MV_Matrix * vec4(lightPostionWorld,1.0));
+	
 
 	gl_Position = MVP_Matrix*position; 	
 	

@@ -97,7 +97,7 @@ void GPUWaterSimulation::raindrops(){
         GLfloat x = (rand() % GPU_WATER_SIZE) - GPU_WATER_SIZE/2;
         GLfloat z = (rand() % GPU_WATER_SIZE) - GPU_WATER_SIZE/2;
         //printf("NEW DROP x:%d  y:%d\n",x,z);
-        vec4 rain = vec4(x,z,0.03,0.0030);
+        vec4 rain = vec4(x,z,0.03,0.0090);
         replaceSimulationConstant(&rain.x,"u_RainDrop");
         mPreviousTime = newTime;
     }else{

@@ -5,6 +5,6 @@ uniform sampler2D u_Texture;
 in vec2 f_TextureCoord;
 void main(void)
 {
-	out_Color = texture(u_Texture, f_TextureCoord);
+	out_Color = 0.4*texture(u_Texture, f_TextureCoord);
 }
 

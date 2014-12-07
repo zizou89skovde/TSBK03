@@ -20,18 +20,21 @@ void GPUClothSimulation::initialize(){
     simulationData->GridDimension  = GPU_CLOTH_DIM;
     simulationData->GridSize       = GPU_CLOTH_SIZE;
     simulationData->GridOffset[0] = 0;
-    simulationData->GridOffset[1] = 0;
+    simulationData->GridOffset[1] = 2;
     simulationData->GridOffset[2] = 0;
     simulationData->isUpward       = true;
     intializeSimulation(simulationData);
     configureSimulation();
 
     mGPUClothScene = new ModelObject();
-
+    mTerrain->setExternalModels(mGPUClothScene);
     /** Setting Cloth model shader **/
-    GLuint clothModelShader = loadShadersG("shaders/cloth.vert","shaders/cloth.frag","shaders/cloth.gs");
-    //GLuint clothModelShader = loadShaders("shaders/cloth_phong.vert","shaders/cloth_phong.frag");
-    mGPUClothScene->setShader(clothModelShader,GPU_SHADER_CLOTH,VP);
+    //GLuint clothModelShader = loadShadersG("shaders/cloth.vert","shaders/cloth.frag","shaders/cloth.gs");
+    GLuint clothModelShader = loadShaders("shaders/cloth_phong.vert","shaders/cloth_phong.frag");
+    mGPUClothScene->setShader(clothModelShader,GPU_SHADER_CLOTH,MVP);
+
+    /** Set initial transform **/
+    mGPUClothScene->setTransform(IdentityMatrix(),GPU_SHADER_CLOTH);
 
     /** Uploading Texture coordinates **/
     uploadBufferCoordinates(mGPUClothScene,GPU_SHADER_CLOTH);
@@ -109,7 +112,7 @@ void GPUClothSimulation::updateWind(){
     /** Update wind randomly**/
     mWindVector[0] = 0.004*sin(mTime);
     mWindVector[2] = 0.004*cos(0.5*mTime);
-    mTime += 0.1;
+    mTime += 0.01;
     replaceSimulationConstant(mWindVector,"u_Wind");
 
 }
@@ -136,8 +139,12 @@ void GPUClothSimulation::draw(mat4 projectionMatrix, mat4 viewMatrix){
 
     /** Render Cloth **/
     mGPUClothScene->replaceTexture(resultFbo->texids[0],(const char *)"u_MassPos_Tex");
-    mGPUClothScene->draw(projectionMatrix,viewMatrix);
 
+    /** No culling. In order to se the back face of the cloth **/
+    glDisable(GL_CULL_FACE);
+    mGPUClothScene->draw(projectionMatrix,viewMatrix);
+    glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
     printError("GPU Cloth draw");
 
 }

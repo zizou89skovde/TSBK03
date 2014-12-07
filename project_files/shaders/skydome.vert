@@ -2,7 +2,6 @@
 out float gl_ClipDistance[1];
 
 in  vec3 in_Position;
-in  vec3 in_Normal;
 in  vec2 in_TextureCoord;
 out vec2 f_TextureCoord;
 uniform mat4 V_Matrix;
@@ -12,7 +11,7 @@ uniform float u_Flip;
 void main(void)
 {
 
-	f_TextureCoord = in_TextureCoord+in_Normal.x*0.0;
+	f_TextureCoord = in_TextureCoord;
 	vec3 position = 8.0*in_Position.xyz;
 	gl_ClipDistance[0] = 1.0;
 	if(u_Flip  < -0.5){

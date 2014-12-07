@@ -11,6 +11,7 @@ out vec2 f_TextureCoord;
 out float f_NormalWorld_y;
 uniform mat4 V_Matrix;
 uniform mat4 VP_Matrix;
+uniform mat3 Normal_Matrix;
 
 uniform vec2 u_Resolution;
 
@@ -49,8 +50,6 @@ vec3 getNormalWorld(vec2 texCoord,vec3 centerPos){
 
 void main(void)
 {
-	/* Calculate normal matrix */
-	mat4 normalMatrix = transpose(inverse(V_Matrix));
 	
 	/* Read buffer position */
 	vec2 texCoord = in_Position.xy;	
@@ -66,8 +65,8 @@ void main(void)
 	
 	/* Set output variables */
 	f_NormalWorld_y = pow(normal.y,40.0);
-    f_Normal		= mat3(normalMatrix)*normal;
-	f_LightPos 		= mat3(normalMatrix)*light.xyz; //vec3(V_Matrix*light);
+    f_Normal		= Normal_Matrix*normal;
+	f_LightPos 		= Normal_Matrix*light.xyz; //vec3(V_Matrix*light);
 	f_Position 		= vec3(V_Matrix*vec4(centerPos,1.0));
 	gl_Position 	= VP_Matrix*vec4(centerPos, 1.0); 	
 }

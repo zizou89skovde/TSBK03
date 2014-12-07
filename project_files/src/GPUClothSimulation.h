@@ -12,8 +12,8 @@
 
 
 /** SIMULATION CONSTANTS **/
-#define GPU_CLOTH_DIM 64
-#define GPU_CLOTH_SIZE 8
+#define GPU_CLOTH_DIM 256
+#define GPU_CLOTH_SIZE 2
 
 /** SHADER ID'S **/
 #define GPU_SHADER_CLOTH 0
@@ -35,12 +35,12 @@ class GPUClothSimulation:public GPUSimulation
 
     private:
              /********** PHYSICS CONSTANTS *****************/
-        static const GLfloat GpuSpringDamping        = -.25f;
-        static const GLfloat GpuSpringConstantStruct = 50.75f;
-        static const GLfloat GpuSpringConstantBend   = 50.25f;
+        static const GLfloat GpuSpringDamping        = -.55f;
+        static const GLfloat GpuSpringConstantStruct = 70.75f;
+        static const GLfloat GpuSpringConstantBend   = 70.25f;
         static const GLfloat GpuSpringBreakFactor    = 3.2f;
 
-        static const GLfloat GpuSystemDamping        = -0.0525f;
+        static const GLfloat GpuSystemDamping        = -0.0325f;
         static const GLfloat GpuSystemDeltaTime      = 1.0f/60.0f;
         static const GLfloat GpuSystemGravity        = -0.00981f;
 
@@ -55,12 +55,12 @@ class GPUClothSimulation:public GPUSimulation
         /********** GRAPHICS ********/
         ModelObject * mGPUClothScene;
 
-        static const GLfloat mSphereRadius = 2.0;
-        static const GLfloat mSphereSpeed = 0.000;
-        static const GLfloat mSphereRouteLength = 7.0;
+        static const GLfloat mSphereRadius = 0.5;
+        static const GLfloat mSphereSpeed = 0.001;
+        static const GLfloat mSphereRouteLength = 1.0;
         static const GLfloat mSphereOffsetX = 0.0;
-        static const GLfloat mSphereOffsetY = -1.0;
-        static const GLfloat mSphereOffsetZ = -4.0;
+        static const GLfloat mSphereOffsetY = 1.5;
+        static const GLfloat mSphereOffsetZ = -1.0;
 
         GLfloat mObjectDirection;
         void configureSimulation();

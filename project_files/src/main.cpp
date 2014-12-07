@@ -59,30 +59,26 @@ void init(void)
 	glEnable(GL_DEPTH_TEST);
 	printError("GL inits");
 
+	mTerrain = new Terrain(&WIDTH,&HEIGHT);
 	postProcessing = new PostProcessing(&WIDTH,&HEIGHT);
-
-	//mTerrain = new Terrain();
-//	mTerrain = new Terrain(&WIDTH,&HEIGHT); //Oklart vilken som är ny /JL
-
+	postProcessing->setTerrin(mTerrain);
 /*
-    mGrassSimulation = new GrassSimulation();
-    mGrassSimulation->setTerrain(mTerrain);
-    mGrassSimulation->initialize();
-	printError("init grass simulation");
-*/
+    waterSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
+    waterSimulation->setTerrain(mTerrain);
+    waterSimulation->initialize();
 
- //   clothSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
-   // clothSimulation->setTerrain(mTerrain);
-   // clothSimulation->initialize();
+    clothSimulation = new GPUClothSimulation(&WIDTH,&HEIGHT);
+    clothSimulation->setTerrain(mTerrain);
+    clothSimulation->initialize();
     printf("ALLAN");
     printError("init cloth simulation");
 
+    mGrassSimulation = new GrassSimulation();
+    mGrassSimulation->setTerrain(mTerrain);
+    mGrassSimulation->initialize();*/
+
     mKeyMouseHandler.mClothSimulation = clothSimulation;
- //   mTerrain = new Terrain();
-/*
 
-
-*/
     // Create key/mouse handler
     //mKeyMouseHandler = KeyMouseHandler();
 
@@ -105,9 +101,9 @@ void display(void)
 	// Enable Z-buffering
 	glEnable(GL_DEPTH_TEST);
 	// Enable backface culling
-	//glEnable(GL_CULL_FACE);
-	//glCullFace(GL_BACK);
-    glDisable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+    //glDisable(GL_CULL_FACE);
 	//	glFlush(); // Can cause flickering on some systems. Can also be necessary to make drawing complete.
 	glClearColor(0.0, 0.0, 0.0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -115,13 +111,13 @@ void display(void)
 
 
     viewMatrix = mKeyMouseHandler.getViewMatrix();
-
-   // mTerrain->draw(projectionMatrix,viewMatrix);
-   // mGrassSimulation->draw(projectionMatrix,viewMatrix);
-//	mGrassSimulation->update();
-   // clothSimulation->draw(projectionMatrix,viewMatrix);
+    mTerrain->draw(projectionMatrix,viewMatrix);
+/*  waterSimulation->draw(projectionMatrix,viewMatrix);
+    mGrassSimulation->draw(projectionMatrix,viewMatrix);
+    clothSimulation->draw(projectionMatrix,viewMatrix);
+*/
 	postProcessing->draw(projectionMatrix,viewMatrix);
-	
+
 
 
 	glutSwapBuffers();
@@ -141,7 +137,7 @@ void reshape(GLsizei w, GLsizei h)
 
     // Send the new window size to AntTweakBar
     //TwWindowSize(w, h);
-	projectionMatrix = perspective(90, ratio, 1.0, 800);
+	projectionMatrix = perspective(90, ratio, 1.0, 200);
 	printError("Reshape");
 }
 

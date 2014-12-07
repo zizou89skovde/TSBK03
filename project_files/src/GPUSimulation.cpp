@@ -226,7 +226,7 @@ void GPUSimulation::uploadSquareModelData(ModelObject * modelObj,GLuint shaderId
                      1, 1,
                      1, 0};
 
-    GLuint squareIndices[] = {0, 1, 2, 0, 2, 3};
+    GLuint squareIndices[] = {0, 2, 1, 0, 3, 2};
     modelObj->LoadDataToModel(
         square,
         NULL,
@@ -287,6 +287,8 @@ void GPUSimulation::uploadBufferCoordinates(ModelObject * modelObj,GLuint shader
         triangleCount*3,
         shaderId);
 
+    free(vertexArray);
+    free(indexArray);
     printError("Cloth Gen Position Buffer Coordinates ");
     }
 /**
