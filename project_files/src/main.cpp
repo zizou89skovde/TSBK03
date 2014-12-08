@@ -16,7 +16,6 @@
 #include <stdlib.h>
 
 
-
 #include "GL_utilities.h"
 
 #include "ModelObject.h"
@@ -24,6 +23,7 @@
 #include "CPUClothSimulation.h"
 #include "GPUClothSimulation.h"
 #include "GPUWaterSimulation.h"
+#include "PostProcessing.h"
 
 #include "GrassSimulation.h"
 #include "Terrain.h"
@@ -36,7 +36,6 @@
 void OnTimer(int value);
 KeyMouseHandler mKeyMouseHandler;
 //----------------------Globals-------------------------------------------------
-GLuint phongshader = 0;
 mat4 projectionMatrix;
 mat4 viewMatrix;
 //-------------------------------------------------------------------------------------
@@ -48,6 +47,7 @@ GLuint HEIGHT;
 GPUSimulation * clothSimulation;
 GrassSimulation * mGrassSimulation;
 GPUWaterSimulation * waterSimulation;
+PostProcessing * postProcessing;
 Terrain *mTerrain;
 void init(void)
 {
@@ -58,29 +58,27 @@ void init(void)
 	glClearDepth(1.0);
 	glEnable(GL_DEPTH_TEST);
 	printError("GL inits");
-	//mTerrain = new Terrain();
-	mTerrain = new Terrain(&WIDTH,&HEIGHT); //Oklart vilken som är ny /JL
 
-
-    mGrassSimulation = new GrassSimulation();
-    mGrassSimulation->setTerrain(mTerrain);
-    mGrassSimulation->initialize();
-	printError("init grass simulation");
-
+	mTerrain = new Terrain(&WIDTH,&HEIGHT);
+	postProcessing = new PostProcessing(&WIDTH,&HEIGHT);
+	postProcessing->setTerrin(mTerrain);
 /*
-    clothSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
+    waterSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
+    waterSimulation->setTerrain(mTerrain);
+    waterSimulation->initialize();
+
+    clothSimulation = new GPUClothSimulation(&WIDTH,&HEIGHT);
     clothSimulation->setTerrain(mTerrain);
     clothSimulation->initialize();
     printf("ALLAN");
     printError("init cloth simulation");
-*/
+
+    mGrassSimulation = new GrassSimulation();
+    mGrassSimulation->setTerrain(mTerrain);
+    mGrassSimulation->initialize();*/
 
     mKeyMouseHandler.mClothSimulation = clothSimulation;
- //   mTerrain = new Terrain();
-/*
 
-
-*/
     // Create key/mouse handler
     //mKeyMouseHandler = KeyMouseHandler();
 
@@ -103,9 +101,9 @@ void display(void)
 	// Enable Z-buffering
 	glEnable(GL_DEPTH_TEST);
 	// Enable backface culling
-	//glEnable(GL_CULL_FACE);
-	//glCullFace(GL_BACK);
-    glDisable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+    //glDisable(GL_CULL_FACE);
 	//	glFlush(); // Can cause flickering on some systems. Can also be necessary to make drawing complete.
 	glClearColor(0.0, 0.0, 0.0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -114,9 +112,14 @@ void display(void)
 
     viewMatrix = mKeyMouseHandler.getViewMatrix();
     mTerrain->draw(projectionMatrix,viewMatrix);
+/*  waterSimulation->draw(projectionMatrix,viewMatrix);
     mGrassSimulation->draw(projectionMatrix,viewMatrix);
-	mGrassSimulation->update();
-    //clothSimulation->draw(projectionMatrix,viewMatrix);
+    clothSimulation->draw(projectionMatrix,viewMatrix);
+*/
+	postProcessing->draw(projectionMatrix,viewMatrix);
+
+
+
 	glutSwapBuffers();
 }
 
@@ -132,8 +135,9 @@ void reshape(GLsizei w, GLsizei h)
 
 	GLfloat ratio = (GLfloat)w / (GLfloat)h;
 
-
-	projectionMatrix = perspective(90, ratio, 1.0, 800);
+    // Send the new window size to AntTweakBar
+    //TwWindowSize(w, h);
+	projectionMatrix = perspective(90, ratio, 1.0, 200);
 	printError("Reshape");
 }
 
@@ -146,7 +150,6 @@ void idle()
 	/* Run update functions */
 
  //  clothSimulation->update();
-
 
 	glutPostRedisplay();
 }
@@ -193,6 +196,8 @@ int main(int argc, char *argv[])
     fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
     printError ("pre init");
 #endif
+    // Initialize AntTweakBar
+
 	init();
 	glutKeyboardFunc(keyboard);
 	glutMouseFunc(mouseClick);

@@ -5,9 +5,13 @@ Terrain::Terrain(GLuint * w, GLuint * h)
     mScreenWitdh = w;
     mScreenHeight = h;
     mTerrainModel = new ModelObject();
-
-    initializeSkyBox();
+    mTerrainDepthModel = new ModelObject();
     initializeTerrain();
+    initializeSkyBox();
+
+
+
+
 
 
 }
@@ -41,6 +45,8 @@ void Terrain::initializeSkyBox(){
 
     /** Upload sky dome model **/
     Model* modelSkyDome = LoadModelPlus((char *)"models/skydome.obj");
+	free(modelSkyDome->normalArray);
+	modelSkyDome->normalArray = NULL;
     mTerrainModel->setModel(modelSkyDome,SKYBOX_SHADER);
 
     /** Set flip **/
@@ -50,49 +56,115 @@ void Terrain::initializeSkyBox(){
 }
 
 void Terrain::initializeTerrain(){
-  // Load model
+
+
+    /** Load shader, one Phong shader, and shader without any shading ( for depth rendering ) */
+    GLuint shader = loadShaders("shaders/terrain.vert", "shaders/terrain.frag");
+	mTerrainModel->setShader(shader,TERRAIN_SHADER);
+
+    GLuint shaderSimple = loadShaders("shaders/simple.vert", "shaders/simple.frag");
+	mTerrainDepthModel->setShader(shaderSimple,TERRAIN_SIMPLE_SHADER);
+
+    /** Load Texture **/
     mTerrainTextureData = new TextureData;
+    LoadTGATextureData((char*)"textures/fft-terrain2.tga", mTerrainTextureData);
 
-    LoadTGATextureData((char*)"textures/fft-terrain.tga", mTerrainTextureData);
-
-   // LoadTGATextureData((char*)"textures/fft-terrain3.tga", mTerrainTextureData);
-
+    /** Generate terrain from height map **/
     GenerateTerrain(mTerrainTextureData);
 
-    GLuint type = GL_RGBA;
-    // Build A Texture From The Data
-	glGenTextures(1, &mTerrainTextureData->texID);			// Generate OpenGL texture IDs
-	glBindTexture(GL_TEXTURE_2D, mTerrainTextureData->texID);		// Bind Our Texture
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// Linear Filtered
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);	// Linear Filtered
-	if (mTerrainTextureData->bpp == 8)						// Was The TGA 8 Bits? Should be grayscale then.
-	{
-		type=GL_RED;			// If So Set The 'type' To GL_RED
-	}
-	if (mTerrainTextureData->bpp == 24)						// Was The TGA 24 Bits?
-	{
-		type=GL_RGB;			// If So Set The 'type' To GL_RGB
-	}
-	glTexImage2D(GL_TEXTURE_2D, 0, type, mTerrainTextureData->w, mTerrainTextureData->h, 0, type, GL_UNSIGNED_BYTE, mTerrainTextureData[0].imageData);
-	/********* MIPMAP ******************/
-    glGenerateMipmap(GL_TEXTURE_2D);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);	// Linear Filtered
-    /***************************/
-    free(mTerrainTextureData->imageData);
-    mTerrainTextureData->imageData = NULL;
+    /** Set transform **/
+    mat4 IdMatrix = IdentityMatrix();
+    mTerrainDepthModel->setTransform(IdMatrix,TERRAIN_SIMPLE_SHADER);
 
-
-
-    	//Load shader-kun
-    GLuint shader = loadShaders("shaders/phong.vert", "shaders/phong.frag");
-	mTerrainModel->setShader(shader,TERRAIN_SHADER);
+    /** Upload u_Clip  parameter **/
     mTerrainModel->setUniform(0.0,TERRAIN_SHADER,"u_Clip");
 
+    /** Set transform **/
     mat4 transformMatrix = IdentityMatrix();
     mTerrainModel->setTransform(transformMatrix,TERRAIN_SHADER);
 
+    /** Initialize FBO's  used for rendering the water reflection **/
     mTerrainReflectionFBO = initFBO(FBOSize,FBOSize,0);
     mTerrainFBO = initFBO(FBOSize, FBOSize, 0);
+
+
+}
+
+Terrain::~Terrain()
+{
+    //dtor
+}
+
+void Terrain::setClip(bool enabled){
+    GLfloat flip = -1.0;
+    if(enabled){
+        GLfloat clip = 1.0;
+        mTerrainModel->replaceUniform(&clip,"u_Clip");
+        mTerrainModel->replaceUniform(&flip,"u_Flip");
+    }else{
+        flip = 1.0;
+        mTerrainModel->replaceUniform(&flip,"u_Flip");
+    }
+}
+void Terrain::drawSimple(mat4 proj, mat4 view){
+    mTerrainDepthModel->draw(TERRAIN_SIMPLE_SHADER,proj,view);
+}
+
+void Terrain::setExternalModels(ModelObject * modelObj){
+    mExternalModel.push_back(modelObj);
+}
+
+void Terrain::renderFlippedExternalModel(mat4 projectionMatrix,mat4 viewMatrix){
+    ModelObject * modelObject;
+    for(std::vector<ModelObject*>::iterator it = mExternalModel.begin(); it != mExternalModel.end(); ++it) {
+        modelObject = *it;
+        /** Flip model in regard to the Y-axis **/
+        modelObject->flipModels();
+
+        modelObject->draw(projectionMatrix,viewMatrix);
+        /** Reset model to its original direction **/
+        modelObject->flipModels();
+    }
+}
+
+void Terrain::draw(mat4 proj, mat4 view){
+
+    /** Draw reflected ***/
+    useFBO(mTerrainReflectionFBO,NULL,NULL);
+    glClearColor(0.0, 0.0, 0.0, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    mat4* transformTerrain = mTerrainModel->getTransform(TERRAIN_SHADER);
+
+
+    /** Draw scene upside down **/
+    *transformTerrain = S(1,-1,1);
+    glEnable(GL_CLIP_DISTANCE0);
+    setClip(true);
+    glDisable(GL_CULL_FACE);
+    mTerrainModel->draw(SKYBOX_SHADER,proj,view);
+    renderFlippedExternalModel(proj,view);
+    mTerrainModel->draw(TERRAIN_SHADER,proj,view);
+    glDisable(GL_CLIP_DISTANCE0);
+    glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+    /** Draw to Offscreen fbo */
+    setClip(false);
+    useFBO(mTerrainFBO,NULL,NULL);
+    glClearColor(0.0, 0.0, 0.0, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	GLfloat sizeTerrain = 1.00;
+    *transformTerrain = S(sizeTerrain,sizeTerrain,sizeTerrain);
+    mTerrainModel->draw(TERRAIN_SHADER,proj,view);
+
+    /** Draw to screen **/
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, *mScreenWitdh, *mScreenHeight);
+    mTerrainModel->draw(SKYBOX_SHADER,proj,view);
+    mTerrainModel->draw(TERRAIN_SHADER,proj,view);
+
+
+
+
 }
 
 void Terrain::GenerateTerrain(TextureData *tex){
@@ -167,11 +239,44 @@ void Terrain::GenerateTerrain(TextureData *tex){
 			TERRAIN_SHADER
 			);
 
+    mTerrainDepthModel->LoadDataToModel(
+			vertexArray,
+			NULL,
+			NULL,
+			NULL,
+			indexArray,
+			vertexCount,
+			triangleCount*3,
+			TERRAIN_SIMPLE_SHADER
+			);
+
+
     /** Clean up **/
     free(vertexArray);
     free(normalArray);
     free(indexArray);
 
+    GLuint type = GL_RGBA;
+    // Build A Texture From The Data
+	glGenTextures(1, &mTerrainTextureData->texID);			// Generate OpenGL texture IDs
+	glBindTexture(GL_TEXTURE_2D, mTerrainTextureData->texID);		// Bind Our Texture
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// Linear Filtered
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);	// Linear Filtered
+	if (mTerrainTextureData->bpp == 8)						// Was The TGA 8 Bits? Should be grayscale then.
+	{
+		type=GL_RED;			// If So Set The 'type' To GL_RED
+	}
+	if (mTerrainTextureData->bpp == 24)						// Was The TGA 24 Bits?
+	{
+		type=GL_RGB;			// If So Set The 'type' To GL_RGB
+	}
+	glTexImage2D(GL_TEXTURE_2D, 0, type, mTerrainTextureData->w, mTerrainTextureData->h, 0, type, GL_UNSIGNED_BYTE, mTerrainTextureData[0].imageData);
+	/********* MIPMAP ******************/
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);	// Linear Filtered
+    /***************************/
+    free(mTerrainTextureData->imageData);
+    mTerrainTextureData->imageData = NULL;
 
   printError("Terrain Buffer");
 
@@ -221,52 +326,5 @@ vec3 Terrain::calcNormal(GLuint x,GLuint z,GLfloat planeRes,GLfloat heightRes, T
 }
 
 
-Terrain::~Terrain()
-{
-    //dtor
-}
 
-void Terrain::setClip(bool enabled){
-    GLfloat flip = -1.0;
-    if(enabled){
-        GLfloat clip = 1.0;
-        mTerrainModel->replaceUniform(&clip,"u_Clip");
-        mTerrainModel->replaceUniform(&flip,"u_Flip");
-    }else{
-        flip = 1.0;
-        mTerrainModel->replaceUniform(&flip,"u_Flip");
-    }
-}
-
-void Terrain::draw(mat4 proj, mat4 view){
-
-    /** Draw reflected ***/
-    useFBO(mTerrainReflectionFBO,NULL,NULL);
-    glClearColor(0.0, 0.0, 0.0, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    mat4* transf = mTerrainModel->getTransform(TERRAIN_SHADER);
-
-    /** Draw scene upside down **/
-    *transf = S(1,-1,1);
-    glEnable(GL_CLIP_DISTANCE0);
-    setClip(true);
-    mTerrainModel->draw(proj,view);
-    glDisable(GL_CLIP_DISTANCE0);
-
-    /** Draw to Offscreen fbo */
-    setClip(false);
-    useFBO(mTerrainFBO,NULL,NULL);
-    glClearColor(0.0, 0.0, 0.0, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	GLfloat sizeTerrain = 1.00;
-    *transf = S(sizeTerrain,sizeTerrain,sizeTerrain);
-    mTerrainModel->draw(proj,view);
-
-    /** Draw to screen **/
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, *mScreenWitdh, *mScreenHeight);
-    mTerrainModel->draw(proj,view);
-
-
-}
 

@@ -40,7 +40,7 @@ GLuint phongshader = 0;
 mat4 projectionMatrix;
 mat4 viewMatrix;
 //-------------------------------------------------------------------------------------
-
+// Micke in inda house
 GLuint WIDTH;
 GLuint HEIGHT;
 

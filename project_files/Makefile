@@ -11,8 +11,8 @@ LINK= -g -shared-libgcc -lstdc++ -lm -lGL -lpthread -DGL_GLEXT_PROTOTYPES -lX11 
 #endif
 
 VPATH=common src
-
-OBJFILES=CPUClothSimulation.o GPUSimulation.o SimulationClass.o GPUWaterSimulation.o GPUClothSimulation.o GrassSimulation.o main.o Terrain.o ModelObject.o KeyMouseHandler.o GL_utilities.o VectorUtils3.o loadobj.o LoadTGA.o MicroGlut.o
+ANT_TWEAK=-LAntTweakBar/lib -lAntTweakBar
+OBJFILES=CPUClothSimulation.o GPUSimulation.o SimulationClass.o GPUWaterSimulation.o GPUClothSimulation.o GrassSimulation.o main.o Terrain.o ModelObject.o KeyMouseHandler.o GL_utilities.o VectorUtils3.o loadobj.o LoadTGA.o MicroGlut.o PostProcessing.o
 
 TARGET=main
 
@@ -21,10 +21,10 @@ TARGET=main
 $(TARGET): $(OBJFILES)  	
 	$(CC) -o $(TARGET) $(OBJFILES) $(LINK)
 %.o: %.cpp
-	$(CC) -c $(CPPFLAGS) $<
+	$(CC) -c $(CPPFLAGS) $< 
 
 %.o: %.c
-	$(CC) -c $(CFLAGS) $<
+	$(CC) -c $(CFLAGS)  $<
 
 clean:
 	@ \rm -f *.o $(SOURCEDIR)*.o *.gch $(COMMONDIR)*.o *~ $(COMMONDIR)*~ $(SOURCEDIR)*~ main

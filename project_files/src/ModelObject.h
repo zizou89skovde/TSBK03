@@ -103,7 +103,7 @@ class ModelObject
 
         /** Get functions **/
         mat4 * getTransform(GLuint ShaderId);
-
+        void flipModels();
 
     protected:
     private:

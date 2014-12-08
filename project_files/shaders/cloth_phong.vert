@@ -8,9 +8,9 @@ out vec3 f_Normal;
 out vec3 f_Position;
 out vec3 f_LightPos;
 
-uniform mat4 V_Matrix;
-uniform mat4 VP_Matrix;
-
+uniform mat4 MV_Matrix;
+uniform mat4 MVP_Matrix;
+uniform mat3 Normal_Matrix;
 uniform vec2 u_Resolution;
 
 vec3 readPositionWorld(vec2 tcoord,vec2 offset){
@@ -47,8 +47,7 @@ vec3 getNormalWorld(vec2 texCoord,vec3 centerPos){
 
 void main(void)
 {
-	/* Calculate normal matrix */
-	mat4 normalMatrix = transpose(inverse(V_Matrix));
+
 	/* Read buffer position */
 	vec2 texCoord = in_Position.xy;	
 	
@@ -60,12 +59,11 @@ void main(void)
 	vec3 centerPos = centerElement.xyz;
 	
 	/* Set output variables */	
-    f_Normal		= mat3(normalMatrix)*getNormalWorld(texCoord,centerPos); 
-	f_LightPos 		= vec3(V_Matrix*light);
+    f_Normal		= Normal_Matrix*getNormalWorld(texCoord,centerPos); 
+	f_LightPos 		= vec3(MV_Matrix*light);
 	
 	/* Quick fix */
-	centerPos 		+= vec3(0.0,7.0,0.0);
-	f_Position 		= vec3(V_Matrix*vec4(centerPos,1.0));
-	gl_Position 	= VP_Matrix*vec4(centerPos, 1.0); 	
+	f_Position 		= vec3(MV_Matrix*vec4(centerPos,1.0));
+	gl_Position 	= MVP_Matrix*vec4(centerPos, 1.0); 	
 }
 

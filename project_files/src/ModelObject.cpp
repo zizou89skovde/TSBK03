@@ -2,6 +2,8 @@
 
 ModelObject::ModelObject()
 {
+
+
 }
 
 ModelObject::~ModelObject()
@@ -114,15 +116,26 @@ void ModelObject::draw(GLuint shaderId,mat4 projectionMatrix, mat4 viewMatrix){
             uploadTransform(shader,projectionMatrix,viewMatrix);
 
             uploadTexture(shader->sShaderId,program);
-
+            if(shader->sDepthTest == NO_DEPTH_TEST){
+                    glDisable(GL_DEPTH_TEST);
+                }
             drawModel(shader->sShaderId,program);
-
+             if(shader->sDepthTest == NO_DEPTH_TEST){
+                    glEnable(GL_DEPTH_TEST);
+                }
             return;
         }
     }
 
 }
 
+void ModelObject::flipModels(){
+    Transform_Type * t;
+    for(std::vector<Transform_Type*>::iterator it = mTransformList.begin(); it != mTransformList.end(); ++it) {
+        t = *it;
+        t->sTransform = S(1,-1,1)*t->sTransform;
+    }
+}
 
 void ModelObject::drawBuffers(GLuint shaderId,GLuint numBuffers,GLuint * attachment){
 
@@ -147,6 +160,7 @@ void ModelObject::uploadTransform(Shader_Type * shader,mat4 projectionMatrix,mat
     mat4 mvMatrix;
     mat4 mvpMatrix;
     mat4 vpMatrix;
+    mat3 normalMatrix;
     switch(shader->sComposition){
     case MVP:
         mvMatrix = Mult(viewMatrix,*getTransform(shader->sShaderId));
@@ -154,12 +168,16 @@ void ModelObject::uploadTransform(Shader_Type * shader,mat4 projectionMatrix,mat
 
         glUniformMatrix4fv(glGetUniformLocation(shader->sShaderHandleGPU, "MV_Matrix"), 1, GL_TRUE, mvMatrix.m);
         glUniformMatrix4fv(glGetUniformLocation(shader->sShaderHandleGPU, "MVP_Matrix"), 1, GL_TRUE, mvpMatrix.m);
+        normalMatrix = InverseTranspose(mvMatrix);
+        glUniformMatrix3fv(glGetUniformLocation(shader->sShaderHandleGPU, "Normal_Matrix"), 1, GL_TRUE, normalMatrix.m);
         break;
     case VP:
         vpMatrix = Mult(projectionMatrix,viewMatrix);
         glUniformMatrix4fv(glGetUniformLocation(shader->sShaderHandleGPU, "V_Matrix"), 1, GL_TRUE, viewMatrix.m);
         glUniformMatrix4fv(glGetUniformLocation(shader->sShaderHandleGPU, "VP_Matrix"), 1, GL_TRUE, vpMatrix.m);
         glUniformMatrix4fv(glGetUniformLocation(shader->sShaderHandleGPU, "P_Matrix"), 1, GL_TRUE, projectionMatrix.m);
+        normalMatrix = InverseTranspose(viewMatrix);
+        glUniformMatrix3fv(glGetUniformLocation(shader->sShaderHandleGPU, "Normal_Matrix"), 1, GL_TRUE, normalMatrix.m);
         break;
     case P:
         glUniformMatrix4fv(glGetUniformLocation(shader->sShaderHandleGPU, "P_Matrix"), 1, GL_TRUE, projectionMatrix.m);

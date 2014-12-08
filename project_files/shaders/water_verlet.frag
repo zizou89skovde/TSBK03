@@ -69,14 +69,14 @@ vec3 applyNeighbourForce(vec3 centerPosition, vec3 velocity,float height){
 			
 	}
 
-	force = (sumNeighbours - 4.0*centerPosition)*0.5;
+	force = (sumNeighbours - 4.0*centerPosition)*0.9;
 	
 	/* FAKE #1337 */
 	float deltaHeight =  u_SeaLevel - centerPosition.y;
 	force.y += 0.004 * deltaHeight;
 
 	if(height <= 1.5){	
-		force *= clamp(0.5*height,0.0,1.0);
+		force *= clamp(height,0.0,1.0);
 	}
 
 	/* Force = acceleration since the mass is considered to be 1. */
@@ -97,17 +97,6 @@ int rainDrop(vec3 position,float height,out vec3 out1,out vec3 out2){
 	}
 	return afftected;
 }
-/*
-float waveSource(vec3 position,out vec3 out1,out vec3 out2){
-	float strength = clamp((0.2 - length(position.xz)),0.0,1.0);
-	if(strength >= 0.1){
-		position.y = u_SeaLevel+0.1*sin(2.0*u_Time)*sin(0.05*u_Time)*cos(0.5*u_Time) ;
-		out1 = position;
-		out2 = position;
-	}
-	return strength;
-}*/
-
 
 /* GPU implementation of the applyForces in CPUClothsimulation.cpp */
 vec3 applyForces(vec3 position, vec3 velocity,float height){
@@ -132,17 +121,6 @@ vec3 applyForces(vec3 position, vec3 velocity,float height){
 vec3 integrate(vec3 position, vec3 previousPosition, vec3 acceleration){
 		vec3 nextPosition = 2.0*position - previousPosition  + u_DeltaTime * u_DeltaTime* acceleration;	
 		return nextPosition;
-}
-
-vec3 groundCollision(vec3 inPosition,out float colllided){
-	vec2 mapPosition = 0.5+(inPosition.xz)/u_TerrainSize;
-	float height = (texture(u_HeightMap, mapPosition).x-0.5)*u_TerrainHeight;
-	vec3 newPosition = inPosition;
-	colllided  = 0.0;
-	if(height > inPosition.y){
-			colllided = 1.0;
-	}
-	return newPosition;
 }
 
 void main(void)

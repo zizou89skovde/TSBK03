@@ -42,7 +42,7 @@ class GPUWaterSimulation:public GPUSimulation
         /** Wind **/
         /** Rain drops **/
         GLfloat mPreviousTime;
-        static const GLfloat RainFrequency = 10;
+        static const GLfloat RainFrequency = 20;
 
         /********** GRAPHICS ********/
         ModelObject * mGPUWaterScene;

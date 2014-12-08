@@ -9,8 +9,9 @@ out vec3 g_Normal;
 out vec3 g_Position;
 out vec3 g_LightPos;
 out highp uint g_SpringState;
-uniform mat4 V_Matrix;
-uniform mat4 VP_Matrix;
+uniform mat4 MV_Matrix;
+uniform mat4 MVP_Matrix;
+uniform mat3 Normal_Matrix;
 
 uniform vec2 u_Resolution;
 
@@ -48,8 +49,7 @@ vec3 getNormalWorld(vec2 texCoord,vec3 centerPos){
 
 void main(void)
 {
-	/* Calculate normal matrix */
-	mat4 normalMatrix = transpose(inverse(V_Matrix));
+
 	/* Read buffer position */
 	vec2 texCoord = in_Position.xy;	
 	
@@ -63,12 +63,11 @@ void main(void)
 	/* Set output variables */
 	g_SpringState	= uint(centerElement.w);
 	g_Texcoord	    = vec2(in_Position.xy); 	
-    g_Normal		= mat3(normalMatrix)*getNormalWorld(texCoord,centerPos); 
-	g_LightPos 		= vec3(V_Matrix*light);
+    g_Normal		= Normal_Matrix*getNormalWorld(texCoord,centerPos); 
+	g_LightPos 		= vec3(MV_Matrix*light);
 	
 	/* Quick fix */
-	centerPos 		+= vec3(0.0,7.0,0.0);
-	g_Position 		= vec3(V_Matrix*vec4(centerPos,1.0));
+	g_Position 		= vec3(MV_Matrix*vec4(centerPos,1.0));
 	gl_Position 	= vec4(centerPos, 1.0); 	
 }
 
