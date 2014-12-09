@@ -7,7 +7,7 @@
 #include "LoadTGA.h"
 #include "Terrain.h"
 
-#define DEBUG 0
+//#define DEBUG 0
 
 #define SHADER_LIGHT_VOLUME 0
 #define SHADER_SPHERE       1
@@ -56,8 +56,8 @@ class PostProcessing
 		static const GLfloat mNear = 1.0f;
 		static const GLfloat mRatio = 1.0f;
 		static const GLfloat mScaleFar = 0.15f;
-		static const GLfloat mScaleNear = 0.2f;
-        static const GLfloat mOffsetFar = 10;
+		static const GLfloat mScaleNear = 0.05f;
+        static const GLfloat mOffsetFar = 15;
 		static const GLfloat mOffsetNear = 1;
 
 		/** Light Source Position **/

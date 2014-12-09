@@ -137,7 +137,7 @@ void reshape(GLsizei w, GLsizei h)
 
     // Send the new window size to AntTweakBar
     //TwWindowSize(w, h);
-	projectionMatrix = perspective(90, ratio, 1.0, 200);
+	projectionMatrix = perspective(90, ratio, 1.0, 80);
 	printError("Reshape");
 }
 

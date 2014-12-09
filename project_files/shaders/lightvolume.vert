@@ -46,7 +46,7 @@ void main(void)
 	/* Only far plane should be affected, near plane at z = 1.0, far plane >> near plane */
 	if(in_Position.z > 1.5){
 		/* Direction from vertex to light position(prp of the frustum) */
-		vec3 vertToLight = normalize(lightPostionWorld-position.xyz);
+		vec3 vertToLight = (lightPostionWorld-position.xyz)/u_LightFar;
 		
 		/* Read depth from the map */
 		float depth = readDepth(projectedCoordinates.st);
