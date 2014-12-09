@@ -7,11 +7,12 @@
 #include "LoadTGA.h"
 #include "Terrain.h"
 
-//#define DEBUG 0
+#define DEBUG 0
 
 #define SHADER_LIGHT_VOLUME 0
 #define SHADER_SPHERE       1
-#define SHADER_SCREEN_QUAD         2
+#define SHADER_SCREEN_QUAD  2
+#define SHADER_SHADOW_MAP   3
 class PostProcessing
 {
 
@@ -38,6 +39,8 @@ class PostProcessing
 
 		/** Shortcut to light volume shader handle **/
 		GLuint mLightShaderHandle;
+		GLuint mShadowShaderHandle;
+
 		GLuint* mScreenHeight;
 		GLuint* mScreenWidth;
 
@@ -50,6 +53,7 @@ class PostProcessing
 		mat4 mLightProjectionMatrix;
 		mat4 mLightViewMatrix;
 		mat4 mVPLightMatrix;
+		mat4 mMVPLightMatrix;
 
 		/** Light frustum **/
 		static const GLfloat mFar = 15.0f;

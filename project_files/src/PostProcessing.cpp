@@ -80,8 +80,24 @@ void PostProcessing::initializePostProcessing(){
 
     /** Set texture **/
     mPostProcessingModel->setTexture(mLightFBO->texid,SHADER_SCREEN_QUAD,"u_Texture");
+	
+
 
     mTime = 0.0f;
+
+   /*************************************************************************************/
+   /** Shadow Map (Full screen quad shader) **/
+   	mShadowShaderHandle = loadShaders("shaders/shadows.vert", "shaders/shadows.frag");
+    mPostProcessingModel->setShader(mShadowShaderHandle,SHADER_SHADOW_MAP,NONE);
+
+	/** Full-screen quad model **/
+	mPostProcessingModel->uploadSquareModelData(mPostProcessingModel,SHADER_SHADOW_MAP);
+
+    /** Set texture **/
+    mPostProcessingModel->setTexture(mLightDepthFBO->texid,SHADER_SHADOW_MAP,"u_LightDepth_Texture");
+    mPostProcessingModel->setTexture(mSceneDepthFBO->texid,SHADER_SHADOW_MAP,"u_SceneDepth_Texture");
+	glUniformMatrix4fv(glGetUniformLocation(mShadowShaderHandle, "MVP_LightMatrix"), 1, GL_TRUE, mMVPLightMatrix.m);
+	
 }
 
 void PostProcessing::lightLookAt(vec3 lightPos, vec3 lightDir){
@@ -95,7 +111,7 @@ void PostProcessing::lightLookAt(vec3 lightPos, vec3 lightDir){
 	mLightViewMatrix 	   = lookAtv(lightPos,lightDir,lightUp);
 	mVPLightMatrix	= mLightProjectionMatrix* mLightViewMatrix;
 	mat4 rot   = Ry((mTime-3.14159265359/2.0));
-	mat4 mMVPLightMatrix = mVPLightMatrix * trans*rot;
+	mMVPLightMatrix = mVPLightMatrix * trans*rot;
  	glUniformMatrix4fv(glGetUniformLocation(mLightShaderHandle, "VP_LightMatrix"), 1, GL_TRUE, mMVPLightMatrix.m);
 
     /** Update model to world matrix for the light volume model **/
@@ -105,6 +121,16 @@ void PostProcessing::lightLookAt(vec3 lightPos, vec3 lightDir){
     mat4 * lightTransform = mPostProcessingModel->getTransform(SHADER_LIGHT_VOLUME);
 
     *lightTransform = res;
+
+}
+
+void PostProcessing::drawShadows(mat4 proj, mat4 view){
+	/** Upload MVP-matrix for the light perspective **/
+	glUniformMatrix4fv(glGetUniformLocation(mShadowShaderHandle, "VP_LightMatrix"), 1, GL_TRUE, mMVPLightMatrix.m);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    mPostProcessingModel->draw(SHADER_SHADOW_MAP,proj,view);
+    glDisable(GL_BLEND);
 
 }
 
@@ -137,6 +163,7 @@ void PostProcessing::draw(mat4 proj, mat4 view){
 #endif
 
 }
+
 
 void PostProcessing::drawLightVolume(mat4 proj, mat4 view){
 
@@ -173,6 +200,8 @@ void PostProcessing::drawLightVolume(mat4 proj, mat4 view){
 }
 
 
+
+
 void PostProcessing::drawLightDepth(mat4 proj, mat4 view){
 	/** Swap to light depth buffer */
 	glBindFramebuffer(GL_FRAMEBUFFER,mLightDepthFBO.fb);
@@ -193,8 +222,8 @@ void PostProcessing::drawLightDepth(mat4 proj, mat4 view){
     /** Disable color rendering, we only want to write to the Z-Buffer */
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 	/** Render scene from light position */
-    mTerrain->drawSimple(proj,view);
-
+    //mTerrain->drawSimple(proj,view);
+	mTerrain->drawDepth(proj,view);
 
 	/** Enable again*/
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
