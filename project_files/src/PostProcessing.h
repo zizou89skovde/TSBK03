@@ -26,6 +26,7 @@ class PostProcessing
     private:
 		void drawLightDepth(mat4 proj, mat4 view);
 		void drawLightVolume(mat4 proj, mat4 view);
+		void drawShadows(mat4 proj, mat4 view);
         void initializePostProcessing();
 
         void lightLookAt(vec3 lightPos, vec3 lightDir);
@@ -66,9 +67,9 @@ class PostProcessing
 
 		/** Light Source Position **/
 		static const GLfloat mLightRadius = 15.0;
-		static const GLfloat mLightHeight = 2.0;
-		static const GLfloat mLightSpeed =  0.0001;
-		static const GLfloat mLightResolutiuon = 32.0;
+		static const GLfloat mLightHeight = 1.0;
+		static const GLfloat mLightSpeed =  0.0005;
+		static const GLfloat mLightResolutiuon = 64.0;
 
 		ModelObject * mPostProcessingModel;
         GLfloat mTime;

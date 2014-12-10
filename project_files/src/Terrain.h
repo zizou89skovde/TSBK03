@@ -25,6 +25,7 @@ class Terrain
         Terrain(GLuint * w, GLuint * h);
         void draw(mat4 proj, mat4 view);
         void drawSimple(mat4 proj, mat4 view);
+        void drawDepth(mat4 proj, mat4 view);
         TextureData * getTextureData();
         TerrainMetaData * getTerrainMetaData();
         FBOstruct * getTerrainFBO();

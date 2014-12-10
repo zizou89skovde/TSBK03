@@ -110,6 +110,10 @@ void Terrain::drawSimple(mat4 proj, mat4 view){
     mTerrainDepthModel->draw(TERRAIN_SIMPLE_SHADER,proj,view);
 }
 
+void Terrain::drawDepth(mat4 proj, mat4 view){
+    mTerrainDepthModel->draw(TERRAIN_SIMPLE_SHADER,proj,view);
+}
+
 void Terrain::setExternalModels(ModelObject * modelObj){
     mExternalModel.push_back(modelObj);
 }

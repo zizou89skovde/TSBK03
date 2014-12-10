@@ -80,7 +80,7 @@ void PostProcessing::initializePostProcessing(){
 
     /** Set texture **/
     mPostProcessingModel->setTexture(mLightFBO->texid,SHADER_SCREEN_QUAD,"u_Texture");
-	
+
 
 
     mTime = 0.0f;
@@ -91,13 +91,22 @@ void PostProcessing::initializePostProcessing(){
     mPostProcessingModel->setShader(mShadowShaderHandle,SHADER_SHADOW_MAP,NONE);
 
 	/** Full-screen quad model **/
-	mPostProcessingModel->uploadSquareModelData(mPostProcessingModel,SHADER_SHADOW_MAP);
+	uploadSquareModelData(mPostProcessingModel,SHADER_SHADOW_MAP);
 
     /** Set texture **/
-    mPostProcessingModel->setTexture(mLightDepthFBO->texid,SHADER_SHADOW_MAP,"u_LightDepth_Texture");
-    mPostProcessingModel->setTexture(mSceneDepthFBO->texid,SHADER_SHADOW_MAP,"u_SceneDepth_Texture");
+    mPostProcessingModel->setTexture(mLightDepthFBO.depth,SHADER_SHADOW_MAP,"u_LightDepth");
+    mPostProcessingModel->setTexture(mSceneDepthFBO.depth,SHADER_SHADOW_MAP,"u_SceneDepth");
+
+
 	glUniformMatrix4fv(glGetUniformLocation(mShadowShaderHandle, "MVP_LightMatrix"), 1, GL_TRUE, mMVPLightMatrix.m);
-	
+	glUniformMatrix4fv(glGetUniformLocation(mShadowShaderHandle, "ViewInvMatrix"), 1, GL_TRUE, mMVPLightMatrix.m);
+ 	/** Light Parameters **/
+    mPostProcessingModel->setUniform(mNear,SHADER_SHADOW_MAP,"u_LightNear");
+    mPostProcessingModel->setUniform(mFar,SHADER_SHADOW_MAP,"u_LightFar");
+
+    /** Camera Parameters **/
+    mPostProcessingModel->setUniform(1,SHADER_SHADOW_MAP,"u_CameraNear");
+    mPostProcessingModel->setUniform(80,SHADER_SHADOW_MAP,"u_CameraFar");
 }
 
 void PostProcessing::lightLookAt(vec3 lightPos, vec3 lightDir){
@@ -126,7 +135,9 @@ void PostProcessing::lightLookAt(vec3 lightPos, vec3 lightDir){
 
 void PostProcessing::drawShadows(mat4 proj, mat4 view){
 	/** Upload MVP-matrix for the light perspective **/
-	glUniformMatrix4fv(glGetUniformLocation(mShadowShaderHandle, "VP_LightMatrix"), 1, GL_TRUE, mMVPLightMatrix.m);
+	mat4 viewInvMatrix = InvertMat4(view);
+	glUniformMatrix4fv(glGetUniformLocation(mShadowShaderHandle, "MVP_LightMatrix"), 1, GL_TRUE, mMVPLightMatrix.m);
+	glUniformMatrix4fv(glGetUniformLocation(mShadowShaderHandle, "ViewInvMatrix"), 1, GL_TRUE, viewInvMatrix.m);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     mPostProcessingModel->draw(SHADER_SHADOW_MAP,proj,view);
@@ -159,7 +170,9 @@ void PostProcessing::draw(mat4 proj, mat4 view){
     /** Select screen as render target*/
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
     glViewport(0, 0, *mScreenWidth, *mScreenHeight);
-    mPostProcessingModel->draw(SHADER_LIGHT_VOLUME,proj,view);
+
+    //mPostProcessingModel->draw(SHADER_LIGHT_VOLUME,proj,view);
+    drawShadows(proj,view);
 #endif
 
 }
@@ -210,7 +223,7 @@ void PostProcessing::drawLightDepth(mat4 proj, mat4 view){
     glClear( GL_DEPTH_BUFFER_BIT);
     /** Disable color rendering, we only want to write to the Z-Buffer */
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-	/** Render scene from light position */
+	/** Render scene from light perspective */
     mTerrain->drawSimple(mLightProjectionMatrix,mLightViewMatrix);
 	//mPostProcessingModel->draw(SHADER_SPHERE,mLightProjectionMatrix,mLightViewMatrix);
 
@@ -221,7 +234,7 @@ void PostProcessing::drawLightDepth(mat4 proj, mat4 view){
     glClear( GL_DEPTH_BUFFER_BIT);
     /** Disable color rendering, we only want to write to the Z-Buffer */
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-	/** Render scene from light position */
+	/** Render scene from camera perspective */
     //mTerrain->drawSimple(proj,view);
 	mTerrain->drawDepth(proj,view);
 
@@ -294,7 +307,7 @@ void PostProcessing::uploadSquareModelData(ModelObject * modelObj,GLuint shaderI
 
 /**
 *
-* Create a light frustum mesh. It is simply a cone..-..
+* Create a light frustum mesh.
 *
 **/
 void PostProcessing::generateFrustumMesh(GLfloat farVal, GLfloat nearVal, GLuint dimension){
