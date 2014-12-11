@@ -99,14 +99,19 @@ void ModelObject::draw(GLuint shaderId,mat4 projectionMatrix, mat4 viewMatrix){
 
     Shader_Type * shader = mShaderMap[shaderId];
     int program = shader->sProgramHandle;
+
     glUseProgram(program);
+
     uploadTransform(shader,projectionMatrix,viewMatrix);
 
     selectTexture(shader);
+
     SELECT_CONFIG
+
     drawModel(shader);
+
     DESELECT_CONFIG
-    return;
+
 }
 
 void ModelObject::flipModels(){
@@ -117,21 +122,6 @@ void ModelObject::flipModels(){
     }
 }
 
-void ModelObject::drawBuffers(GLuint shaderId,GLuint numBuffers,GLuint * attachment){
-/*
-
-  Shader_Type * shader;
-        for(std::vector<Shader_Type*>::iterator it = mShaderList.begin(); it != mShaderList.end(); ++it) {
-        shader = *it;
-        if(shader->sShaderId == shaderId){
-            int program = shader->sShaderHandleGPU;
-            glUseProgram(program);
-            drawModel(shader->sShaderId,program);
-            return;
-        }
-    }
-*/
-}
 
 void ModelObject::uploadTransform(Shader_Type * shader,mat4 projectionMatrix,mat4 viewMatrix){
     mat4 mvMatrix;
@@ -218,7 +208,6 @@ void ModelObject::uploadUniformFloat(UniformFloat_Type* uniform){
     }
     glUseProgram(0);
     #ifdef MODEL_OBJECT_VERBOSE
-    printf("Could not find uniform with name: %s",uniform->sUniformName);
     printError("Upload Uniform");
     #endif
 }
@@ -230,14 +219,14 @@ void ModelObject::uploadUniformMatrix(UniformMatrix_Type* uniformMatrix){
     int loc = glGetUniformLocation(program, uniformMatrix->sUniformName);
     #ifdef MODEL_OBJECT_VERBOSE
     if(loc < 0 ){
-        printf("Unused or invalid uniform: %s\n", uniform->sUniformName);
+        printf("Unused or invalid uniform: %s\n", uniformMatrix->sUniformName);
     }
-    printError(uniform->sUniformName);
+    printError(uniformMatrix->sUniformName);
     #endif
-    glUniformMatrix4fv(loc, 1, GL_TRUE, uniformMatrix->sMatrix.m);
+    glUniformMatrix4fv(glGetUniformLocation(program, uniformMatrix->sUniformName), 1, GL_TRUE,  uniformMatrix->sMatrix.m);
+    //glUniformMatrix4fv(loc, 1, GL_TRUE, uniformMatrix->sMatrix.m);
     glUseProgram(0);
     #ifdef MODEL_OBJECT_VERBOSE
-    printf("Could not find uniform with name: %s",uniform->sUniformName);
     printError("Upload Uniform");
     #endif
 }
@@ -256,7 +245,7 @@ void ModelObject::setUniformFloat(GLfloat * data, GLuint sizeData, GLuint shader
 
 }
 
-void ModelObject::setUniformMatrix(mat4 matrix, GLuint sizeData, GLuint shaderId, const char * uniformName){
+void ModelObject::setUniformMatrix(mat4 matrix, GLuint shaderId, const char * uniformName){
     UniformMatrix_Type * uniform = new UniformMatrix_Type();
     uniform->sMatrix = matrix;
     uniform->sShaderId = shaderId;
@@ -367,19 +356,6 @@ mat4 * ModelObject::getTransform(GLuint shaderId){
     return &(mShaderMap[shaderId]->sTransform);
 }
 
-void ModelObject::uploadNewVertexData(GLfloat* dataBuffer,size_t bufferSize,GLuint shaderId){
-    /*Model* model = NULL;
-    Model_Type * m;
-    for(std::vector<Model_Type*>::iterator it = mModelList.begin(); it != mModelList.end(); ++it) {
-        m = *it;
-        if(m->sShaderId == shaderId)
-            model = m->sModel;
-    }
-    glBindVertexArray(model->vao);
-    glBindBuffer(GL_ARRAY_BUFFER, model->vb);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, bufferSize, dataBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);*/
-}
 void ModelObject::BuildModelVAO2(Model *m){
 
 	glGenVertexArrays(1, &m->vao);

@@ -102,7 +102,7 @@ void GPUWaterSimulation::raindrops(){
         mPreviousTime = newTime;
     }else{
         GLfloat rain[] = {0.0f,0.0f,0.0f,0.0f};
-       // replaceSimulationConstant(&rain.x,"u_RainDrop");
+        replaceSimulationConstant(rain,"u_RainDrop");
     }
 
 

@@ -26,7 +26,6 @@ void PostProcessing::initializePostProcessing(){
 #else
 	GLuint lightVolumeShader = loadShaders("shaders/lightvolume.vert","shaders/lightvolume.frag");
 #endif
-	mLightShaderHandle = lightVolumeShader;
     mPostProcessingModel->setShader(lightVolumeShader,SHADER_LIGHT_VOLUME,MVP);
 
     /** Set Transform */
@@ -40,6 +39,9 @@ void PostProcessing::initializePostProcessing(){
 	mPostProcessingModel->setTexture(mSceneDepthFBO.depth,SHADER_LIGHT_VOLUME,"u_SceneDepthMap");
 
 	/** Upload VP-matrix for light */
+	mPostProcessingModel->setUniformMatrix(IdentityMatrix(),SHADER_LIGHT_VOLUME,"LightTextureMatrix");
+
+
 	mLightProjectionMatrix = perspective(90, mRatio, mNear, mFar);
     lightLookAt(vec3(0,0,-1),vec3(1,0,-1));
 
@@ -84,7 +86,7 @@ void PostProcessing::initializePostProcessing(){
 
 
     mTime = 0.0f;
-
+#ifdef SHADOW_MAP
    /*************************************************************************************/
    /** Shadow Map (Full screen quad shader) **/
    	mShadowShaderHandle = loadShaders("shaders/shadows.vert", "shaders/shadows.frag");
@@ -97,10 +99,9 @@ void PostProcessing::initializePostProcessing(){
     mPostProcessingModel->setTexture(mLightDepthFBO.depth,SHADER_SHADOW_MAP,"u_LightDepth");
     mPostProcessingModel->setTexture(mSceneDepthFBO.depth,SHADER_SHADOW_MAP,"u_SceneDepth");
 
-    glUseProgram(mShadowShaderHandle);
-	glUniformMatrix4fv(glGetUniformLocation(mShadowShaderHandle, "MVP_LightMatrix"), 1, GL_TRUE, mMVPLightMatrix.m);
-	glUniformMatrix4fv(glGetUniformLocation(mShadowShaderHandle, "ViewInvMatrix"), 1, GL_TRUE, mMVPLightMatrix.m);
-	glUseProgram(0);
+    /** Upload unifor matrices **/
+    mPostProcessingModel->setUniformMatrix(IdentityMatrix(),SHADER_SHADOW_MAP,"InvViewMatrix");
+    mPostProcessingModel->setUniformMatrix(IdentityMatrix(),SHADER_SHADOW_MAP,"LightTextureMatrix");
 
  	/** Light Parameters **/
     mPostProcessingModel->setUniformFloat(mNear,SHADER_SHADOW_MAP,"u_LightNear");
@@ -109,54 +110,41 @@ void PostProcessing::initializePostProcessing(){
     /** Camera Parameters **/
     mPostProcessingModel->setUniformFloat(1,SHADER_SHADOW_MAP,"u_CameraNear");
     mPostProcessingModel->setUniformFloat(80,SHADER_SHADOW_MAP,"u_CameraFar");
+#endif
 }
 
 void PostProcessing::lightLookAt(vec3 lightPos, vec3 lightDir){
 
     mat4 trans = T(lightPos.x,lightPos.y,lightPos.z);
 
-
-
-    /** Upload MVP-matrix for light */
+    /** Upload Texture matrix for light */
 	vec3 lightUp  = vec3(0,1,0);
+	/** View **/
 	mLightViewMatrix 	   = lookAtv(lightPos,lightDir,lightUp);
+    /** View projection **/
 	mVPLightMatrix	= mLightProjectionMatrix* mLightViewMatrix;
-	mat4 rot   = Ry((mTime-3.14159265359/2.0));
+	/** Model **/
+	mat4 rot   = Ry((-mTime-3.14159265359));
 	mModelLightMatrix = trans*rot;
-	mMVPLightMatrix = mVPLightMatrix * trans*rot;
+
+	/** MVP **/
+	mMVPLightMatrix = mVPLightMatrix * mModelLightMatrix;
+
+	/** Texture Matrix **/
 	mLightTextureMatrix = T(0.5, 0.5, 0.0)* S(0.5, 0.5, 1.0)*mMVPLightMatrix;
-	glUseProgram(mLightShaderHandle);
- 	glUniformMatrix4fv(glGetUniformLocation(mLightShaderHandle, "LightTextureMatrix"), 1, GL_TRUE, mLightTextureMatrix.m);
-    glUseProgram(0);
+	mPostProcessingModel->replaceUniformMatrix(mLightTextureMatrix,SHADER_LIGHT_VOLUME,"LightTextureMatrix");
+
     /** Update model to world matrix for the light volume model **/
-
-    rot   = Ry((-mTime-3.14159265359));
-    mat4 res = trans*rot;
     mat4 * lightTransform = mPostProcessingModel->getTransform(SHADER_LIGHT_VOLUME);
-
-    *lightTransform = res;
+    *lightTransform = mModelLightMatrix;
 
 }
 
 void PostProcessing::drawShadows(mat4 proj, mat4 view){
 	/** Upload MVP-matrix for the light perspective **/
 	mat4 InvViewMatrix = InvertMat4(view);
-
-    glUseProgram(mShadowShaderHandle);
-	int loc = glGetUniformLocation(mShadowShaderHandle, "ViewInvMatrix");
-	if(loc < 0){
-        printf("Error uploading inv(View) \n");
-    }else{
-        glUniformMatrix4fv(loc, 1, GL_FALSE,view.m);
-    }
-    loc = glGetUniformLocation(mShadowShaderHandle, "MVP_LightMatrix");
-    if(loc < 0){
-        printf("Error uploading MVP_LightMatrix \n");
-    }else{
-        glUniformMatrix4fv(loc, 1, GL_TRUE,mMVPLightMatrix.m);
-    }
-	glUseProgram(0);
-
+    mPostProcessingModel->replaceUniformMatrix(mLightTextureMatrix,SHADER_SHADOW_MAP,"LightTextureMatrix");
+    mPostProcessingModel->replaceUniformMatrix(InvViewMatrix,SHADER_SHADOW_MAP,"InvViewMatrix");
     /** Enable blend **/
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -192,8 +180,10 @@ void PostProcessing::draw(mat4 proj, mat4 view){
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
     glViewport(0, 0, *mScreenWidth, *mScreenHeight);
 
-    //mPostProcessingModel->draw(SHADER_LIGHT_VOLUME,proj,view);
+    mPostProcessingModel->draw(SHADER_LIGHT_VOLUME,proj,view);
+#ifdef SHADOW_MAP
     drawShadows(proj,view);
+#endif
 #endif
 
 }
@@ -223,7 +213,7 @@ void PostProcessing::drawLightVolume(mat4 proj, mat4 view){
     glBlendFunc(GL_ONE, GL_ONE);
 
 	mPostProcessingModel->draw(SHADER_LIGHT_VOLUME,proj,view);
-   // mTerrain->drawSimple(proj,view);
+
 	/** Reset settings **/
 
 	glDisable(GL_BLEND);
@@ -246,7 +236,6 @@ void PostProcessing::drawLightDepth(mat4 proj, mat4 view){
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 	/** Render scene from light perspective */
     mTerrain->drawSimple(mLightProjectionMatrix,mLightViewMatrix);
-	//mPostProcessingModel->draw(SHADER_SPHERE,mLightProjectionMatrix,mLightViewMatrix);
 
     /** Swap to scene depth buffer */
 	glBindFramebuffer(GL_FRAMEBUFFER,mSceneDepthFBO.fb);
@@ -256,8 +245,7 @@ void PostProcessing::drawLightDepth(mat4 proj, mat4 view){
     /** Disable color rendering, we only want to write to the Z-Buffer */
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 	/** Render scene from camera perspective */
-    //mTerrain->drawSimple(proj,view);
-	mTerrain->drawDepth(proj,view);
+	mTerrain->drawSimple(proj,view);
 
 	/** Enable again*/
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);

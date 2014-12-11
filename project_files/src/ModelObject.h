@@ -20,7 +20,7 @@
 #define SELECT_CONFIG  if(shader->sDepthTest == NO_DEPTH_TEST){glDisable(GL_DEPTH_TEST);}
 #define DESELECT_CONFIG if(shader->sDepthTest == NO_DEPTH_TEST){glEnable(GL_DEPTH_TEST);}
 
-//#define MODEL_OBJECT_VERBOSE
+#define MODEL_OBJECT_VERBOSE
 
 typedef enum{
     //MPV = 0, DEFAUULT
@@ -125,7 +125,7 @@ class ModelObject
         void setShader(GLuint handle,GLuint id);
         void setTexture(GLuint handle,GLuint shaderId,const char* uniformName);
         void setUniformFloat(GLfloat* data, GLuint sizeData, GLuint shaderId, const char* uniformName);
-        void setUniformMatrix(mat4 data, GLuint sizeData, GLuint shaderId, const char* uniformName);
+        void setUniformMatrix(mat4 data, GLuint shaderId, const char* uniformName);
         void setUniformFloat(const GLfloat data, GLuint shaderId, const char* uniformName);
         void setTransform(mat4 transf,GLuint id);
 

@@ -7,7 +7,7 @@
 #include "LoadTGA.h"
 #include "Terrain.h"
 
-//#define DEBUG 0
+#define DEBUG 0
 
 #define SHADER_LIGHT_VOLUME 0
 #define SHADER_SPHERE       1
@@ -37,10 +37,6 @@ class PostProcessing
 
         /** Terrain Handle **/
         Terrain * mTerrain;
-
-		/** Shortcut to light volume shader handle **/
-		GLuint mLightShaderHandle;
-		GLuint mShadowShaderHandle;
 
 		GLuint* mScreenHeight;
 		GLuint* mScreenWidth;
