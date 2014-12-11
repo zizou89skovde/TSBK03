@@ -60,7 +60,9 @@ void init(void)
 	printError("GL inits");
 
 	mTerrain = new Terrain(&WIDTH,&HEIGHT);
-    postProcessing = new PostProcessing(&WIDTH,&HEIGHT);
+
+
+	postProcessing = new PostProcessing(&WIDTH,&HEIGHT);
     postProcessing->setTerrin(mTerrain);
     mKeyMouseHandler.setPostProcessing(postProcessing);
 
@@ -73,7 +75,7 @@ void init(void)
 
     printError("init cloth simulation");
 
-   clothSimulation = new GPUClothSimulation(&WIDTH,&HEIGHT);
+    clothSimulation = new GPUClothSimulation(&WIDTH,&HEIGHT);
     clothSimulation->setTerrain(mTerrain);
     clothSimulation->initialize();
 
@@ -118,19 +120,22 @@ void display(void)
     mTerrain->draw(projectionMatrix,viewMatrix);
 
 
-
-   // mGrassSimulation->draw(projectionMatrix,viewMatrix);
-    //clothSimulation->draw(projectionMatrix,viewMatrix);
-    //waterSimulation->draw(projectionMatrix,viewMatrix);
+/*
+   	mGrassSimulation->draw(projectionMatrix,viewMatrix);
+	mGrassSimulation->update();
+    clothSimulation->draw(projectionMatrix,viewMatrix);
+    waterSimulation->draw(projectionMatrix,viewMatrix);
+	*/
 	postProcessing->draw(projectionMatrix,viewMatrix);
-
-
+	
+ 	
 
 	glutSwapBuffers();
 }
 
 void reshape(GLsizei w, GLsizei h)
 {
+
     WIDTH = w;
     HEIGHT = h;
     GLint curfbo;

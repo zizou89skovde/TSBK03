@@ -20,7 +20,12 @@
 #define SELECT_CONFIG  if(shader->sDepthTest == NO_DEPTH_TEST){glDisable(GL_DEPTH_TEST);}
 #define DESELECT_CONFIG if(shader->sDepthTest == NO_DEPTH_TEST){glEnable(GL_DEPTH_TEST);}
 
-//#define MODEL_OBJECT_VERBOSE
+#define MODEL_OBJECT_VERBOSE
+
+typedef enum{
+	ARRAYS,
+	POINTS
+}DrawMethod_Type;
 
 typedef enum{
     //MPV = 0, DEFAUULT
@@ -84,6 +89,9 @@ typedef struct{
     mat4 sTransform;
     Tranform_Composition_Type sComposition;
 
+	/** Draw method type **/
+	DrawMethod_Type sDrawMethod;
+
 
     Model_Type * sModelData;
 
@@ -118,6 +126,7 @@ class ModelObject
         void draw(mat4 projectionMatrix, mat4 viewMatrix);
         void drawBuffers(GLuint shaderId,GLuint numBuffers,GLuint * attachment);
         void draw(GLuint shaderId,mat4 projectionMatrix, mat4 viewMatrix);
+		
         /** Set functions **/
         void setModel(Model * m,GLuint shaderId);
         void setShader(GLuint handle,GLuint id,Tranform_Composition_Type  composition);
@@ -128,6 +137,12 @@ class ModelObject
         void setUniformMatrix(mat4 data, GLuint shaderId, const char* uniformName);
         void setUniformFloat(const GLfloat data, GLuint shaderId, const char* uniformName);
         void setTransform(mat4 transf,GLuint id);
+		void setDrawMethod(GLuint shaderId, DrawMethod_Type method);
+
+
+		/* Get functions */
+		DrawMethod_Type getDrawMethod(GLuint shaderId);
+
 
         void replaceTexture(GLuint handle,GLuint shaderId,const char* uniformName);
         void replaceUniformFloat(GLfloat* handle,GLuint shaderId,const char* uniformName);
@@ -149,8 +164,11 @@ class ModelObject
         /** Private data containers **/
         std::map<GLuint,Shader_Type*> mShaderMap;
 
-        /** Private GetFunctions **/
+        /** Private draw functions **/
+		void selectDrawMethod(Shader_Type * shader, mat4 projectionMatrix, mat4 viewMatrix);
         void drawModel(Shader_Type* shader);
+		void drawPoints(Shader_Type *  shader,mat4 projectionMatrix, mat4 viewMatrix);
+		void drawArrays(Shader_Type *  shader,mat4 projectionMatrix, mat4 viewMatrix);
 
 
 

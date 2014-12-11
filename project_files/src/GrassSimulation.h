@@ -6,12 +6,11 @@
 #include "LoadTGA.h"
 #include "Terrain.h"
 
-#define GRASS_SPHERE_SHADER_ID 0
-#define GRASS_SHADER_ID 1
+#define GRASS_SHADER_ID	0
 
 #define FLOATS_PER_VERTEX 3
 #define FLOATS_PER_TEXEL 4
-#define VERTICES_PER_TRIANGLE 3
+
 
 class GrassSimulation
 {
@@ -31,7 +30,7 @@ class GrassSimulation
         GLfloat previousTime;
 		GLfloat angle;
 
-    	void uploadBufferCoordinates(ModelObject * modelobject,GLuint shaderId);
+    	void uploadBufferCoordinates(ModelObject * modelobject,TextureData * maskTexture,GLuint shaderId);
 };
 
 #endif // GRASSSIMULATION_H

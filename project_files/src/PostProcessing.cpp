@@ -141,12 +141,16 @@ void PostProcessing::lightLookAt(vec3 lightPos, vec3 lightCenter){
 	/** Model **/
 	vec3 lightLook      = Normalize(lightPos - lightCenter);
 	vec3 lightRight 	= Normalize(CrossProduct(lightLook,lightUp));
-
-	GLfloat  angleY 	= atan2(lightLook.y,-lightLook.x);
+	GLfloat pi = 3.14159265;
+	GLfloat  angleY 	= pi-atan2(lightLook.x,lightLook.z);
 
 	GLfloat  lengthXZ 	= sqrt(lightLook.x*lightLook.x + lightLook.z*lightLook.z);
-	GLfloat  angleArb 	= atan2(lightLook.y,lengthXZ);
+	GLfloat  angleArb 	= -atan2(lightLook.y,lengthXZ);
 
+
+	GLfloat trueAngle = pi-mTime;
+	printf("angleY:%f  , true angle: %f\n",angleY,trueAngle);
+	printf("anglearb:%f\n",angleArb);
 	mat4 rot   = Ry(angleY)*ArbRotate(lightRight,angleArb);
 	mModelLightMatrix = trans*rot;
 
@@ -198,7 +202,7 @@ void PostProcessing::draw(mat4 proj, mat4 view){
     mTime+=mLightSpeed;
     GLfloat x = mLightRadius*sin(mTime);
     GLfloat z = mLightRadius*cos(mTime);
-    lightLookAt(vec3(x,mLightHeight,z),vec3(0,0,0));
+    lightLookAt(vec3(x,mLightHeight,z),vec3(0,-5,0));
 
     drawLightDepth(proj,view);
 #ifndef DEBUG
@@ -226,6 +230,7 @@ void PostProcessing::draw(mat4 proj, mat4 view){
     glViewport(0, 0, *mScreenWidth, *mScreenHeight);
    
 	mPostProcessingModel->draw(SHADER_LIGHT_VOLUME,proj,view);
+
 #ifdef SHADOW_MAP
     drawShadows(proj,view);
 #endif
