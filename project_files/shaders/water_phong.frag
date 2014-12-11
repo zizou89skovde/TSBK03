@@ -4,6 +4,8 @@ uniform sampler2D u_TerrainColor;
 uniform sampler2D u_TerrainReflection;
 out vec4 out_Color;
 
+uniform vec2 u_ScreenSize;
+
 in vec3 f_Normal;
 in vec3 f_Position;
 in vec3 f_LightPos;
@@ -33,8 +35,10 @@ void main(void)
 	vec2 distRefl = waterReflection.xy * 0.1*distortionAmplitude;
 	vec2 distRefr = waterReflection.xy * 0.4*distortionAmplitude;
 	
-	vec2 texRefr = clamp(vec2(0.5+gl_FragCoord.xy)/512.0+distRefr,0.0,1.0);
-	vec2 texRefl = clamp(vec2(0.5+gl_FragCoord.xy)/512.0+distRefl,0.0,1.0);
+	vec2 texBaseCoord = vec2(0.5+gl_FragCoord.xy)/u_ScreenSize;
+
+	vec2 texRefr = clamp(texBaseCoord+distRefr,0.0,1.0);
+	vec2 texRefl = clamp(texBaseCoord+distRefl,0.0,1.0);
 	
 	/** Sample refraction and reflection image **/
 	vec4 colorRefraction = texture(u_TerrainColor,texRefr);
