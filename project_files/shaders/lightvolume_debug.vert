@@ -23,11 +23,6 @@ float readDepth( in vec2 coord )
 	return z_world;
 }
 
-/* TODO: Move bias mat to the CPU-code */
-const mat4 biasMat =   mat4(0.5, 0.0, 0.0, 0.0,
-							0.0, 0.5, 0.0, 0.0,
-							0.0, 0.0, 0.5, 0.0,
-							0.5, 0.5, 0.5, 1.0);
 
 void main(void)
 {

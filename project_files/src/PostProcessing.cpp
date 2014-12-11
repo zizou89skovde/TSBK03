@@ -208,8 +208,7 @@ void PostProcessing::draw(mat4 proj, mat4 view){
     /** Select screen as render target*/
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
     glViewport(0, 0, *mScreenWidth, *mScreenHeight);
-
-  //  mPostProcessingModel->draw(SHADER_LIGHT_VOLUME,proj,view);
+    mPostProcessingModel->draw(SHADER_LIGHT_VOLUME,proj,view);
 #ifdef SHADOW_MAP
     drawShadows(proj,view);
 #endif

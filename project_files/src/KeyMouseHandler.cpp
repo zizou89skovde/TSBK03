@@ -93,7 +93,8 @@ void KeyMouseHandler::mouseHandle(int x, int y)
 
 mat4 KeyMouseHandler::getViewMatrix()
 {
-    mPostProcessing->setCameraInfo(cameraEye,cameraCenter);
+	if(mPostProcessing != NULL)
+	    mPostProcessing->setCameraInfo(cameraEye,cameraCenter);
 
     return lookAt(cameraEye->x, cameraEye->y, cameraEye->z,
                   cameraCenter->x, cameraCenter->y, cameraCenter->z,

@@ -63,7 +63,7 @@ void Terrain::initializeTerrain(){
 
     /** Load Texture **/
     mTerrainTextureData = new TextureData;
-    LoadTGATextureData((char*)"textures/fft-terrain2.tga", mTerrainTextureData);
+    LoadTGATextureData((char*)"textures/fft-terrain4.tga", mTerrainTextureData);
 
     /** Generate terrain from height map **/
     GenerateTerrain(mTerrainTextureData);
@@ -121,7 +121,9 @@ void Terrain::renderFlippedExternalModel(mat4 projectionMatrix,mat4 viewMatrix){
         /** Flip model in regard to the Y-axis **/
         modelObject->flipModels();
 
+	
         modelObject->draw(projectionMatrix,viewMatrix);
+	
         /** Reset model to its original direction **/
         modelObject->flipModels();
     }
@@ -142,7 +144,9 @@ void Terrain::draw(mat4 proj, mat4 view){
     setClip(true);
     glDisable(GL_CULL_FACE);
     mTerrainModel->draw(SKYBOX_SHADER,proj,view);
+
     renderFlippedExternalModel(proj,view);
+	   
     mTerrainModel->draw(TERRAIN_SHADER,proj,view);
     glDisable(GL_CLIP_DISTANCE0);
     glEnable(GL_CULL_FACE);

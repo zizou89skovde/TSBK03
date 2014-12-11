@@ -8,7 +8,7 @@ in vec3 v_LightPos;
 in float v_Height;
 void main(void)
 {
-	vec4 color = vec4(0.5,0.7,0.3,1.0);
+	vec4 color = vec4(0.4,0.2,0.0,1.0);
     
 	vec3 normal = v_Normal;
 	
@@ -22,8 +22,8 @@ void main(void)
 	specular = pow(specular,40.0);
 	
 	float diffuse = max(dot(n,-l),0.0);
-	float ambient = 0.1;
+	float ambient = 0.4;
 
-	out_Color = (specular+diffuse+ambient)*color;
+	out_Color = min((specular+diffuse+ambient),1.0)*color;
 }
 
