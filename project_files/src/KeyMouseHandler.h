@@ -4,6 +4,7 @@
 #include "GL_utilities.h"
 #include "VectorUtils3.h"
 #include "CPUClothSimulation.h"
+#include "PostProcessing.h"
 class KeyMouseHandler
 {
     public:
@@ -14,6 +15,7 @@ class KeyMouseHandler
 
         void keyPress(unsigned char key, int x, int y);
         void mouseHandle(int x, int y);
+        void setPostProcessing(PostProcessing* postProcessing){mPostProcessing = postProcessing;};
         mat4 getViewMatrix();
 
         //void mouseDown(int x, int y);
@@ -21,6 +23,8 @@ class KeyMouseHandler
 
     protected:
     private:
+        PostProcessing* mPostProcessing;
+
         vec3 *cameraEye;
         vec3 *cameraCenter;
         vec3 *cameraUp;

@@ -4,7 +4,7 @@ in  vec3 in_Position;
 
 uniform mat4 MVP_Matrix;
 uniform mat4 MV_Matrix;
-uniform mat4 VP_LightMatrix;
+uniform mat4 LightTextureMatrix;
 
 uniform float u_LightNear;
 uniform float u_LightFar;
@@ -25,28 +25,19 @@ float readDepth( in vec2 coord )
 	return z_world;
 }
 
-/* TODO: Move bias mat to the CPU-code */
-const mat4 biasMat =   mat4(0.5, 0.0, 0.0, 0.0,
-							0.0, 0.5, 0.0, 0.0,
-							0.0, 0.0, 0.5, 0.0,
-							0.5, 0.5, 0.5, 1.0);
-
 void main(void)
 {
 	vec3 lightPostionWorld = vec3(0.0);
 	vec4 position = vec4(in_Position,1.0);
 	
-	/* Determine position of frustum in lights projected viewspace */
-	vec4 positionLightViewProj = VP_LightMatrix * position;
-	
 	/* Compute the projected texture coordinates for the depth map sampling */
-	vec4 projectedCoordinates = biasMat * positionLightViewProj;
+	vec4 projectedCoordinates = LightTextureMatrix * position;
 	projectedCoordinates /= projectedCoordinates.w;
 	
 	/* Only far plane should be affected, near plane at z = 1.0, far plane >> near plane */
 	if(in_Position.z > 1.5){
 		/* Direction from vertex to light position(prp of the frustum) */
-		vec3 vertToLight = normalize(lightPostionWorld-position.xyz);
+		vec3 vertToLight = (lightPostionWorld-position.xyz)/u_LightFar;
 		
 		/* Read depth from the map */
 		float depth = readDepth(projectedCoordinates.st);

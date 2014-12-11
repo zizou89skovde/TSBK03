@@ -33,6 +33,10 @@ void GPUClothSimulation::initialize(){
     GLuint clothModelShader = loadShaders("shaders/cloth_phong.vert","shaders/cloth_phong.frag");
     mGPUClothScene->setShader(clothModelShader,GPU_SHADER_CLOTH,MVP);
 
+    /** Sphere Shader **/
+    GLuint sphereShader = loadShaders("shaders/sphere.vert", "shaders/sphere.frag");
+    mGPUClothScene->setShader(sphereShader,GPU_SHADER_SPHERE);
+
     /** Set initial transform **/
     mGPUClothScene->setTransform(IdentityMatrix(),GPU_SHADER_CLOTH);
 
@@ -40,13 +44,13 @@ void GPUClothSimulation::initialize(){
     uploadBufferCoordinates(mGPUClothScene,GPU_SHADER_CLOTH);
 
     /** Set initial textures **/
-    mGPUClothScene->setTexture(DUMMY_TEXTURE,GPU_SHADER_CLOTH,"u_MassPos_Tex");
+    mGPUClothScene->setTexture(getActiveFBO()->texids[0],GPU_SHADER_CLOTH,"u_MassPos_Tex");
 
     /** Upload grid resolution **/
-    GLfloat * meta = (GLfloat*)malloc(sizeof(GLfloat)*2);
+    GLfloat meta[2];
 	meta[0] = GPU_CLOTH_DIM;
 	meta[1] = GPU_CLOTH_SIZE;
-    mGPUClothScene->setUniform(meta,2,GPU_SHADER_CLOTH,"u_Resolution");
+    mGPUClothScene->setUniformFloat(meta,2,GPU_SHADER_CLOTH,"u_Resolution");
     setSimulationConstant(meta,2,(const char*) "u_Resolution");
 
     /** Sphere - For collision **/
@@ -58,10 +62,9 @@ void GPUClothSimulation::initialize(){
     /** Sphere Model **/
     Model* modelSphere = LoadModelPlus((char *)"models/sphere.obj");
     mGPUClothScene->setModel(modelSphere,GPU_SHADER_SPHERE);
+    mGPUClothScene->freeModelData(modelSphere);
 
-    /** Sphere Shader **/
-    GLuint sphereShader = loadShaders("shaders/sphere.vert", "shaders/sphere.frag");
-    mGPUClothScene->setShader(sphereShader,GPU_SHADER_SPHERE);
+
 
     /** Sphere Transform **/
     mObjectDirection = 1.0;
@@ -82,9 +85,6 @@ void GPUClothSimulation::configureSimulation(){
     setSimulationConstant(GpuSystemDamping,"u_SystemDamping");
     setSimulationConstant(GpuSystemGravity,"u_Gravity");
 
-    /** Fix points **/
-    setSimulationConstant(0.9,"u_FixPointConstant");
-
     /** Upload spring props **/
     setSimulationConstant(GpuSpringDamping,"u_SpringDamping");
     setSimulationConstant(GpuSpringConstantStruct,"u_SpringConstant");
@@ -93,13 +93,14 @@ void GPUClothSimulation::configureSimulation(){
     setSimulationConstant((const float)sqrt(2.0*GpuRestLengthStruct*GpuRestLengthStruct),"u_RestLengthShear");
     setSimulationConstant(GpuRestLengthBend,"u_RestLengthBend");
 
+#ifdef WIND
     /** Upload wind **/
     mTime = 0;
     mWindVector[0] = 0;
     mWindVector[1] = 0;
     mWindVector[2] = 0;
     setSimulationConstant(mWindVector,3,"u_Wind");
-
+#endif
     /** Sphere initial position */
     GLfloat dummyPos[3] = {0,0,-28};
     setSimulationConstant(dummyPos,3,"u_SpherePosition");
@@ -129,16 +130,17 @@ void GPUClothSimulation::updateCollisionObject(){
 
 void GPUClothSimulation::draw(mat4 projectionMatrix, mat4 viewMatrix){
 
+#ifdef WIND
     updateWind();
-
+#endif
     /** Computing shaders **/
-    FBOstruct * resultFbo = simulate(4);
+    FBOstruct * resultFbo = simulate(5);
 
     /** Update update sphere */
     updateCollisionObject();
 
     /** Render Cloth **/
-    mGPUClothScene->replaceTexture(resultFbo->texids[0],(const char *)"u_MassPos_Tex");
+    mGPUClothScene->replaceTexture(resultFbo->texids[0],GPU_SHADER_CLOTH,(const char *)"u_MassPos_Tex");
 
     /** No culling. In order to se the back face of the cloth **/
     glDisable(GL_CULL_FACE);

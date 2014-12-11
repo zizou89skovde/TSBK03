@@ -6,13 +6,9 @@ Terrain::Terrain(GLuint * w, GLuint * h)
     mScreenHeight = h;
     mTerrainModel = new ModelObject();
     mTerrainDepthModel = new ModelObject();
-    initializeTerrain();
+
     initializeSkyBox();
-
-
-
-
-
+    initializeTerrain();
 
 }
 
@@ -48,9 +44,9 @@ void Terrain::initializeSkyBox(){
 	free(modelSkyDome->normalArray);
 	modelSkyDome->normalArray = NULL;
     mTerrainModel->setModel(modelSkyDome,SKYBOX_SHADER);
-
+    mTerrainModel->freeModelData(modelSkyDome);
     /** Set flip **/
-    mTerrainModel->setUniform(1,SKYBOX_SHADER,"u_Flip");
+    mTerrainModel->setUniformFloat(1.0f,SKYBOX_SHADER,"u_Flip");
 
 
 }
@@ -77,7 +73,7 @@ void Terrain::initializeTerrain(){
     mTerrainDepthModel->setTransform(IdMatrix,TERRAIN_SIMPLE_SHADER);
 
     /** Upload u_Clip  parameter **/
-    mTerrainModel->setUniform(0.0,TERRAIN_SHADER,"u_Clip");
+    mTerrainModel->setUniformFloat(0.0,TERRAIN_SHADER,"u_Clip");
 
     /** Set transform **/
     mat4 transformMatrix = IdentityMatrix();
@@ -99,14 +95,18 @@ void Terrain::setClip(bool enabled){
     GLfloat flip = -1.0;
     if(enabled){
         GLfloat clip = 1.0;
-        mTerrainModel->replaceUniform(&clip,"u_Clip");
-        mTerrainModel->replaceUniform(&flip,"u_Flip");
+        mTerrainModel->replaceUniformFloat(&clip,TERRAIN_SHADER,"u_Clip");
+        mTerrainModel->replaceUniformFloat(&flip,SKYBOX_SHADER,"u_Flip");
     }else{
         flip = 1.0;
-        mTerrainModel->replaceUniform(&flip,"u_Flip");
+        mTerrainModel->replaceUniformFloat(&flip,SKYBOX_SHADER,"u_Flip");
     }
 }
 void Terrain::drawSimple(mat4 proj, mat4 view){
+    mTerrainDepthModel->draw(TERRAIN_SIMPLE_SHADER,proj,view);
+}
+
+void Terrain::drawDepth(mat4 proj, mat4 view){
     mTerrainDepthModel->draw(TERRAIN_SIMPLE_SHADER,proj,view);
 }
 

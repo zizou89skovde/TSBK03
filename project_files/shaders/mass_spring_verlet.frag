@@ -16,7 +16,7 @@ uniform float u_SpringConstantBend;
 uniform float u_RestLengthStruct; 
 uniform float u_RestLengthShear;
 uniform float u_RestLengthBend;
-uniform float u_FixPointConstant;
+
 
 out vec4 out1;
 out vec4 out2;
@@ -185,7 +185,7 @@ vec3 applySpringForce(vec3 position, vec3 velocity,highp uint springState,out hi
 }
 
 vec3 collisionForce(vec3 position){
-	float sphereRadius = u_SphereRadius+0.05;
+	float sphereRadius = u_SphereRadius+0.07;
 	vec3 spherePosition = u_SpherePosition; //vec3(0.0);
 	vec3 delta = position-spherePosition;
 	float distance = length(delta);
@@ -193,7 +193,7 @@ vec3 collisionForce(vec3 position){
 	vec3 collisionForce = vec3(0.0);
 	if(distance < sphereRadius){
 		float adjustDistance = sphereRadius - distance;
-		collisionForce = 1.01*adjustDistance*normalize(delta);
+		collisionForce = 2.01*adjustDistance*normalize(delta);
 	}
 	return collisionForce;
 }

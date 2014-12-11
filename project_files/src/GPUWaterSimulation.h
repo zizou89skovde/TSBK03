@@ -13,11 +13,13 @@
 
 /** SIMULATION CONSTANTS **/
 #define GPU_WATER_DIM 256
-#define GPU_WATER_SIZE 24
+#define GPU_WATER_SIZE 10
 
 /** SHADER ID'S **/
 #define GPU_SHADER_WATER 0
 
+/** Wind ON/OFF**/
+//#define WIND
 
 
 class GPUWaterSimulation:public GPUSimulation
@@ -40,10 +42,12 @@ class GPUWaterSimulation:public GPUSimulation
         static const GLfloat GpuSpringConstant       = 20.75f;
         static const GLfloat GpuRestLength          = 2.0*GPU_WATER_SIZE/(GPU_WATER_DIM-1.0);
         /** Wind **/
+
         /** Rain drops **/
         GLfloat mPreviousTime;
-        static const GLfloat RainFrequency = 20;
-
+        static const GLfloat RainFrequency = 60;
+        static const GLfloat RainDropForce = 0.003f;
+        static const GLfloat RainDropRadius = 0.0060f;
         /********** GRAPHICS ********/
         ModelObject * mGPUWaterScene;
 

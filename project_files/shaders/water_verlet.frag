@@ -10,7 +10,6 @@ uniform float u_DeltaTime;
 uniform float u_SystemDamping;
 uniform float u_TerrainHeight;
 uniform float u_TerrainSize;
-uniform float u_TerrainHeightOffset;
 uniform vec4 u_RainDrop;
 in vec2 f_TexCoord;
 
@@ -35,7 +34,7 @@ vec3 getVerletVelocity(vec3 position, vec3 previousPosition){
 
 float heightOverGround(vec3 position){
 	vec2 mapPosition = 0.5+(position.xz)/u_TerrainSize;
-	float height = (texture(u_HeightMap, mapPosition).x-0.5)*u_TerrainHeight;//-u_TerrainHeightOffset;
+	float height = (texture(u_HeightMap, mapPosition).x-0.5)*u_TerrainHeight;
 	return (u_SeaLevel-height);
 }
 

@@ -66,6 +66,8 @@ class GPUSimulation: public SimulationClass
          Terrain* mTerrain;
         GLuint* mScreenWidth;
         GLuint* mScreenHeight;
+
+        FBOstruct* getActiveFBO();
     private:
 
         /* Internal ID of the gpu computation program */
@@ -90,7 +92,7 @@ class GPUSimulation: public SimulationClass
         /** FBO Stuff **/
         void shiftFBO();
         void enableFbo(FBOstruct * fbo);
-        FBOstruct* getActiveFBO();
+
 
         /** Index where the most recent comptution is done **/
         GLuint mActiveFBOIndex;
