@@ -57,6 +57,14 @@ void GPUWaterSimulation::initialize(){
     mGPUWaterScene->setUniformFloat(meta,2,GPU_SHADER_WATER,"u_Resolution");
     setSimulationConstant(meta,2,(const char*) "u_Meta");
 
+	/** Upload screen size **/
+	mPreviousScreenWidth = *mScreenWidth;
+	mPreviousScreenHeight = *mScreenHeight;
+	GLfloat screenSize[2];
+	screenSize[0] = *mScreenWidth;
+	screenSize[1] = *mScreenHeight;
+    mGPUWaterScene->setUniformFloat(screenSize,2,GPU_SHADER_WATER,"u_ScreenSize");
+
 }
 
 GPUWaterSimulation::~GPUWaterSimulation(){
@@ -64,6 +72,8 @@ GPUWaterSimulation::~GPUWaterSimulation(){
 }
 
 void GPUWaterSimulation::configureSimulation(){
+
+
 
     /** Upload ground heightmap **/
     TextureData* textureData = mTerrain->getTextureData();
@@ -111,6 +121,20 @@ void GPUWaterSimulation::raindrops(){
 
 
 void GPUWaterSimulation::draw(mat4 projectionMatrix, mat4 viewMatrix){
+
+	/** Check if screen size has changed, if so upload new screen size to shader **/
+	if(mPreviousScreenWidth != *mScreenWidth || mPreviousScreenHeight != *mScreenHeight ){
+
+		mPreviousScreenWidth = *mScreenWidth;
+		mPreviousScreenHeight = *mScreenHeight;
+
+		GLfloat screenSize[2];
+		screenSize[0] = *mScreenWidth;
+		screenSize[1] = *mScreenHeight;
+
+    	mGPUWaterScene->replaceUniformFloat(screenSize,GPU_SHADER_WATER,"u_ScreenSize");	
+	}
+
 
     raindrops();
 
