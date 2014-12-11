@@ -60,14 +60,12 @@ void init(void)
 	printError("GL inits");
 
 	mTerrain = new Terrain(&WIDTH,&HEIGHT);
-//	postProcessing = new PostProcessing(&WIDTH,&HEIGHT);
-//	postProcessing->setTerrin(mTerrain);
+    postProcessing = new PostProcessing(&WIDTH,&HEIGHT);
+    postProcessing->setTerrin(mTerrain);
+    mKeyMouseHandler.setPostProcessing(postProcessing);
 
 
 
-    clothSimulation = new GPUClothSimulation(&WIDTH,&HEIGHT);
-    clothSimulation->setTerrain(mTerrain);
-    clothSimulation->initialize();
 /*
     waterSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
     waterSimulation->setTerrain(mTerrain);
@@ -75,11 +73,15 @@ void init(void)
 
     printError("init cloth simulation");
 
+   clothSimulation = new GPUClothSimulation(&WIDTH,&HEIGHT);
+    clothSimulation->setTerrain(mTerrain);
+    clothSimulation->initialize();
+
     mGrassSimulation = new GrassSimulation();
     mGrassSimulation->setTerrain(mTerrain);
     mGrassSimulation->initialize();
 */
-    mKeyMouseHandler.mClothSimulation = clothSimulation;
+
 
     // Create key/mouse handler
     //mKeyMouseHandler = KeyMouseHandler();
@@ -113,14 +115,14 @@ void display(void)
 
 
     viewMatrix = mKeyMouseHandler.getViewMatrix();
-   // mTerrain->draw(projectionMatrix,viewMatrix);
+    mTerrain->draw(projectionMatrix,viewMatrix);
 
 
 
    // mGrassSimulation->draw(projectionMatrix,viewMatrix);
-    clothSimulation->draw(projectionMatrix,viewMatrix);
+    //clothSimulation->draw(projectionMatrix,viewMatrix);
     //waterSimulation->draw(projectionMatrix,viewMatrix);
-	//postProcessing->draw(projectionMatrix,viewMatrix);
+	postProcessing->draw(projectionMatrix,viewMatrix);
 
 
 

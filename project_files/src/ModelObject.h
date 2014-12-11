@@ -20,7 +20,7 @@
 #define SELECT_CONFIG  if(shader->sDepthTest == NO_DEPTH_TEST){glDisable(GL_DEPTH_TEST);}
 #define DESELECT_CONFIG if(shader->sDepthTest == NO_DEPTH_TEST){glEnable(GL_DEPTH_TEST);}
 
-#define MODEL_OBJECT_VERBOSE
+//#define MODEL_OBJECT_VERBOSE
 
 typedef enum{
     //MPV = 0, DEFAUULT

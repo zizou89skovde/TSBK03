@@ -13,7 +13,7 @@
 
 /** SIMULATION CONSTANTS **/
 #define GPU_WATER_DIM 256
-#define GPU_WATER_SIZE 4
+#define GPU_WATER_SIZE 10
 
 /** SHADER ID'S **/
 #define GPU_SHADER_WATER 0

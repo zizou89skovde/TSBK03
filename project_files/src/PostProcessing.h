@@ -8,6 +8,7 @@
 #include "Terrain.h"
 
 #define DEBUG 0
+#define SHADOW_MAP 1
 
 #define SHADER_LIGHT_VOLUME 0
 #define SHADER_SPHERE       1
@@ -21,6 +22,7 @@ class PostProcessing
         PostProcessing(GLuint * w, GLuint * h);
         void draw(mat4 proj, mat4 view);
         void setTerrin(Terrain* terrain){mTerrain = terrain;};
+        void setCameraInfo(vec3* cameraEye,vec3* cameraCenter);
         virtual ~PostProcessing();
     protected:
     private:
@@ -71,6 +73,9 @@ class PostProcessing
 
 		ModelObject * mPostProcessingModel;
         GLfloat mTime;
+
+        vec3 * mCameraEye;
+        vec3 * mCameraCenter;
 };
 
 #endif // PostProcessing_H
