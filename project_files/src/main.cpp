@@ -60,23 +60,25 @@ void init(void)
 	printError("GL inits");
 
 	mTerrain = new Terrain(&WIDTH,&HEIGHT);
-	postProcessing = new PostProcessing(&WIDTH,&HEIGHT);
+/*	postProcessing = new PostProcessing(&WIDTH,&HEIGHT);
 	postProcessing->setTerrin(mTerrain);
-/*
-    waterSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
-    waterSimulation->setTerrain(mTerrain);
-    waterSimulation->initialize();
+*/
+
 
     clothSimulation = new GPUClothSimulation(&WIDTH,&HEIGHT);
     clothSimulation->setTerrain(mTerrain);
     clothSimulation->initialize();
-    printf("ALLAN");
-    printError("init cloth simulation");
 
+    waterSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
+    waterSimulation->setTerrain(mTerrain);
+    waterSimulation->initialize();
+
+    printError("init cloth simulation");
+/*
     mGrassSimulation = new GrassSimulation();
     mGrassSimulation->setTerrain(mTerrain);
-    mGrassSimulation->initialize();*/
-
+    mGrassSimulation->initialize();
+*/
     mKeyMouseHandler.mClothSimulation = clothSimulation;
 
     // Create key/mouse handler
@@ -112,11 +114,13 @@ void display(void)
 
     viewMatrix = mKeyMouseHandler.getViewMatrix();
     mTerrain->draw(projectionMatrix,viewMatrix);
-/*  waterSimulation->draw(projectionMatrix,viewMatrix);
-    mGrassSimulation->draw(projectionMatrix,viewMatrix);
+
+
+
+   // mGrassSimulation->draw(projectionMatrix,viewMatrix);
     clothSimulation->draw(projectionMatrix,viewMatrix);
-*/
-	postProcessing->draw(projectionMatrix,viewMatrix);
+    waterSimulation->draw(projectionMatrix,viewMatrix);
+//	postProcessing->draw(projectionMatrix,viewMatrix);
 
 
 
@@ -179,7 +183,7 @@ int main(int argc, char *argv[])
 	glutInitWindowSize(W, H);
 
 	glutInitContextVersion(4, 1);
-	glutCreateWindow("Render to texture with FBO");
+	glutCreateWindow("Mysteriet Paw Silkesoen");
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
 	glutIdleFunc(idle);

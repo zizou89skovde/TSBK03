@@ -17,11 +17,13 @@ void GPUSimulation::intializeSimulation(SimulationData_Type * simulationData){
     mSimulationData = *simulationData;
 
     mGPUSimulation = new ModelObject();
-    uploadSquareModelData(mGPUSimulation,GPU_SHADER_COMPUTE);
 
+    /** Create a shader **/
     GLuint verletShader = loadShaders(simulationData->VertexShader,simulationData->FragmentShader);
-    printf("ALLAN");
     mGPUSimulation->setShader(verletShader,GPU_SHADER_COMPUTE,NONE);
+
+    /** Upload full screen quad model **/
+    uploadSquareModelData(mGPUSimulation,GPU_SHADER_COMPUTE);
 
     FRAME_ATTACHMENT[0] = GL_COLOR_ATTACHMENT0;
     FRAME_ATTACHMENT[1] = GL_COLOR_ATTACHMENT1;
@@ -54,23 +56,23 @@ void GPUSimulation::setSimulationTexture(GLuint texid,const char * uniformName){
 }
 
 void GPUSimulation::replaceSimulationTexture(GLuint texid,const char * uniformName){
-    mGPUSimulation->replaceTexture(texid,uniformName);
+    mGPUSimulation->replaceTexture(texid,GPU_SHADER_COMPUTE,uniformName);
 }
 
 void GPUSimulation::setSimulationConstant(GLfloat constant, const char *uniformName){
-   mGPUSimulation->setUniform(constant,GPU_SHADER_COMPUTE,uniformName);
+   mGPUSimulation->setUniformFloat(constant,GPU_SHADER_COMPUTE,uniformName);
 }
 
 void GPUSimulation::setSimulationConstant(GLfloat* constant,GLuint sizeConstant, const char *uniformName){
-   mGPUSimulation->setUniform(constant,sizeConstant,GPU_SHADER_COMPUTE,uniformName);
+   mGPUSimulation->setUniformFloat(constant,sizeConstant,GPU_SHADER_COMPUTE,uniformName);
 }
 
 void GPUSimulation::replaceSimulationConstant(GLfloat constant, const char *uniformName){
-   mGPUSimulation->replaceUniform(&constant,uniformName);
+   mGPUSimulation->replaceUniformFloat(&constant,GPU_SHADER_COMPUTE,uniformName);
 }
 
 void GPUSimulation::replaceSimulationConstant(GLfloat* constant, const char *uniformName){
-   mGPUSimulation->replaceUniform(constant,uniformName);
+   mGPUSimulation->replaceUniformFloat(constant,GPU_SHADER_COMPUTE,uniformName);
 }
 
 /**
@@ -103,8 +105,8 @@ void GPUSimulation::shiftFBO(){
 
     enableFbo(getActiveFBO());
 
-    mGPUSimulation->replaceTexture(ListFBOPosition.at(idx1)->texids[0],((const char *)"u_CurrentPosition"));
-    mGPUSimulation->replaceTexture(ListFBOPosition.at(idx1)->texids[1],((const char *)"u_PreviousPosition"));
+    mGPUSimulation->replaceTexture(ListFBOPosition.at(idx1)->texids[0],GPU_SHADER_COMPUTE,((const char *)"u_CurrentPosition"));
+    mGPUSimulation->replaceTexture(ListFBOPosition.at(idx1)->texids[1],GPU_SHADER_COMPUTE,((const char *)"u_PreviousPosition"));
 
     printError("Shift FBO");
 }
@@ -215,27 +217,42 @@ GLulong GPUSimulation::getSpringState(GLuint x,GLuint y){
 Upload square model data ( code ripped from lab1 in TSBK03)
 **/
 void GPUSimulation::uploadSquareModelData(ModelObject * modelObj,GLuint shaderId){
-    GLfloat square[] = {
+    GLfloat square [] = {
                     -1,-1,0,
                     -1,1, 0,
                     1,1, 0,
                     1,-1, 0};
+    size_t numBytes = sizeof(GLfloat)* 12;
+    GLfloat * squareData = (GLfloat * ) malloc(numBytes);
+    memcpy(squareData,square,numBytes);
+
     GLfloat squareTexCoord[] = {
                      0, 0,
                      0, 1,
                      1, 1,
                      1, 0};
+    numBytes = sizeof(GLfloat)* 8;
+    GLfloat * squareTexCoordData = (GLfloat * ) malloc(numBytes);
+    memcpy(squareTexCoordData,squareTexCoord,numBytes);
 
     GLuint squareIndices[] = {0, 2, 1, 0, 3, 2};
+    numBytes = sizeof(GLuint)* 6;
+    GLuint * squareIndicesData = (GLuint * )malloc(numBytes);
+    memcpy(squareIndicesData,squareIndices,numBytes);
+
     modelObj->LoadDataToModel(
-        square,
+        squareData,
         NULL,
-        squareTexCoord,
+        squareTexCoordData,
         NULL,
-        squareIndices,
+        squareIndicesData,
         4,
         2*3,
         shaderId);
+
+    free(squareData);
+    free(squareTexCoordData);
+    free(squareIndicesData);
 
     printError("Cloth Gen Position Buffer Coordinates ");
 }
@@ -298,7 +315,7 @@ void GPUSimulation::uploadBufferCoordinates(ModelObject * modelObj,GLuint shader
 
  void GPUSimulation::generatePositionBuffer(FBOstruct* fbo){
 
-    GLuint GRID_DIM       = mSimulationData.GridDimension;
+    GLuint GRID_DIM        = mSimulationData.GridDimension;
     GLfloat GRID_RES       = mSimulationData.GridDimension-1;
     GLfloat GRID_SIZE      = mSimulationData.GridSize/2.0;
 
@@ -344,14 +361,14 @@ void GPUSimulation::uploadBufferCoordinates(ModelObject * modelObj,GLuint shader
     glGenFramebuffers(1, &fbo->fb);
 
     /** Num textures/render targets */
-    GLuint numRendersTargets = 2;
+    GLuint numRenderTargets = 2;
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo->fb);
-	fbo->texids = new GLuint[numRendersTargets];
-	glGenTextures(numRendersTargets, fbo->texids);
+	fbo->texids = new GLuint[numRenderTargets];
+	glGenTextures(numRenderTargets, fbo->texids);
 
     printError("Cloth BIND FBO Gen Buf");
 
-    for(GLuint i = 0; i < numRendersTargets; i++){
+    for(GLuint i = 0; i < numRenderTargets; i++){
 
         /** Bind texture **/
         glBindTexture(GL_TEXTURE_2D, fbo->texids[i]);
@@ -375,6 +392,8 @@ void GPUSimulation::uploadBufferCoordinates(ModelObject * modelObj,GLuint shader
     if(status != GL_FRAMEBUFFER_COMPLETE){
         printf("ERROR FBO \n");
     }
+
+    /** Clean up **/
 	free(vertexArray);
     printError("Cloth Fbo Gen Buf");
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

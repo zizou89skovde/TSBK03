@@ -51,10 +51,10 @@ void GPUWaterSimulation::initialize(){
     mGPUWaterScene->setTexture(terrainReflectionFBO->texid,GPU_SHADER_WATER,"u_TerrainReflection");
 
     /** Upload grid resolution **/
-    GLfloat *meta = (GLfloat*)malloc(sizeof(GLfloat)*2);
+    GLfloat meta[2];
 	meta[0] = GPU_WATER_DIM;
 	meta[1] = GPU_WATER_SIZE;
-    mGPUWaterScene->setUniform(meta,2,GPU_SHADER_WATER,"u_Resolution");
+    mGPUWaterScene->setUniformFloat(meta,2,GPU_SHADER_WATER,"u_Resolution");
     setSimulationConstant(meta,2,(const char*) "u_Meta");
 
 }
@@ -69,22 +69,23 @@ void GPUWaterSimulation::configureSimulation(){
     TextureData* textureData = mTerrain->getTextureData();
     setSimulationTexture(textureData->texID,"u_HeightMap");
 
-        /** Upload system props **/
+    /** Upload Rain **/
+    GLfloat rain[] = {0.0,0.0,0.02,0.030};
+    setSimulationConstant(rain,4,"u_RainDrop");
+
+    /** Upload system props **/
     setSimulationConstant(GpuSystemDeltaTime,"u_DeltaTime");
     setSimulationConstant(GpuSystemDamping,"u_SystemDamping");
 
     TerrainMetaData* terrainMeta = mTerrain->getTerrainMetaData();
     setSimulationConstant(terrainMeta->HeightScale, "u_TerrainHeight");
     setSimulationConstant(terrainMeta->TerrainSize, "u_TerrainSize");
-    setSimulationConstant(terrainMeta->TerrainHeightOffset, "u_TerrainHeightOffset");
 
-
-
+    mPreviousTime = 0.0f;
     /** Upload wind **/
 	//uploadTime(0.0079);
 
-    vec4 rain = vec4(0,0,0,0);
-    setSimulationConstant(&rain.x,4,"u_RainDrop");
+
 
 
 }
@@ -94,15 +95,14 @@ void GPUWaterSimulation::raindrops(){
     GLfloat newTime = (GLfloat) glutGet(GLUT_ELAPSED_TIME);
     GLfloat elapsedTime = newTime-mPreviousTime;
     if(elapsedTime > RainFrequency){
-        GLfloat x = (rand() % GPU_WATER_SIZE) - GPU_WATER_SIZE/2;
-        GLfloat z = (rand() % GPU_WATER_SIZE) - GPU_WATER_SIZE/2;
-        //printf("NEW DROP x:%d  y:%d\n",x,z);
-        vec4 rain = vec4(x,z,0.03,0.0090);
-        replaceSimulationConstant(&rain.x,"u_RainDrop");
+        GLfloat x = (GLfloat)(rand() % 100*GPU_WATER_SIZE)/100.0f - GPU_WATER_SIZE/2;
+        GLfloat z = (GLfloat)(rand() % 100*GPU_WATER_SIZE)/100.0f - GPU_WATER_SIZE/2;
+        GLfloat rain[] = {x,z,RainDropRadius,RainDropForce};
+        replaceSimulationConstant(rain,"u_RainDrop");
         mPreviousTime = newTime;
     }else{
-        vec4 rain = vec4(0,0,0,0);
-        replaceSimulationConstant(&rain.x,"u_RainDrop");
+        GLfloat rain[] = {0.0f,0.0f,0.0f,0.0f};
+       // replaceSimulationConstant(&rain.x,"u_RainDrop");
     }
 
 
@@ -112,13 +112,13 @@ void GPUWaterSimulation::raindrops(){
 
 void GPUWaterSimulation::draw(mat4 projectionMatrix, mat4 viewMatrix){
 
-
     raindrops();
+
     /** Computing shaders **/
     FBOstruct * resultFbo = simulate(1);
 
     /** Render Cloth **/
-    mGPUWaterScene->replaceTexture(resultFbo->texids[0],"u_Position_Texture");
+    mGPUWaterScene->replaceTexture(resultFbo->texids[0],GPU_SHADER_WATER,"u_Position_Texture");
     glEnable (GL_BLEND);
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     mGPUWaterScene->draw(projectionMatrix,viewMatrix);

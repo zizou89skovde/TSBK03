@@ -9,9 +9,13 @@ ModelObject::ModelObject()
 ModelObject::~ModelObject()
 {
     /** Clean up models **/
-    Model_Type * m;
-    for(std::vector<Model_Type*>::iterator it = mModelList.begin(); it != mModelList.end(); ++it) {
-        m = *it;
+    Shader_Type* shader;
+    for(ShaderIterator it = mShaderMap.begin(); it != mShaderMap.end(); ++it) {
+        shader = it->second;
+
+        /***** Delete Models ********/
+        Model_Type * m = shader->sModelData;
+
         if(m->sModel->vertexArray!= NULL){
             free(m->sModel->vertexArray);
             glDeleteBuffers(1, &m->sModel->vb);
@@ -34,111 +38,87 @@ ModelObject::~ModelObject()
         /** Delete Model containers**/
         free(m->sModel);
         delete m;
+
+        /***** Delete Textures ********/
+
+        Texture_Type * texture;
+        for(TextureIterator itTexture = shader->sTextureMap.begin(); itTexture != shader->sTextureMap.end(); ++itTexture) {
+            texture = itTexture->second;
+            glDeleteTextures(1,&texture->sTextureId);
+            delete texture->sUniformName;
+            delete texture;
+        }
+        shader->sTextureMap.clear();
+
+
+        /** Delete Uniform**/
+        UniformFloat_Type * uniformFloat;
+        for(UniformFloatIterator itUniform = shader->sUniformFloatMap.begin(); itUniform != shader->sUniformFloatMap.end(); ++itUniform) {
+            uniformFloat = itUniform->second;
+            delete uniformFloat;
+
+        }
+        shader->sUniformFloatMap.clear();
+
+
+        /** Delete Matrix Uniform**/
+        UniformMatrix_Type * matrixUniform;
+        for(UniformMatrixIterator itUniform = shader->sUniformMatrixMap.begin(); itUniform != shader->sUniformMatrixMap.end(); ++itUniform) {
+            matrixUniform = itUniform->second;
+            delete matrixUniform;
+        }
+        shader->sUniformFloatMap.clear();
+
     }
 
-
-
-    /**Clear the list **/
-    mModelList.clear();
-
-    /** Delete Textures **/
-    Texture_Type * texture;
-    for(std::vector<Texture_Type*>::iterator it = mTextureList.begin(); it != mTextureList.end(); ++it) {
-        texture = *it;
-        glDeleteTextures(1,&texture->sTextureId);
-        delete texture->sUniformName;
-        delete texture;
-    }
-    mTextureList.clear();
-
-    /** Delete Uniform**/
-    Uniform_Type * uniform;
-    for(std::vector<Uniform_Type*>::iterator it = mUniformList.begin(); it != mUniformList.end(); ++it) {
-        uniform = *it;
-        delete uniform->sData;
-        delete uniform->sUniformName;
-        delete uniform;
-    }
-    mUniformList.clear();
-
-    Shader_Type * shader;
-    for(std::vector<Shader_Type*>::iterator it = mShaderList.begin(); it != mShaderList.end(); ++it) {
-        shader = *it;
-        glDeleteProgram(shader->sShaderHandleGPU);
-        delete shader;
-    }
-    mShaderList.clear();
-
-     Transform_Type * t;
-    for(std::vector<Transform_Type*>::iterator it = mTransformList.begin(); it != mTransformList.end(); ++it) {
-        t = *it;
-        delete t;
-    }
-    mTransformList.clear();
+    #ifdef MODEL_OBJECT_VERBOSE
     printError("Model Object Clean up");
+    #endif
 }
 void ModelObject::draw(mat4 projectionMatrix, mat4 viewMatrix){
 
-        Shader_Type * shader;
-        for(std::vector<Shader_Type*>::iterator it = mShaderList.begin(); it != mShaderList.end(); ++it) {
+    Shader_Type * shader;
+    for(ShaderIterator it = mShaderMap.begin(); it != mShaderMap.end(); ++it) {
+        shader = it->second;
 
-        shader = *it;
-
-        int program = shader->sShaderHandleGPU;
+        int program = shader->sProgramHandle;
         glUseProgram(program);
 
         uploadTransform(shader,projectionMatrix,viewMatrix);
 
-        uploadTexture(shader->sShaderId,program);
+        selectTexture(shader);
 
-     //   uploadUniformFloat(shader->sShaderId,program);
-        uploadTexture(shader->sShaderId,program);
-        if(shader->sDepthTest == NO_DEPTH_TEST){
-            glDisable(GL_DEPTH_TEST);
-        }
-        drawModel(shader->sShaderId,program);
-        if(shader->sDepthTest == NO_DEPTH_TEST){
-            glEnable(GL_DEPTH_TEST);
-        }
+        SELECT_CONFIG
+        drawModel(shader);
+        DESELECT_CONFIG
     }
 
 }
 
 void ModelObject::draw(GLuint shaderId,mat4 projectionMatrix, mat4 viewMatrix){
-        Shader_Type * shader;
-        for(std::vector<Shader_Type*>::iterator it = mShaderList.begin(); it != mShaderList.end(); ++it) {
 
-        shader = *it;
-        if(shader->sShaderId == shaderId){
-            int program = shader->sShaderHandleGPU;
-            glUseProgram(program);
+    Shader_Type * shader = mShaderMap[shaderId];
+    int program = shader->sProgramHandle;
+    glUseProgram(program);
+    uploadTransform(shader,projectionMatrix,viewMatrix);
 
-            uploadTransform(shader,projectionMatrix,viewMatrix);
-
-            uploadTexture(shader->sShaderId,program);
-            if(shader->sDepthTest == NO_DEPTH_TEST){
-                    glDisable(GL_DEPTH_TEST);
-                }
-            drawModel(shader->sShaderId,program);
-             if(shader->sDepthTest == NO_DEPTH_TEST){
-                    glEnable(GL_DEPTH_TEST);
-                }
-            return;
-        }
-    }
-
+    selectTexture(shader);
+    SELECT_CONFIG
+    drawModel(shader);
+    DESELECT_CONFIG
+    return;
 }
 
 void ModelObject::flipModels(){
-    Transform_Type * t;
-    for(std::vector<Transform_Type*>::iterator it = mTransformList.begin(); it != mTransformList.end(); ++it) {
-        t = *it;
-        t->sTransform = S(1,-1,1)*t->sTransform;
+    Shader_Type * shader;
+    for(ShaderIterator it = mShaderMap.begin(); it != mShaderMap.end(); ++it) {
+        shader = it->second;
+        shader->sTransform = S(1,-1,1)*shader->sTransform;
     }
 }
 
 void ModelObject::drawBuffers(GLuint shaderId,GLuint numBuffers,GLuint * attachment){
-
+/*
 
   Shader_Type * shader;
         for(std::vector<Shader_Type*>::iterator it = mShaderList.begin(); it != mShaderList.end(); ++it) {
@@ -146,14 +126,11 @@ void ModelObject::drawBuffers(GLuint shaderId,GLuint numBuffers,GLuint * attachm
         if(shader->sShaderId == shaderId){
             int program = shader->sShaderHandleGPU;
             glUseProgram(program);
-         //
-
             drawModel(shader->sShaderId,program);
-
             return;
         }
     }
-
+*/
 }
 
 void ModelObject::uploadTransform(Shader_Type * shader,mat4 projectionMatrix,mat4 viewMatrix){
@@ -161,88 +138,112 @@ void ModelObject::uploadTransform(Shader_Type * shader,mat4 projectionMatrix,mat
     mat4 mvpMatrix;
     mat4 vpMatrix;
     mat3 normalMatrix;
+    GLuint program = shader->sProgramHandle;
     switch(shader->sComposition){
     case MVP:
-        mvMatrix = Mult(viewMatrix,*getTransform(shader->sShaderId));
+        mvMatrix = Mult(viewMatrix,shader->sTransform);
         mvpMatrix = Mult(projectionMatrix,mvMatrix);
-
-        glUniformMatrix4fv(glGetUniformLocation(shader->sShaderHandleGPU, "MV_Matrix"), 1, GL_TRUE, mvMatrix.m);
-        glUniformMatrix4fv(glGetUniformLocation(shader->sShaderHandleGPU, "MVP_Matrix"), 1, GL_TRUE, mvpMatrix.m);
+        glUniformMatrix4fv(glGetUniformLocation(program, "MV_Matrix"), 1, GL_TRUE, mvMatrix.m);
+        glUniformMatrix4fv(glGetUniformLocation(program, "MVP_Matrix"), 1, GL_TRUE, mvpMatrix.m);
         normalMatrix = InverseTranspose(mvMatrix);
-        glUniformMatrix3fv(glGetUniformLocation(shader->sShaderHandleGPU, "Normal_Matrix"), 1, GL_TRUE, normalMatrix.m);
+        glUniformMatrix3fv(glGetUniformLocation(program, "Normal_Matrix"), 1, GL_TRUE, normalMatrix.m);
         break;
     case VP:
         vpMatrix = Mult(projectionMatrix,viewMatrix);
-        glUniformMatrix4fv(glGetUniformLocation(shader->sShaderHandleGPU, "V_Matrix"), 1, GL_TRUE, viewMatrix.m);
-        glUniformMatrix4fv(glGetUniformLocation(shader->sShaderHandleGPU, "VP_Matrix"), 1, GL_TRUE, vpMatrix.m);
-        glUniformMatrix4fv(glGetUniformLocation(shader->sShaderHandleGPU, "P_Matrix"), 1, GL_TRUE, projectionMatrix.m);
+        glUniformMatrix4fv(glGetUniformLocation(program, "V_Matrix"), 1, GL_TRUE, viewMatrix.m);
+        glUniformMatrix4fv(glGetUniformLocation(program, "VP_Matrix"), 1, GL_TRUE, vpMatrix.m);
+        glUniformMatrix4fv(glGetUniformLocation(program, "P_Matrix"), 1, GL_TRUE, projectionMatrix.m);
         normalMatrix = InverseTranspose(viewMatrix);
-        glUniformMatrix3fv(glGetUniformLocation(shader->sShaderHandleGPU, "Normal_Matrix"), 1, GL_TRUE, normalMatrix.m);
+        glUniformMatrix3fv(glGetUniformLocation(program, "Normal_Matrix"), 1, GL_TRUE, normalMatrix.m);
         break;
     case P:
-        glUniformMatrix4fv(glGetUniformLocation(shader->sShaderHandleGPU, "P_Matrix"), 1, GL_TRUE, projectionMatrix.m);
+        glUniformMatrix4fv(glGetUniformLocation(program, "P_Matrix"), 1, GL_TRUE, projectionMatrix.m);
         break;
     case NONE:
         break;
     default:
-        mvMatrix = Mult(viewMatrix,*getTransform(shader->sShaderId));
+        mvMatrix = Mult(viewMatrix,shader->sTransform);
         mvpMatrix = Mult(projectionMatrix,mvMatrix);
 
-        glUniformMatrix4fv(glGetUniformLocation(shader->sShaderHandleGPU, "MV_Matrix"), 1, GL_TRUE, mvMatrix.m);
-        glUniformMatrix4fv(glGetUniformLocation(shader->sShaderHandleGPU, "MVP_Matrix"), 1, GL_TRUE, mvpMatrix.m);
+        glUniformMatrix4fv(glGetUniformLocation(program, "MV_Matrix"), 1, GL_TRUE, mvMatrix.m);
+        glUniformMatrix4fv(glGetUniformLocation(program, "MVP_Matrix"), 1, GL_TRUE, mvpMatrix.m);
         break;
     }
+    #ifdef MODEL_OBJECT_VERBOSE
+    printError("Shader Transform Matrices");
+    #endif
 
 }
-void ModelObject::uploadTexture(GLuint activeShaderId,GLuint activeShaderHandle){
-
+void ModelObject::selectTexture(Shader_Type * shader){
     Texture_Type * texture;
     GLuint numActiveTextures = 0;
-    for(std::vector<Texture_Type*>::iterator it = mTextureList.begin(); it != mTextureList.end(); ++it) {
-        texture = *it;
-        if(texture->sShaderId == activeShaderId ){
-            glActiveTexture(GL_TEXTURE0+numActiveTextures);
-            glBindTexture(GL_TEXTURE_2D, texture->sTextureId);
-            glUniform1i(glGetUniformLocation(activeShaderHandle, texture->sUniformName), numActiveTextures);
-            numActiveTextures++;
-        }
+    GLuint program = shader->sProgramHandle;
+    for(TextureIterator it = shader->sTextureMap.begin(); it != shader->sTextureMap.end(); ++it) {
+        texture = it->second;
+        glActiveTexture(GL_TEXTURE0+numActiveTextures);
+        glBindTexture(GL_TEXTURE_2D, texture->sTextureId);
+        glUniform1i(glGetUniformLocation(program, texture->sUniformName), numActiveTextures);
+        numActiveTextures++;
+        #ifdef MODEL_OBJECT_VERBOSE
+        printError(texture->sUniformName);
+        #endif
     }
-
 }
-void ModelObject::uploadUniformFloat(Uniform_Type* uniform){
-    Shader_Type * shader;
-    for(std::vector<Shader_Type*>::iterator itShader = mShaderList.begin(); itShader != mShaderList.end(); ++itShader) {
-        shader = *itShader;
-        if(uniform->sShaderId == shader->sShaderId){
-            glUseProgram(shader->sShaderHandleGPU);
-            int loc = glGetUniformLocation(shader->sShaderHandleGPU, uniform->sUniformName);
-            printError("Uniform invalid location");
-            switch(uniform->sSize){
-                case 1:
-                    glUniform1f(loc, uniform->sData[0]);
-                break;
-                case 2:
-                    glUniform2f(loc, uniform->sData[0],uniform->sData[1]);
-                     printError("DEBUG Uniform");
-                break;
-                case 3:
-                    glUniform3f(loc, uniform->sData[0],uniform->sData[1],uniform->sData[2]);
-                break;
-                case 4:
-                    glUniform4f(loc, uniform->sData[0],uniform->sData[1],uniform->sData[2],uniform->sData[3]);
-                break;
-                default:
-                break;
-            }
-            return;
-        }
+void ModelObject::uploadUniformFloat(UniformFloat_Type* uniform){
+    Shader_Type * shader = mShaderMap[uniform->sShaderId];
+    GLuint program = shader->sProgramHandle;
+    glUseProgram(program);
+    int loc = glGetUniformLocation(program, uniform->sUniformName);
+    #ifdef MODEL_OBJECT_VERBOSE
+    if(loc < 0 ){
+        printf("Unused or invalid uniform: %s\n", uniform->sUniformName);
     }
+    printError(uniform->sUniformName);
+    #endif
+    switch(uniform->sSize){
+        case 1:
+            glUniform1f(loc, uniform->sData[0]);
+        break;
+        case 2:
+            glUniform2f(loc, uniform->sData[0],uniform->sData[1]);
+        break;
+        case 3:
+            glUniform3f(loc, uniform->sData[0],uniform->sData[1],uniform->sData[2]);
+        break;
+        case 4:
+            glUniform4f(loc, uniform->sData[0],uniform->sData[1],uniform->sData[2],uniform->sData[3]);
+        break;
+        default:
+        break;
+    }
+    glUseProgram(0);
+    #ifdef MODEL_OBJECT_VERBOSE
     printf("Could not find uniform with name: %s",uniform->sUniformName);
     printError("Upload Uniform");
+    #endif
 }
 
-void ModelObject::setUniform(GLfloat * data, GLuint sizeData, GLuint shaderId, const char * uniformName){
-    Uniform_Type * uniform = new Uniform_Type();
+void ModelObject::uploadUniformMatrix(UniformMatrix_Type* uniformMatrix){
+    Shader_Type * shader = mShaderMap[uniformMatrix->sShaderId];
+    GLuint program = shader->sProgramHandle;
+    glUseProgram(program);
+    int loc = glGetUniformLocation(program, uniformMatrix->sUniformName);
+    #ifdef MODEL_OBJECT_VERBOSE
+    if(loc < 0 ){
+        printf("Unused or invalid uniform: %s\n", uniform->sUniformName);
+    }
+    printError(uniform->sUniformName);
+    #endif
+    glUniformMatrix4fv(loc, 1, GL_TRUE, uniformMatrix->sMatrix.m);
+    glUseProgram(0);
+    #ifdef MODEL_OBJECT_VERBOSE
+    printf("Could not find uniform with name: %s",uniform->sUniformName);
+    printError("Upload Uniform");
+    #endif
+}
+
+void ModelObject::setUniformFloat(GLfloat * data, GLuint sizeData, GLuint shaderId, const char * uniformName){
+    UniformFloat_Type * uniform = new UniformFloat_Type();
     for(GLuint i=0;i < sizeData; i++){
         uniform->sData[i] = data[i];
     }
@@ -250,59 +251,70 @@ void ModelObject::setUniform(GLfloat * data, GLuint sizeData, GLuint shaderId, c
     uniform->sShaderId = shaderId;
     memset(uniform->sUniformName,0,uniform->CHAR_LEN*sizeof(char));
     strcpy(uniform->sUniformName,uniformName);
-    mUniformList.push_back(uniform);
+    mShaderMap[shaderId]->sUniformFloatMap[uniformName] = uniform;
     uploadUniformFloat(uniform);
 
 }
 
-void ModelObject::setUniform(const GLfloat data,GLuint shaderId, const char * uniformName){
-    Uniform_Type * uniform = new Uniform_Type();
+void ModelObject::setUniformMatrix(mat4 matrix, GLuint sizeData, GLuint shaderId, const char * uniformName){
+    UniformMatrix_Type * uniform = new UniformMatrix_Type();
+    uniform->sMatrix = matrix;
+    uniform->sShaderId = shaderId;
+    memset(uniform->sUniformName,0,uniform->CHAR_LEN*sizeof(char));
+    strcpy(uniform->sUniformName,uniformName);
+    mShaderMap[shaderId]->sUniformMatrixMap[uniformName] = uniform;
+    uploadUniformMatrix(uniform);
+
+}
+
+void ModelObject::setUniformFloat(const GLfloat data,GLuint shaderId, const char * uniformName){
+    UniformFloat_Type * uniform = new UniformFloat_Type();
     uniform->sData[0] = data;
     uniform->sSize = 1;
     uniform->sShaderId = shaderId;
     memset(uniform->sUniformName,0,uniform->CHAR_LEN*sizeof(char));
     strcpy(uniform->sUniformName,uniformName);
-    mUniformList.push_back(uniform);
+    mShaderMap[shaderId]->sUniformFloatMap[uniformName] = uniform;
     uploadUniformFloat(uniform);
 }
 
 void ModelObject::setShader(GLuint handleGPU, GLuint shaderId,Tranform_Composition_Type  composition){
     Shader_Type * shader = new Shader_Type();
-    shader->sShaderHandleGPU = handleGPU;
+    shader->sProgramHandle = handleGPU;
     shader->sShaderId        = shaderId;
     shader->sComposition     = composition;
     shader->sDepthTest       = DEPTH_TEST;
-    mShaderList.push_back(shader);
-
-
+    mShaderMap[shaderId] = shader;
 }
 
 void ModelObject::setShader(GLuint handleGPU, GLuint shaderId,Tranform_Composition_Type  composition,DepthTest_Type depthTest){
-    Shader_Type * shader = new Shader_Type();
-    shader->sShaderHandleGPU = handleGPU;
+    Shader_Type * shader     = new Shader_Type();
+    shader->sProgramHandle   = handleGPU;
     shader->sShaderId        = shaderId;
     shader->sComposition     = composition;
     shader->sDepthTest       = depthTest;
-    mShaderList.push_back(shader);
+    mShaderMap[shaderId] = shader;
 }
 
 void ModelObject::setShader(GLuint handleGPU, GLuint shaderId){
     Shader_Type * shader = new Shader_Type();
-    shader->sShaderHandleGPU = handleGPU;
+    shader->sProgramHandle   = handleGPU;
     shader->sShaderId        = shaderId;
     shader->sComposition     = MVP;
     shader->sDepthTest       = DEPTH_TEST;
-    mShaderList.push_back(shader);
+    mShaderMap[shaderId] = shader;
 }
 void ModelObject::setTexture(GLuint handle,GLuint shaderId,const char* uniformName){
 
     Texture_Type * newTexture = new Texture_Type();
-    newTexture->sShaderId  = shaderId;
+
+    newTexture->sShaderId     = shaderId;
     newTexture->sTextureId    = handle;
+
     memset(newTexture->sUniformName,0,newTexture->CHAR_LEN*sizeof(char));
     strcpy(newTexture->sUniformName,uniformName);
-    mTextureList.reserve(sizeof(Texture_Type)*4);
-    mTextureList.push_back(newTexture);
+
+    mShaderMap[shaderId]->sTextureMap[uniformName] = newTexture;
 
 
 }
@@ -310,71 +322,53 @@ void ModelObject::setModel(Model * m, GLuint shaderId){
     Model_Type * model = new Model_Type();
     model->sModel = m;
     model->sShaderId = shaderId;
-    mModelList.push_back(model);
+    mShaderMap[shaderId]->sModelData = model;
+
 }
 void ModelObject::setTransform(mat4 transf,GLuint shaderId){
-    Transform_Type * transformT = new Transform_Type();
-    transformT->sTransform = transf;
-    transformT->sShaderId  = shaderId;
-    mTransformList.push_back(transformT);
+    mShaderMap[shaderId]->sTransform = transf;
 }
 
-void ModelObject::replaceTexture(GLuint handle,const char* uniformName){
-    Texture_Type * texture;
-    for(std::vector<Texture_Type*>::iterator it = mTextureList.begin(); it != mTextureList.end(); ++it) {
-            texture = *it;
-            if(strcmp(texture->sUniformName,uniformName) == 0){
-                    texture->sTextureId = handle;
-                    return;
-            }
-    }
+void ModelObject::replaceTexture(GLuint handle,GLuint shaderId,const char* uniformName){
+    mShaderMap[shaderId]->sTextureMap[uniformName]->sTextureId = handle;
 }
 
-void ModelObject::replaceUniform(GLfloat* data,const char* uniformName){
-    Uniform_Type * uniform;
-    for(std::vector<Uniform_Type*>::iterator it = mUniformList.begin(); it != mUniformList.end(); ++it) {
-            uniform = *it;
-            if(strcmp(uniform->sUniformName,uniformName) == 0){
-                    for(GLuint i = 0;i < uniform->sSize; i++)
-                        uniform->sData[i] = data[i];
-                    uploadUniformFloat(uniform);
-                    return;
-            }
-    }
+void ModelObject::replaceUniformFloat(GLfloat* data,GLuint shaderId,const char* uniformName){
+    UniformFloat_Type * uniform = mShaderMap[shaderId]->sUniformFloatMap[uniformName];
+
+    for(GLuint i = 0;i < uniform->sSize; i++)
+        uniform->sData[i] = data[i];
+    uploadUniformFloat(uniform);
+
 }
 
-void ModelObject::drawModel(GLuint shaderId,GLuint activeShaderHandle){
-    Model_Type * m;
-    for(std::vector<Model_Type*>::iterator it = mModelList.begin(); it != mModelList.end(); ++it) {
-        m = *it;
-        if(m->sShaderId == shaderId){
+void ModelObject::replaceUniformMatrix(mat4 matrix,GLuint shaderId,const char* uniformName){
+    UniformMatrix_Type * uniform = mShaderMap[shaderId]->sUniformMatrixMap[uniformName];
+    uniform->sMatrix = matrix;
+    uploadUniformMatrix(uniform);
 
-            char* normalAttributeString= NULL;
-            if(m->sModel->normalArray != NULL) normalAttributeString = (char *)"in_Normal";
+}
 
-            char* textureAttributeString = NULL;
-            if(m->sModel->texCoordArray != NULL) textureAttributeString = (char *)"in_TextureCoord";
+void ModelObject::drawModel(Shader_Type* shader){
+    Model_Type * m = shader->sModelData;
+    GLuint program = shader->sProgramHandle;
+    char* normalAttributeString= NULL;
+    if(m->sModel->normalArray != NULL) normalAttributeString = (char *)"in_Normal";
+
+    char* textureAttributeString = NULL;
+    if(m->sModel->texCoordArray != NULL) textureAttributeString = (char *)"in_TextureCoord";
 
 
-            DrawModel(m->sModel, activeShaderHandle,(char *)"in_Position" ,normalAttributeString , textureAttributeString);
+    DrawModel(m->sModel, program,(char *)"in_Position" ,normalAttributeString , textureAttributeString);
 
-            return;
-        }
-    }
-    printf("ERROR: No model was selected for current shader. Shader id: %d",shaderId);
+
 }
 mat4 * ModelObject::getTransform(GLuint shaderId){
-    Transform_Type * t;
-    for(std::vector<Transform_Type*>::iterator it = mTransformList.begin(); it != mTransformList.end(); ++it) {
-        t = *it;
-        if(t->sShaderId == shaderId)
-            return &t->sTransform;
-    }
-    return NULL;
+    return &(mShaderMap[shaderId]->sTransform);
 }
 
 void ModelObject::uploadNewVertexData(GLfloat* dataBuffer,size_t bufferSize,GLuint shaderId){
-    Model* model = NULL;
+    /*Model* model = NULL;
     Model_Type * m;
     for(std::vector<Model_Type*>::iterator it = mModelList.begin(); it != mModelList.end(); ++it) {
         m = *it;
@@ -384,7 +378,7 @@ void ModelObject::uploadNewVertexData(GLfloat* dataBuffer,size_t bufferSize,GLui
     glBindVertexArray(model->vao);
     glBindBuffer(GL_ARRAY_BUFFER, model->vb);
     glBufferSubData(GL_ARRAY_BUFFER, 0, bufferSize, dataBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);*/
 }
 void ModelObject::BuildModelVAO2(Model *m){
 
@@ -445,12 +439,11 @@ void ModelObject::LoadDataToModel(
 	m->numIndices = numInd;
 
 	BuildModelVAO2(m);
-    //freeModelData(m);
     Model_Type * model = new Model_Type();
     model->sModel      = m;
     model->sShaderId   = shaderId;
 
-	this->mModelList.push_back(model);
+	mShaderMap[shaderId]->sModelData = model;
 }
 
 void ModelObject::freeModelData(Model * m){

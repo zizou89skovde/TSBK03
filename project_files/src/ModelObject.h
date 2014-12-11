@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <vector>
+#include <map>
+#include <string>
 #include "loadobj.h"
 #include "VectorUtils3.h"
 #include "GL_utilities.h"
@@ -14,6 +16,11 @@
  corresponding shader. Serving the same purpose
  as "map", TODO: change to map.
 **/
+
+#define SELECT_CONFIG  if(shader->sDepthTest == NO_DEPTH_TEST){glDisable(GL_DEPTH_TEST);}
+#define DESELECT_CONFIG if(shader->sDepthTest == NO_DEPTH_TEST){glEnable(GL_DEPTH_TEST);}
+
+//#define MODEL_OBJECT_VERBOSE
 
 typedef enum{
     //MPV = 0, DEFAUULT
@@ -41,28 +48,51 @@ typedef struct{
     GLuint sSize;
     GLfloat sData[4];
     GLuint sShaderId;
-}Uniform_Type;
+}UniformFloat_Type;
 
 typedef struct{
+    mat4 sMatrix;
     GLuint sShaderId;
-    GLuint sShaderHandleGPU;
-    Tranform_Composition_Type sComposition;
-    DepthTest_Type sDepthTest;
-}Shader_Type;
+    char sUniformName[40];
+    static const GLuint CHAR_LEN = 40;
+}UniformMatrix_Type;
 
 typedef struct{
     GLuint sShaderId;
     Model* sModel;
 }Model_Type;
 
-
-
 typedef struct{
+
+    /** Key value for the shader map **/
     GLuint sShaderId;
+
+    /** Shader program **/
+    GLuint sProgramHandle;
+
+    /** Textures **/
+    std::map<std::string,Texture_Type*> sTextureMap;
+
+    /** Uniform Lists*/
+    std::map<std::string,UniformFloat_Type *> sUniformFloatMap;
+    std::map<std::string,UniformMatrix_Type *> sUniformMatrixMap;
+
+    /** GL flags **/
+    DepthTest_Type sDepthTest;
+
+    /** Model to world transform **/
     mat4 sTransform;
-}Transform_Type;
+    Tranform_Composition_Type sComposition;
 
 
+    Model_Type * sModelData;
+
+}Shader_Type;
+
+typedef std::map<GLuint,Shader_Type*>::iterator ShaderIterator;
+typedef std::map<std::string,Texture_Type*>::iterator TextureIterator;
+typedef std::map<std::string,UniformFloat_Type*>::iterator UniformFloatIterator;
+typedef std::map<std::string,UniformMatrix_Type*>::iterator UniformMatrixIterator;
 
 class ModelObject
 {
@@ -94,14 +124,16 @@ class ModelObject
         void setShader(GLuint handle,GLuint id,Tranform_Composition_Type  composition,DepthTest_Type depthTest);
         void setShader(GLuint handle,GLuint id);
         void setTexture(GLuint handle,GLuint shaderId,const char* uniformName);
-        void setUniform(GLfloat* data, GLuint sizeData, GLuint shaderId, const char* uniformName);
-        void setUniform(const GLfloat data, GLuint shaderId, const char* uniformName);
+        void setUniformFloat(GLfloat* data, GLuint sizeData, GLuint shaderId, const char* uniformName);
+        void setUniformMatrix(mat4 data, GLuint sizeData, GLuint shaderId, const char* uniformName);
+        void setUniformFloat(const GLfloat data, GLuint shaderId, const char* uniformName);
         void setTransform(mat4 transf,GLuint id);
 
-        void replaceTexture(GLuint handle,const char* uniformName);
-        void replaceUniform(GLfloat* handle,const char* uniformName);
-
-        /** Get functions **/
+        void replaceTexture(GLuint handle,GLuint shaderId,const char* uniformName);
+        void replaceUniformFloat(GLfloat* handle,GLuint shaderId,const char* uniformName);
+        void replaceUniformMatrix(mat4 matrix,GLuint shaderId,const char* uniformName);
+        /** Misc functions **/
+         void freeModelData(Model * m);
         mat4 * getTransform(GLuint ShaderId);
         void flipModels();
 
@@ -109,21 +141,17 @@ class ModelObject
     private:
 
         /** Private help functions **/
-        void   uploadUniformFloat(Uniform_Type* uniform);
-
-        void   uploadTexture(GLuint activeShaderIndex,GLuint activeShaderHandle);
+        void   uploadUniformFloat(UniformFloat_Type* uniform);
+        void   uploadUniformMatrix(UniformMatrix_Type* uniform);
+        void   selectTexture(Shader_Type * shader);
         void   uploadTransform(Shader_Type * shader,mat4 projectionMatrix,mat4 viewMatrix);
 
         /** Private data containers **/
-        std::vector<Texture_Type*> mTextureList;
-        std::vector<Uniform_Type*> mUniformList;
-        std::vector<Shader_Type * > mShaderList;
-        std::vector<Model_Type*>  mModelList;
-        std::vector<Transform_Type *> mTransformList;
+        std::map<GLuint,Shader_Type*> mShaderMap;
 
         /** Private GetFunctions **/
-        void drawModel(GLuint shaderId,GLuint activeShaderHandle);
-        void freeModelData(Model * m);
+        void drawModel(Shader_Type* shader);
+
 
 
 };

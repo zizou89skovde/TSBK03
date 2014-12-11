@@ -4,7 +4,7 @@ in  vec3 in_Position;
 
 uniform mat4 MVP_Matrix;
 uniform mat4 MV_Matrix;
-uniform mat4 VP_LightMatrix;
+uniform mat4 LightTextureMatrix;
 
 uniform float u_LightNear;
 uniform float u_LightFar;
@@ -35,10 +35,10 @@ void main(void)
 	vec4 position = vec4(in_Position,1.0);
 	
 	/* Determine position of frustum in lights projected viewspace */
-	vec4 positionLightViewProj = VP_LightMatrix * position;
+	vec4 projectedCoordinates = LightTextureMatrix * position;
 	
 	/* Compute the projected texture coordinates for the depth map sampling */
-	vec4 projectedCoordinates = biasMat * positionLightViewProj;
+	//vec4 projectedCoordinates = positionLightViewProj; //biasMat * positionLightViewProj;
 	projectedCoordinates /= projectedCoordinates.w;
 	
 	/* Only far plane should be affected, near plane at z = 1.0, far plane >> near plane */
