@@ -62,7 +62,6 @@ void main(void)
     f_Normal		= Normal_Matrix*getNormalWorld(texCoord,centerPos); 
 	f_LightPos 		= vec3(MV_Matrix*light);
 	
-	/* Quick fix */
 	f_Position 		= vec3(MV_Matrix*vec4(centerPos,1.0));
 	gl_Position 	= MVP_Matrix*vec4(centerPos, 1.0); 	
 }

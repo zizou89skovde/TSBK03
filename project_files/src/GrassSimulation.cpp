@@ -21,7 +21,7 @@ void GrassSimulation::initialize(){
 
     /** Upload terrain parameters **/
     TerrainMetaData* terrainData = mTerrain->getTerrainMetaData();
-    mGrassScene->setUniform(1.0f, GRASS_SHADER_ID, "u_Wind");
+    mGrassScene->setUniformFloat(1.0f, GRASS_SHADER_ID, "u_Wind");
 
 	angle = 0.0f;
 
@@ -31,10 +31,10 @@ void GrassSimulation::initialize(){
     gridOffset[0] = -terrainData->TerrainSize/2.0;
     gridOffset[1] = 0;
     gridOffset[2] = -terrainData->TerrainSize/2.0;
-    mGrassScene->setUniform(gridOffset,3,GRASS_SHADER_ID,"u_GridOffset");
+    mGrassScene->setUniformFloat(gridOffset,3,GRASS_SHADER_ID,"u_GridOffset");
     //mGrassScene->setUniform(terrainData->TerrainResolution,"u_GridResolution");
-    mGrassScene->setUniform(terrainData->TerrainSize,GRASS_SHADER_ID,"u_GridSize");
-    mGrassScene->setUniform(terrainData->HeightScale,GRASS_SHADER_ID,"u_GridHeightScale");
+    mGrassScene->setUniformFloat(terrainData->TerrainSize,GRASS_SHADER_ID,"u_GridSize");
+    mGrassScene->setUniformFloat(terrainData->HeightScale,GRASS_SHADER_ID,"u_GridHeightScale");
 
     /** Set hight map texture **/
     mGrassScene->setTexture(mTerrain->getTextureData()->texID,GRASS_SHADER_ID,"u_HeightMap");
@@ -103,10 +103,10 @@ void GrassSimulation::draw(mat4 projectionMatrix,mat4 viewMatrix){
 }
 
 void GrassSimulation::update(){
-	
+
 	//GLfloat temp = 2.0f;
 	//mGrassScene->replaceUniform(&temp,"u_Wind");
-	
+
 
    /* if(previousTime < 0){
         previousTime = glutGet(GLUT_ELAPSED_TIME);
@@ -119,13 +119,13 @@ void GrassSimulation::update(){
 
 	GLfloat dt = 0.005f;
 	GLfloat pi = 3.141592653589793;
-	
+
 	angle += dt;
 	if (angle >= 2*pi) {
 		angle = 0;
 	}
 	printf("Vind: %f \n", angle);
-	mGrassScene->replaceUniform(&angle,"u_Wind");
+	mGrassScene->replaceUniformFloat(&angle,GRASS_SHADER_ID,"u_Wind");
 /*
     GLuint numIterations = (GLuint)(elapsedTime/(dt*1.0f));
     if(numIterations > 0){

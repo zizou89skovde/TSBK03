@@ -15,15 +15,17 @@ CPUClothSimulation::CPUClothSimulation(): SimulationClass()
     /** Initialize cloth model object **/
     mCPUClothScene = new ModelObject();
 
+    /** Load shader **/
+    GLuint clothShader = loadShadersG("shaders/cloth.vert","shaders/cloth.frag","shaders/cloth.gs");
+	mCPUClothScene->setShader(clothShader,CLOTH_SHADER_ID,VP);
+
     /**  Load buffer (texture) coordinates **/
     uploadBufferCoordinates();
 
     /** Generate Cloth FBO, used in vertex shader for vertex displacement and also calculating normals. **/
     generateFrameBuffers();
 
-    /** Load shader **/
-    GLuint clothShader = loadShadersG("shaders/cloth.vert","shaders/cloth.frag","shaders/cloth.gs");
-	mCPUClothScene->setShader(clothShader,CLOTH_SHADER_ID,VP);
+
 
     /**  Assign texture handles to the model object **/
     mCPUClothScene->setTexture(mFboMassPosition->texid,CLOTH_SHADER_ID,(const char *)"u_MassPos_Tex");
@@ -32,7 +34,7 @@ CPUClothSimulation::CPUClothSimulation(): SimulationClass()
 	GLfloat * resolution = (GLfloat*)malloc(sizeof(GLfloat)*2);
 	resolution[0] = CLOTH_RES;
 	resolution[1] = CLOTH_SIZE_X;
-    mCPUClothScene->setUniform(resolution,2,0,(const char*) "u_Resolution");
+    mCPUClothScene->setUniformFloat(resolution,2,0,(const char*) "u_Resolution");
 
     /** Set initial transform **/
     mat4 transform1 = IdentityMatrix();
