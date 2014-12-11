@@ -107,6 +107,8 @@ void PostProcessing::initializePostProcessing(){
     /** Camera Parameters **/
     mPostProcessingModel->setUniform(1,SHADER_SHADOW_MAP,"u_CameraNear");
     mPostProcessingModel->setUniform(80,SHADER_SHADOW_MAP,"u_CameraFar");
+
+
 }
 
 void PostProcessing::lightLookAt(vec3 lightPos, vec3 lightDir){
@@ -136,8 +138,8 @@ void PostProcessing::lightLookAt(vec3 lightPos, vec3 lightDir){
 void PostProcessing::drawShadows(mat4 proj, mat4 view){
 	/** Upload MVP-matrix for the light perspective **/
 	mat4 viewInvMatrix = InvertMat4(view);
-	glUniformMatrix4fv(glGetUniformLocation(mShadowShaderHandle, "MVP_LightMatrix"), 1, GL_TRUE, mMVPLightMatrix.m);
-	glUniformMatrix4fv(glGetUniformLocation(mShadowShaderHandle, "ViewInvMatrix"), 1, GL_TRUE, viewInvMatrix.m);
+	//glUniformMatrix4fv(glGetUniformLocation(mShadowShaderHandle, "MVP_LightMatrix"), 1, GL_TRUE, mMVPLightMatrix.m);
+	//glUniformMatrix4fv(glGetUniformLocation(mShadowShaderHandle, "ViewInvMatrix"), 1, GL_TRUE, viewInvMatrix.m);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     mPostProcessingModel->draw(SHADER_SHADOW_MAP,proj,view);
@@ -170,9 +172,9 @@ void PostProcessing::draw(mat4 proj, mat4 view){
     /** Select screen as render target*/
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
     glViewport(0, 0, *mScreenWidth, *mScreenHeight);
+   // drawShadows(proj,view);
+	mPostProcessingModel->draw(SHADER_LIGHT_VOLUME,proj,view);
 
-    //mPostProcessingModel->draw(SHADER_LIGHT_VOLUME,proj,view);
-    drawShadows(proj,view);
 #endif
 
 }
