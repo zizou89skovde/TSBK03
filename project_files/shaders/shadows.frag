@@ -1,6 +1,7 @@
 #version 400
 uniform sampler2D u_SceneDepth;
 uniform sampler2D u_LightDepth;
+uniform sampler2D u_LightColor;
 
 uniform mat4 LightTextureMatrix;
 
@@ -70,6 +71,7 @@ void main(void)
 	float redValueX   = 0.0;
 	float greenValueZ = 0.0;
 	float grayValueY  =  0.0;
+	vec4  lightColor  = texture(u_LightColor,f_TexCoord);
 	if(sceneDepth < u_CameraFar*0.9){
 		
 		/**  Compute ~world position of the current pixel **/
@@ -107,18 +109,18 @@ void main(void)
 		shadowing *= (1.0 - 5.0*length(projectedCoordinates.st - vec2(0.5)));
 		
 	}
-	vec4 color = vec4(0.0);
+	vec4 shadowColor = vec4(0.0);
 #ifdef DEBUG_WORLD_POSITION
-	color.r = redValueX;
-	color.g = greenValueZ; 
-	color.a = 1.0;
+	shadowColor.r = redValueX;
+	shadowColor.g = greenValueZ; 
+	shadowColor.a = 1.0;
 /*#else ifdef DEBUG_WORLD_POSITION_Y
 	color = vec4(grayValueY);
 	color.a = 1.0;
 	#endif*/
 #else
-	color.a = shadowing;
+	shadowColor.a = shadowing;
 #endif
-    out_Color = color;
+    out_Color = lightColor + shadowColor;
 
 }

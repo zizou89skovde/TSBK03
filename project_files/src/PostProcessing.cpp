@@ -57,37 +57,7 @@ void PostProcessing::initializePostProcessing(){
     mPostProcessingModel->setUniformFloat(1,SHADER_LIGHT_VOLUME,"u_CameraNear");
     mPostProcessingModel->setUniformFloat(80,SHADER_LIGHT_VOLUME,"u_CameraFar");
 #endif
-/*************************************************************************************/
 
-
-    /** Sphere Shader **/
-    GLuint sphereShader = loadShaders("shaders/sphere.vert", "shaders/sphere.frag");
-    mPostProcessingModel->setShader(sphereShader,SHADER_SPHERE,MVP);
-
-    /** Sphere Model **/
-    Model* modelSphere = LoadModelPlus((char *)"models/skydome.obj");
-	free(modelSphere->texCoordArray);
-	modelSphere->texCoordArray = NULL;
-    mPostProcessingModel->setModel(modelSphere,SHADER_SPHERE);
-
-    /** Sphere Transform **/
-    mat4 transform2 = T(0,0,0)*S(4,4,4);
-    mPostProcessingModel->setTransform(transform2,SHADER_SPHERE);
-
-   /*************************************************************************************/
-    /** Full-screen shader**/
-    GLuint quadShader = loadShaders("shaders/screen_quad.vert", "shaders/screen_quad.frag");
-    mPostProcessingModel->setShader(quadShader,SHADER_SCREEN_QUAD,NONE);
-
-  	/** Full-screen quad model **/
-    uploadSquareModelData(mPostProcessingModel,SHADER_SCREEN_QUAD);
-
-    /** Set texture **/
-    mPostProcessingModel->setTexture(mLightFBO->texid,SHADER_SCREEN_QUAD,"u_Texture");
-
-
-
-    mTime = 0.0f;
 #ifdef SHADOW_MAP
    /*************************************************************************************/
    /** Shadow Map (Full screen quad shader) **/
@@ -100,6 +70,7 @@ void PostProcessing::initializePostProcessing(){
     /** Set texture **/
     mPostProcessingModel->setTexture(mLightDepthFBO.depth,SHADER_SHADOW_MAP,"u_LightDepth");
     mPostProcessingModel->setTexture(mSceneDepthFBO.depth,SHADER_SHADOW_MAP,"u_SceneDepth");
+    mPostProcessingModel->setTexture(mLightFBO->texid,SHADER_SHADOW_MAP,"u_LightColor");
 
     /** Upload uniform matrices **/
     mPostProcessingModel->setUniformMatrix(IdentityMatrix(),SHADER_SHADOW_MAP,"LightTextureMatrix");
@@ -147,10 +118,6 @@ void PostProcessing::lightLookAt(vec3 lightPos, vec3 lightCenter){
 	GLfloat  lengthXZ 	= sqrt(lightLook.x*lightLook.x + lightLook.z*lightLook.z);
 	GLfloat  angleArb 	= atan2(lightLook.y,lengthXZ);
 
-
-	GLfloat trueAngle = pi-mTime;
-	/*printf("angleY:%f  , true angle: %f\n",angleY,trueAngle);
-	printf("anglearb:%f\n",angleArb);*/
 	mat4 rot   = ArbRotate(lightRight,angleArb)*Ry(angleY);//
 	mModelLightMatrix = trans*rot;
 
@@ -214,15 +181,8 @@ void PostProcessing::draw(mat4 proj, mat4 view){
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
     glViewport(0, 0, *mScreenWidth, *mScreenHeight);
 
-
 	/** Draw Shadows  **/
     drawShadows(proj,view);
-
-    /** Draw light onto screen **/
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    mPostProcessingModel->draw(SHADER_SCREEN_QUAD,proj,view);
-    glDisable(GL_BLEND);
 
 #else
     /** Select screen as render target*/
