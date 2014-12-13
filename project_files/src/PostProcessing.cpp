@@ -13,9 +13,9 @@ PostProcessing::PostProcessing(GLuint * w, GLuint * h)
 void PostProcessing::initializePostProcessing(){
 
     /** Create FBO's **/
-	generateDepthFBO(&mLightDepthFBO,mFBOSize,mFBOSize);
-	generateDepthFBO(&mSceneDepthFBO,mFBOSize,mFBOSize);
-    mLightFBO = initFBO(mFBOSize,mFBOSize,0);
+	generateDepthFBO(&mLightDepthFBO,mFBOWidth,mFBOHeight);
+	generateDepthFBO(&mSceneDepthFBO,mFBOWidth,mFBOHeight);
+    mLightFBO = initFBO(mFBOWidth,mFBOHeight,0);
 
 	/** Create model object */
   	mPostProcessingModel = new ModelObject();
@@ -50,8 +50,8 @@ void PostProcessing::initializePostProcessing(){
     mPostProcessingModel->setUniformFloat(mFar,SHADER_LIGHT_VOLUME,"u_LightFar");
 #ifndef DEBUG
     /** Screen Parameters **/
-    mPostProcessingModel->setUniformFloat(512,SHADER_LIGHT_VOLUME,"u_ScreenWidth");
-    mPostProcessingModel->setUniformFloat(512,SHADER_LIGHT_VOLUME,"u_ScreenHeight");
+    mPostProcessingModel->setUniformFloat(mFBOWidth,SHADER_LIGHT_VOLUME,"u_ScreenWidth");
+    mPostProcessingModel->setUniformFloat(mFBOHeight,SHADER_LIGHT_VOLUME,"u_ScreenHeight");
 
     /** Camera Parameters **/
     mPostProcessingModel->setUniformFloat(1,SHADER_LIGHT_VOLUME,"u_CameraNear");
@@ -111,8 +111,8 @@ void PostProcessing::initializePostProcessing(){
     mPostProcessingModel->setUniformFloat(emptyFloat,3,SHADER_SHADOW_MAP,"u_CameraPosition");
 
  	/** Light Parameters **/
-   // mPostProcessingModel->setUniformFloat(mNear,SHADER_SHADOW_MAP,"u_LightNear");
-   // mPostProcessingModel->setUniformFloat(mFar,SHADER_SHADOW_MAP,"u_LightFar");
+    mPostProcessingModel->setUniformFloat(mNear,SHADER_SHADOW_MAP,"u_LightNear");
+    mPostProcessingModel->setUniformFloat(mFar,SHADER_SHADOW_MAP,"u_LightFar");
 
 
     /** Camera Parameters **/
@@ -140,25 +140,25 @@ void PostProcessing::lightLookAt(vec3 lightPos, vec3 lightCenter){
 
 	/** Model **/
 	vec3 lightLook      = Normalize(lightPos - lightCenter);
-	vec3 lightRight 	= Normalize(CrossProduct(lightLook,lightUp));
+	vec3 lightRight 	= CrossProduct(lightLook,lightUp);
 	GLfloat pi = 3.14159265;
 	GLfloat  angleY 	= pi-atan2(lightLook.x,lightLook.z);
 
 	GLfloat  lengthXZ 	= sqrt(lightLook.x*lightLook.x + lightLook.z*lightLook.z);
-	GLfloat  angleArb 	= -atan2(lightLook.y,lengthXZ);
+	GLfloat  angleArb 	= atan2(lightLook.y,lengthXZ);
 
 
 	GLfloat trueAngle = pi-mTime;
-	printf("angleY:%f  , true angle: %f\n",angleY,trueAngle);
-	printf("anglearb:%f\n",angleArb);
-	mat4 rot   = Ry(angleY)*ArbRotate(lightRight,angleArb);
+	/*printf("angleY:%f  , true angle: %f\n",angleY,trueAngle);
+	printf("anglearb:%f\n",angleArb);*/
+	mat4 rot   = ArbRotate(lightRight,angleArb)*Ry(angleY);//
 	mModelLightMatrix = trans*rot;
 
 	/** MVP **/
 	mMVPLightMatrix = mVPLightMatrix * mModelLightMatrix;
 
 	/** Texture Matrix **/
-	mLightTextureMatrix = T(0.5, 0.5, 0.0)* S(0.5, 0.5, 1.0)*mMVPLightMatrix;
+	mLightTextureMatrix = T(0.5, 0.5, 0.0)*S(0.5, 0.5, 1.0)*mMVPLightMatrix;
 	mPostProcessingModel->replaceUniformMatrix(mLightTextureMatrix,SHADER_LIGHT_VOLUME,"LightTextureMatrix");
 
     /** Update model to world matrix for the light volume model **/
@@ -202,7 +202,7 @@ void PostProcessing::draw(mat4 proj, mat4 view){
     mTime+=mLightSpeed;
     GLfloat x = mLightRadius*sin(mTime);
     GLfloat z = mLightRadius*cos(mTime);
-    lightLookAt(vec3(x,mLightHeight,z),vec3(0,-5,0));
+    lightLookAt(vec3(x,mLightHeight,z),vec3(0,2,0));
 
     drawLightDepth(proj,view);
 #ifndef DEBUG
@@ -228,7 +228,7 @@ void PostProcessing::draw(mat4 proj, mat4 view){
     /** Select screen as render target*/
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
     glViewport(0, 0, *mScreenWidth, *mScreenHeight);
-   
+
 	mPostProcessingModel->draw(SHADER_LIGHT_VOLUME,proj,view);
 
 #ifdef SHADOW_MAP
@@ -249,7 +249,7 @@ void PostProcessing::drawLightVolume(mat4 proj, mat4 view){
 
     /** Set use light FBO */
     useFBO(mLightFBO,NULL,NULL);
-    glViewport(0, 0, mFBOSize, mFBOSize);
+    glViewport(0, 0, mFBOWidth, mFBOHeight);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
@@ -279,23 +279,23 @@ void PostProcessing::drawLightVolume(mat4 proj, mat4 view){
 void PostProcessing::drawLightDepth(mat4 proj, mat4 view){
 	/** Swap to light depth buffer */
 	glBindFramebuffer(GL_FRAMEBUFFER,mLightDepthFBO.fb);
-	glViewport(0, 0, mFBOSize, mFBOSize);
+	glViewport(0, 0, mFBOWidth, mFBOHeight);
     /** Clear previous frame values */
     glClear( GL_DEPTH_BUFFER_BIT);
     /** Disable color rendering, we only want to write to the Z-Buffer */
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 	/** Render scene from light perspective */
-    mTerrain->drawSimple(mLightProjectionMatrix,mLightViewMatrix);
+    mTerrain->drawDepthModels(mLightProjectionMatrix,mLightViewMatrix);
 
     /** Swap to scene depth buffer */
 	glBindFramebuffer(GL_FRAMEBUFFER,mSceneDepthFBO.fb);
-	glViewport(0, 0, mFBOSize, mFBOSize);
+	glViewport(0, 0, mFBOWidth, mFBOHeight);
     /** Clear previous frame values */
     glClear( GL_DEPTH_BUFFER_BIT);
     /** Disable color rendering, we only want to write to the Z-Buffer */
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 	/** Render scene from camera perspective */
-	mTerrain->drawSimple(proj,view);
+	mTerrain->drawDepthModels(proj,view);
 
 	/** Enable again*/
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);

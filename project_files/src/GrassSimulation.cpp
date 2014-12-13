@@ -15,12 +15,11 @@ void GrassSimulation::initialize(){
 	/** Load shader **/
 	GLuint grassShader = loadShadersG("shaders/grass.vert", "shaders/grass.frag", "shaders/grass.gs");
 
-
 	mGrassScene->setShader(grassShader, GRASS_SHADER_ID, MVP); //mGrassScene->setShader(grassShader, GRASS_SHADER_ID,VP);
 	mGrassScene->setTransform(IdentityMatrix(), GRASS_SHADER_ID);
-	mGrassScene->setDrawMethod(GRASS_SHADER_ID,POINTS);
+	mGrassScene->setDrawMethod(GRASS_SHADER_ID,A_POINTS);
 
-	mTerrain->setExternalModels(mGrassScene);
+	mTerrain->setReflectedModels(mGrassScene,GRASS_SHADER_ID);
 
 
     /** Grass mask **/
@@ -74,7 +73,7 @@ void GrassSimulation::uploadBufferCoordinates(ModelObject * modelobject,TextureD
 
 	GLuint textureWidth = maskTexture->width; // OBS 256!
 	GLuint textureHeight = maskTexture->height;
-	
+
     GLuint DIM = 300; /* Antal vertices per rad*/
 
     GLuint vertexCount = DIM*DIM;
@@ -97,7 +96,7 @@ void GrassSimulation::uploadBufferCoordinates(ModelObject * modelobject,TextureD
 			if(mask == 255){
             	vertexArray[indexCount++] = xPos;
             	vertexArray[indexCount++] = yPos;
-            	vertexArray[indexCount++] = 0;	
+            	vertexArray[indexCount++] = 0;
 			}
         }
 
@@ -131,16 +130,16 @@ void GrassSimulation::uploadBufferCoordinates(ModelObject * modelobject,TextureD
 	glGenBuffers(1, &m->vb);
 	glBindBuffer(GL_ARRAY_BUFFER, m->vb);
 	glBufferData(GL_ARRAY_BUFFER, numBytes, maskedArray, GL_STATIC_DRAW);
-	
+
 
 	m->numVertices = indexCount/3;
 
 	/** Free data */
 	free(maskTexture->imageData);
 	free(maskedArray);
-	
+
 	modelobject->setModel(m,shaderId);
-	
+
 
 
 }
@@ -156,10 +155,10 @@ void GrassSimulation::draw(mat4 projectionMatrix,mat4 viewMatrix){
 }
 
 void GrassSimulation::update(){
-	
+
 	//GLfloat temp = 2.0f;
 	//mGrassScene->replaceUniform(&temp,"u_Wind");
-	
+
 
    /* if(previousTime < 0){
         previousTime = glutGet(GLUT_ELAPSED_TIME);
@@ -172,7 +171,7 @@ void GrassSimulation::update(){
 
 	GLfloat dt = 0.005f;
 	GLfloat pi = 3.141592653589793;
-	
+
 	angle += dt;
 	if (angle >= 2*pi) {
 		angle = 0;

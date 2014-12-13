@@ -24,7 +24,7 @@
 
 typedef enum{
 	ARRAYS,
-	POINTS
+	A_POINTS
 }DrawMethod_Type;
 
 typedef enum{
@@ -126,7 +126,7 @@ class ModelObject
         void draw(mat4 projectionMatrix, mat4 viewMatrix);
         void drawBuffers(GLuint shaderId,GLuint numBuffers,GLuint * attachment);
         void draw(GLuint shaderId,mat4 projectionMatrix, mat4 viewMatrix);
-		
+        void clone(GLuint srcShaderId, GLuint dstShaderId, bool copyUniforms, bool copyTextures);
         /** Set functions **/
         void setModel(Model * m,GLuint shaderId);
         void setShader(GLuint handle,GLuint id,Tranform_Composition_Type  composition);
@@ -150,7 +150,7 @@ class ModelObject
         /** Misc functions **/
          void freeModelData(Model * m);
         mat4 * getTransform(GLuint ShaderId);
-        void flipModels();
+        void flipModels(GLuint shaderId);
 
     protected:
     private:

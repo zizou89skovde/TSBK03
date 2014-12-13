@@ -33,9 +33,9 @@ void GPUWaterSimulation::initialize(){
 
     mGPUWaterScene = new ModelObject();
 
-    /** Setting Cloth model shader **/
-    GLuint clothModelShader = loadShaders("shaders/water_phong.vert","shaders/water_phong.frag");
-    mGPUWaterScene->setShader(clothModelShader,GPU_SHADER_WATER,VP);
+    /** Setting Water model shader **/
+    GLuint waterShader = loadShaders("shaders/water_phong.vert","shaders/water_phong.frag");
+    mGPUWaterScene->setShader(waterShader ,GPU_SHADER_WATER,VP);
 
     /** Uploading Texture coordinates **/
     uploadBufferCoordinates(mGPUWaterScene,GPU_SHADER_WATER);
@@ -46,6 +46,7 @@ void GPUWaterSimulation::initialize(){
     /** Upload Offscreen rendering of the terrain */
 	FBOstruct * terrainFBO = mTerrain->getTerrainFBO();
     mGPUWaterScene->setTexture(terrainFBO->texid,GPU_SHADER_WATER,"u_TerrainColor");
+
     /** Upload upside down rendering of the terrain  **/
     FBOstruct * terrainReflectionFBO = mTerrain->getTerrainReflectedFBO();
     mGPUWaterScene->setTexture(terrainReflectionFBO->texid,GPU_SHADER_WATER,"u_TerrainReflection");
@@ -64,6 +65,13 @@ void GPUWaterSimulation::initialize(){
 	screenSize[0] = *mScreenWidth;
 	screenSize[1] = *mScreenHeight;
     mGPUWaterScene->setUniformFloat(screenSize,2,GPU_SHADER_WATER,"u_ScreenSize");
+
+    /** Setting Water model shader **/
+    GLuint waterSimpleShader = loadShaders("shaders/water_phong.vert","shaders/water_phong.frag");
+    mGPUWaterScene->setShader(waterSimpleShader ,GPU_SHADER_SIMPLE_WATER,VP);
+    mGPUWaterScene->clone(GPU_SHADER_WATER,GPU_SHADER_SIMPLE_WATER,false,true);
+
+    mTerrain->setDepthModels(mGPUWaterScene,GPU_SHADER_SIMPLE_WATER);
 
 }
 
@@ -132,7 +140,7 @@ void GPUWaterSimulation::draw(mat4 projectionMatrix, mat4 viewMatrix){
 		screenSize[0] = *mScreenWidth;
 		screenSize[1] = *mScreenHeight;
 
-    	mGPUWaterScene->replaceUniformFloat(screenSize,GPU_SHADER_WATER,"u_ScreenSize");	
+    	mGPUWaterScene->replaceUniformFloat(screenSize,GPU_SHADER_WATER,"u_ScreenSize");
 	}
 
 

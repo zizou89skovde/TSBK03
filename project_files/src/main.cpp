@@ -30,8 +30,8 @@
 #include "KeyMouseHandler.h"
 
 // initial width and heights
-#define W 512
-#define H 512
+#define W SCREEN_WIDTH
+#define H SCREEN_HEIGHT
 
 void OnTimer(int value);
 KeyMouseHandler mKeyMouseHandler;
@@ -66,18 +66,20 @@ void init(void)
     postProcessing->setTerrin(mTerrain);
     mKeyMouseHandler.setPostProcessing(postProcessing);
 
-
-
-/*
-    waterSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
-    waterSimulation->setTerrain(mTerrain);
-    waterSimulation->initialize();
-
-    printError("init cloth simulation");
-
     clothSimulation = new GPUClothSimulation(&WIDTH,&HEIGHT);
     clothSimulation->setTerrain(mTerrain);
     clothSimulation->initialize();
+
+      waterSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
+    waterSimulation->setTerrain(mTerrain);
+    waterSimulation->initialize();
+
+/*
+
+
+    printError("init cloth simulation");
+
+
 
     mGrassSimulation = new GrassSimulation();
     mGrassSimulation->setTerrain(mTerrain);
@@ -123,12 +125,14 @@ void display(void)
 /*
    	mGrassSimulation->draw(projectionMatrix,viewMatrix);
 	mGrassSimulation->update();
-    clothSimulation->draw(projectionMatrix,viewMatrix);
-    waterSimulation->draw(projectionMatrix,viewMatrix);
+
+
 	*/
+	  waterSimulation->draw(projectionMatrix,viewMatrix);
+    clothSimulation->draw(projectionMatrix,viewMatrix);
 	postProcessing->draw(projectionMatrix,viewMatrix);
-	
- 	
+
+
 
 	glutSwapBuffers();
 }

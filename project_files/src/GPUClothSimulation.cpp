@@ -27,9 +27,8 @@ void GPUClothSimulation::initialize(){
     configureSimulation();
 
     mGPUClothScene = new ModelObject();
-    mTerrain->setExternalModels(mGPUClothScene);
-    /** Setting Cloth model shader **/
-    //GLuint clothModelShader = loadShadersG("shaders/cloth.vert","shaders/cloth.frag","shaders/cloth.gs");
+
+    /** Create cloth model shader **/
     GLuint clothModelShader = loadShaders("shaders/cloth_phong.vert","shaders/cloth_phong.frag");
     mGPUClothScene->setShader(clothModelShader,GPU_SHADER_CLOTH,MVP);
 
@@ -53,6 +52,12 @@ void GPUClothSimulation::initialize(){
     mGPUClothScene->setUniformFloat(meta,2,GPU_SHADER_CLOTH,"u_Resolution");
     setSimulationConstant(meta,2,(const char*) "u_Resolution");
 
+    /** Create simple cloth model shader ( without any shading) used for rendering depth buffer **/
+    GLuint clothSimpleShader = loadShaders("shaders/cloth_simple.vert","shaders/cloth_simple.frag");
+    mGPUClothScene->setShader(clothSimpleShader,GPU_SHADER_SIMPLE_CLOTH,VP);
+    /** Clone position buffer from GPU_SHADER_CLOTH **/
+    mGPUClothScene->clone(GPU_SHADER_CLOTH,GPU_SHADER_SIMPLE_CLOTH,false,true);
+
     /** Sphere - For collision **/
     Sphere * sphere = new Sphere();
     sphere->position = new vec3(mSphereOffsetX,mSphereOffsetY,mSphereOffsetZ);
@@ -64,14 +69,18 @@ void GPUClothSimulation::initialize(){
     mGPUClothScene->setModel(modelSphere,GPU_SHADER_SPHERE);
     mGPUClothScene->freeModelData(modelSphere);
 
-
-
     /** Sphere Transform **/
     mObjectDirection = 1.0;
     GLfloat r = sphere->radius;
     vec3  pos = *sphere->position;
     mat4 transform2 = T(pos.x,pos.y,pos.z)*S(r,r,r);
     mGPUClothScene->setTransform(transform2,GPU_SHADER_SPHERE);
+
+    mTerrain->setReflectedModels(mGPUClothScene,GPU_SHADER_CLOTH);
+    mTerrain->setReflectedModels(mGPUClothScene,GPU_SHADER_SPHERE);
+
+    mTerrain->setDepthModels(mGPUClothScene,GPU_SHADER_SIMPLE_CLOTH);
+    mTerrain->setDepthModels(mGPUClothScene,GPU_SHADER_SPHERE);
 
 }
 

@@ -85,15 +85,47 @@ void ModelObject::draw(mat4 projectionMatrix, mat4 viewMatrix){
 
 }
 
+
+void ModelObject::clone(GLuint srcShaderId, GLuint dstShaderId, bool copyUniforms, bool copyTextures){
+
+    Shader_Type* srcShader = mShaderMap[srcShaderId];
+
+    /**Copy Uniforms **/
+    if(copyUniforms){
+        for(UniformFloatIterator it = srcShader->sUniformFloatMap.begin(); it != srcShader->sUniformFloatMap.end(); ++it) {
+            mShaderMap[dstShaderId]->sUniformFloatMap[it->first] = it->second;
+        }
+        for(UniformMatrixIterator it = srcShader->sUniformMatrixMap.begin(); it != srcShader->sUniformMatrixMap.end(); ++it) {
+            mShaderMap[dstShaderId]->sUniformMatrixMap[it->first] = it->second;
+        }
+    }
+    /** Copy textures **/
+    if(copyTextures){
+        for(TextureIterator it = srcShader->sTextureMap.begin(); it != srcShader->sTextureMap.end(); ++it) {
+                mShaderMap[dstShaderId]->sTextureMap[it->first] = it->second;
+        }
+    }
+
+    /** Create a new model data object **/
+    Model_Type* modelData = new Model_Type();
+    modelData->sShaderId = dstShaderId;
+
+    /** Copy handles to buffers **/
+    modelData->sModel = srcShader->sModelData->sModel;
+    mShaderMap[dstShaderId]->sModelData = modelData;
+
+}
+
+
 void ModelObject::draw(GLuint shaderId,mat4 projectionMatrix, mat4 viewMatrix){
-	selectDrawMethod(mShaderMap[shaderId],projectionMatrix,viewMatrix);	
+	selectDrawMethod(mShaderMap[shaderId],projectionMatrix,viewMatrix);
 }
 
 void ModelObject::selectDrawMethod(Shader_Type * shader, mat4 projectionMatrix, mat4 viewMatrix){
-   
+
 	switch(shader->sDrawMethod){
 
-		case POINTS:
+		case A_POINTS:
 			drawPoints(shader,projectionMatrix,viewMatrix);
 		break;
 
@@ -104,17 +136,14 @@ void ModelObject::selectDrawMethod(Shader_Type * shader, mat4 projectionMatrix, 
 		default:
 			printf("ERROR invalid draw Method\n");
 		break;
-	}	
+	}
 }
 
 
 
-void ModelObject::flipModels(){
-    Shader_Type * shader;
-    for(ShaderIterator it = mShaderMap.begin(); it != mShaderMap.end(); ++it) {
-        shader = it->second;
-        shader->sTransform = S(1,-1,1)*shader->sTransform;
-    }
+void ModelObject::flipModels(GLuint shaderId){
+    Shader_Type * shader = mShaderMap[shaderId];
+    shader->sTransform = S(1,-1,1)*shader->sTransform;
 }
 
 
@@ -360,7 +389,7 @@ void ModelObject::replaceUniformMatrix(mat4 matrix,GLuint shaderId,const char* u
 void ModelObject::drawPoints(Shader_Type * shader,mat4 projectionMatrix, mat4 viewMatrix){
 
 	GLuint program  = shader->sProgramHandle;
-		
+
     glUseProgram(program);
 
     uploadTransform(shader,projectionMatrix,viewMatrix);
@@ -394,7 +423,7 @@ void ModelObject::drawPoints(Shader_Type * shader,mat4 projectionMatrix, mat4 vi
     #ifdef MODEL_OBJECT_VERBOSE
     printError("Draw Points");
     #endif
-  
+
 
 }
 

@@ -4,6 +4,7 @@
 #include "ModelObject.h"
 #include "GL_utilities.h"
 #include "VectorUtils3.h"
+#include "ScreenSize.h"
 #include "LoadTGA.h"
 
 //#include "LoadTGA.h"
@@ -17,6 +18,10 @@ typedef struct{
 #define SKYBOX_SHADER 0
 #define TERRAIN_SHADER 1
 #define TERRAIN_SIMPLE_SHADER 2
+
+typedef std::pair<GLuint,ModelObject*> ModelItem;
+typedef std::vector<ModelItem>::iterator ModelIterator;
+
 class Terrain
 {
 
@@ -24,13 +29,13 @@ class Terrain
     public:
         Terrain(GLuint * w, GLuint * h);
         void draw(mat4 proj, mat4 view);
-        void drawSimple(mat4 proj, mat4 view);
-        void drawDepth(mat4 proj, mat4 view);
+        void drawDepthModels(mat4 proj, mat4 view);
         TextureData * getTextureData();
         TerrainMetaData * getTerrainMetaData();
         FBOstruct * getTerrainFBO();
         FBOstruct * getTerrainReflectedFBO();
-        void setExternalModels(ModelObject * modelObject);
+        void setDepthModels(ModelObject * modelObject,GLuint shaderId);
+        void setReflectedModels(ModelObject * modelObject,GLuint shaderId);
         virtual ~Terrain();
     protected:
     private:
@@ -42,7 +47,7 @@ class Terrain
         vec3 calcNormal(GLuint x,GLuint z,GLfloat planeRes,GLfloat heightRes, TextureData * tex);
         void uploadBufferCoordinates(ModelObject * modelObj,GLuint shaderId);
 
-        void renderFlippedExternalModel(mat4 projectionMatrix,mat4 viewMatrix);
+        void drawReflectedModels(mat4 projectionMatrix,mat4 viewMatrix);
         void setClip(bool enabled);
 
         /** Terrain model object for rendering **/
@@ -55,7 +60,8 @@ class Terrain
 
 
         /** Render targets. Used for reflecting and refracting the water **/
-        const static GLuint FBOSize =  512;
+        const static GLuint mFBOWidth   =  SCREEN_WIDTH;
+        const static GLuint mFBOHeight  =  SCREEN_WIDTH;
         FBOstruct* mTerrainFBO;
         FBOstruct* mTerrainReflectionFBO;
 
@@ -67,8 +73,8 @@ class Terrain
         static const GLfloat TerrainHeightScale =  5.0;
         static const GLfloat TerrainPlaneScale =  20.0;
 
-        std::vector<ModelObject *> mExternalModel;
-
+        std::vector<ModelItem> mReflectionModelMap;
+        std::vector<ModelItem> mDepthModelMap;
 
 };
 

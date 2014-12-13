@@ -61,9 +61,12 @@ void Terrain::initializeTerrain(){
     GLuint shaderSimple = loadShaders("shaders/simple.vert", "shaders/simple.frag");
 	mTerrainDepthModel->setShader(shaderSimple,TERRAIN_SIMPLE_SHADER);
 
+    setDepthModels(mTerrainDepthModel,TERRAIN_SIMPLE_SHADER);
+
+
     /** Load Texture **/
     mTerrainTextureData = new TextureData;
-    LoadTGATextureData((char*)"textures/fft-terrain2.tga", mTerrainTextureData);
+    LoadTGATextureData((char*)"textures/fft-terrain4.tga", mTerrainTextureData);
 
     /** Generate terrain from height map **/
     GenerateTerrain(mTerrainTextureData);
@@ -72,7 +75,7 @@ void Terrain::initializeTerrain(){
     mat4 IdMatrix = IdentityMatrix();
     mTerrainDepthModel->setTransform(IdMatrix,TERRAIN_SIMPLE_SHADER);
 
-    /** Upload u_Clip  parameter **/
+    /** Upload u_Clip  **/
     mTerrainModel->setUniformFloat(0.0,TERRAIN_SHADER,"u_Clip");
 
     /** Set transform **/
@@ -80,8 +83,8 @@ void Terrain::initializeTerrain(){
     mTerrainModel->setTransform(transformMatrix,TERRAIN_SHADER);
 
     /** Initialize FBO's  used for rendering the water reflection **/
-    mTerrainReflectionFBO = initFBO(FBOSize,FBOSize,0);
-    mTerrainFBO = initFBO(FBOSize, FBOSize, 0);
+    mTerrainReflectionFBO   = initFBO(mFBOWidth,mFBOHeight,0);
+    mTerrainFBO             = initFBO(mFBOWidth,mFBOHeight, 0);
 
 
 }
@@ -102,31 +105,55 @@ void Terrain::setClip(bool enabled){
         mTerrainModel->replaceUniformFloat(&flip,SKYBOX_SHADER,"u_Flip");
     }
 }
-void Terrain::drawSimple(mat4 proj, mat4 view){
-    mTerrainDepthModel->draw(TERRAIN_SIMPLE_SHADER,proj,view);
+
+void Terrain::setReflectedModels(ModelObject * modelObj,GLuint shaderId){
+    mReflectionModelMap.push_back(std::make_pair(shaderId,modelObj));
 }
 
-void Terrain::drawDepth(mat4 proj, mat4 view){
-    mTerrainDepthModel->draw(TERRAIN_SIMPLE_SHADER,proj,view);
+void Terrain::setDepthModels(ModelObject * modelObj,GLuint shaderId){
+    mDepthModelMap.push_back(std::make_pair(shaderId,modelObj));
 }
 
-void Terrain::setExternalModels(ModelObject * modelObj){
-    mExternalModel.push_back(modelObj);
-}
-
-void Terrain::renderFlippedExternalModel(mat4 projectionMatrix,mat4 viewMatrix){
+void Terrain::drawReflectedModels(mat4 projectionMatrix,mat4 viewMatrix){
     ModelObject * modelObject;
-    for(std::vector<ModelObject*>::iterator it = mExternalModel.begin(); it != mExternalModel.end(); ++it) {
-        modelObject = *it;
-        /** Flip model in regard to the Y-axis **/
-        modelObject->flipModels();
+    GLuint shaderId;
+    for(ModelIterator it = mReflectionModelMap.begin(); it != mReflectionModelMap.end(); ++it) {
 
-	
-        modelObject->draw(projectionMatrix,viewMatrix);
-	
+        ModelItem item = *it;
+
+        /** Read pair **/
+        shaderId    = item.first;
+        modelObject = item.second;
+
+        /** Flip model in regard to the Y-axis **/
+        modelObject->flipModels(shaderId);
+
+        modelObject->draw(shaderId,projectionMatrix,viewMatrix);
+
         /** Reset model to its original direction **/
-        modelObject->flipModels();
+        modelObject->flipModels(shaderId);
     }
+}
+
+void Terrain::drawDepthModels(mat4 projectionMatrix,mat4 viewMatrix){
+
+  //  mTerrainDepthModel->draw(TERRAIN_SIMPLE_SHADER,projectionMatrix,viewMatrix);
+
+    ModelObject * modelObject;
+    GLuint shaderId;
+    glDisable(GL_CULL_FACE);
+    for(ModelIterator it = mDepthModelMap.begin(); it != mDepthModelMap.end(); ++it) {
+
+        ModelItem item = *it;
+        // Read pair //
+        shaderId    = item.first;
+        modelObject = item.second;
+
+        modelObject->draw(shaderId,projectionMatrix,viewMatrix);
+    }
+    glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+
 }
 
 void Terrain::draw(mat4 proj, mat4 view){
@@ -145,12 +172,14 @@ void Terrain::draw(mat4 proj, mat4 view){
     glDisable(GL_CULL_FACE);
     mTerrainModel->draw(SKYBOX_SHADER,proj,view);
 
-    renderFlippedExternalModel(proj,view);
-	   
+    drawReflectedModels(proj,view);
+
     mTerrainModel->draw(TERRAIN_SHADER,proj,view);
     glDisable(GL_CLIP_DISTANCE0);
     glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
+
+
     /** Draw to Offscreen fbo */
     setClip(false);
     useFBO(mTerrainFBO,NULL,NULL);

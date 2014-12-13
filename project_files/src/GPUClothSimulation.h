@@ -18,7 +18,7 @@
 /** SHADER ID'S **/
 #define GPU_SHADER_CLOTH 0
 #define GPU_SHADER_SPHERE 1
-
+#define GPU_SHADER_SIMPLE_CLOTH 2
 
 
 class GPUClothSimulation:public GPUSimulation

@@ -8,7 +8,8 @@ void main(){
 	
 	
 		//out_Color = vec4(1.0);
-		out_Color  = clamp(texture(u_Texture,f_TexCoord),0.0,0.8); 	
+		float color = pow(clamp(texture(u_Texture,f_TexCoord).x,0.0,0.8),2.0);
+		out_Color  = vec4(color); 	
 	
 }
 

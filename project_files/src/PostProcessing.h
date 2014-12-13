@@ -7,7 +7,7 @@
 #include "LoadTGA.h"
 #include "Terrain.h"
 
-//#define DEBUG 0
+#define DEBUG 0
 #define SHADOW_MAP 1
 
 #define SHADER_LIGHT_VOLUME 0
@@ -47,7 +47,8 @@ class PostProcessing
 		FBOstruct mLightDepthFBO;
 		FBOstruct * mLightFBO;
 		FBOstruct mSceneDepthFBO;
-		static const GLuint mFBOSize = 512;
+		static const GLuint mFBOWidth  = SCREEN_WIDTH;
+		static const GLuint mFBOHeight = SCREEN_HEIGHT;
 
 		mat4 mLightProjectionMatrix;
 		mat4 mLightViewMatrix;
@@ -57,17 +58,18 @@ class PostProcessing
 		mat4 mLightTextureMatrix;
 
 		/** Light frustum **/
-		static const GLfloat mFar = 15.0f;
+		#define FAR_LIGHT 10
+		static const GLfloat mFar = FAR_LIGHT;
 		static const GLfloat mNear = 1.0f;
-		static const GLfloat mRatio = 1.0f;
-		static const GLfloat mScaleFar = 0.15f;
+		static const GLfloat mRatio     = 1.0f;
+		static const GLfloat mScaleFar  = 0.2f;
 		static const GLfloat mScaleNear = 0.05f;
-        static const GLfloat mOffsetFar = 15;
+        static const GLfloat mOffsetFar = FAR_LIGHT;
 		static const GLfloat mOffsetNear = 1;
 
 		/** Light Source Position **/
-		static const GLfloat mLightRadius = 15.0;
-		static const GLfloat mLightHeight = 1.0;
+		static const GLfloat mLightRadius = 3.0;
+		static const GLfloat mLightHeight = 6.0;
 		static const GLfloat mLightSpeed =  0.0005;
 		static const GLfloat mLightResolutiuon = 64.0;
 

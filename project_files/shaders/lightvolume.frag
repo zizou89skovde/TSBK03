@@ -33,8 +33,8 @@ float InScatter(vec3 dir, vec3 lightPos, float d)
 	vec3 q = -lightPos;
 	 
 	// coefficients
-	float b = 0.7*dot(dir, q);
-	float c = 1.0*dot(q, q);
+	float b = dot(dir, q);
+	float c = dot(q, q);
 	 
 	// evaluate integral
 	float s = 1.0f / sqrt(c - b*b);
@@ -61,7 +61,7 @@ void main(void)
 	
     //volumeDepth = min(volumeDepth, depthInCS); // clamp to scene depth
 	/* Compute air light contribution over distance from eye to light */
-    float res = 15.0*InScatter(direction,f_LightPosition,distance);
+    float res = 10.0*InScatter(direction,f_LightPosition,distance);
 
     if (gl_FrontFacing) {
         res*=-1.0;
