@@ -5,7 +5,7 @@
 #include "GL_utilities.h"
 #include "VectorUtils3.h"
 #include "LoadTGA.h"
-#include "Terrain.h"
+#include "Environment.h"
 
 //#define DEBUG 0
 #define SHADOW_MAP 1
@@ -21,7 +21,7 @@ class PostProcessing
     public:
         PostProcessing(GLuint * w, GLuint * h);
         void draw(mat4 proj, mat4 view);
-        void setTerrin(Terrain* terrain){mTerrain = terrain;};
+        void setTerrin(Environment* terrain){mTerrain = terrain;};
         void setCameraInfo(vec3* cameraEye,vec3* cameraCenter);
         virtual ~PostProcessing();
     protected:
@@ -38,7 +38,7 @@ class PostProcessing
         void uploadSquareModelData(ModelObject * modelObj,GLuint shaderId);
 
         /** Terrain Handle **/
-        Terrain * mTerrain;
+        Environment * mTerrain;
 
 		GLuint* mScreenHeight;
 		GLuint* mScreenWidth;

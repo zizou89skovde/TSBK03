@@ -44,11 +44,11 @@ void GPUWaterSimulation::initialize(){
     mGPUWaterScene->setTexture(DUMMY_TEXTURE,GPU_SHADER_WATER,"u_Position_Texture");
 
     /** Upload Offscreen rendering of the terrain */
-	FBOstruct * terrainFBO = mTerrain->getTerrainFBO();
+	FBOstruct * terrainFBO = mTerrain->getEnvironmentFBO();
     mGPUWaterScene->setTexture(terrainFBO->texid,GPU_SHADER_WATER,"u_TerrainColor");
 
     /** Upload upside down rendering of the terrain  **/
-    FBOstruct * terrainReflectionFBO = mTerrain->getTerrainReflectedFBO();
+    FBOstruct * terrainReflectionFBO = mTerrain->getEnvironmentReflectedFBO();
     mGPUWaterScene->setTexture(terrainReflectionFBO->texid,GPU_SHADER_WATER,"u_TerrainReflection");
 
     /** Upload grid resolution **/
@@ -84,9 +84,9 @@ void GPUWaterSimulation::configureSimulation(){
 
 
     /** Upload ground heightmap **/
-    TextureData* textureData = mTerrain->getTextureData();
+  /* TextureData* textureData = mTerrain->getTextureData();
     setSimulationTexture(textureData->texID,"u_HeightMap");
-
+*/
     /** Upload Rain **/
     GLfloat rain[] = {0.0,0.0,0.02,0.030};
     setSimulationConstant(rain,4,"u_RainDrop");
@@ -94,11 +94,11 @@ void GPUWaterSimulation::configureSimulation(){
     /** Upload system props **/
     setSimulationConstant(GpuSystemDeltaTime,"u_DeltaTime");
     setSimulationConstant(GpuSystemDamping,"u_SystemDamping");
-
+/*
     TerrainMetaData* terrainMeta = mTerrain->getTerrainMetaData();
     setSimulationConstant(terrainMeta->HeightScale, "u_TerrainHeight");
     setSimulationConstant(terrainMeta->TerrainSize, "u_TerrainSize");
-
+*/
     mPreviousTime = 0.0f;
     /** Upload wind **/
 	//uploadTime(0.0079);

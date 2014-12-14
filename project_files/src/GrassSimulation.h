@@ -4,7 +4,7 @@
 #include "GL_utilities.h"
 #include "ModelObject.h"
 #include "LoadTGA.h"
-#include "Terrain.h"
+#include "Environment.h"
 
 #define GRASS_SHADER_ID	0
 
@@ -19,13 +19,13 @@ class GrassSimulation
         virtual ~GrassSimulation();
         void initialize();
         void draw(mat4 projectionMatrix,mat4 viewMatrix);
-        void setTerrain(Terrain * terrain);
+        void setTerrain(Environment * terrain);
         void update();
 
     protected:
 
     private:
-        Terrain * mTerrain;
+        Environment * mTerrain;
     	ModelObject * mGrassScene;
         GLfloat previousTime;
 		GLfloat angle;

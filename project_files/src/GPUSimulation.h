@@ -5,7 +5,7 @@
 #include "GL_utilities.h"
 #include "VectorUtils3.h"
 #include "SimulationClass.h"
-#include "Terrain.h"
+#include "Environment.h"
 
 #include <math.h>
 #include <vector>
@@ -44,7 +44,7 @@ class GPUSimulation: public SimulationClass
         virtual void initialize(){};
 
 
-        void setTerrain(Terrain * terrain){mTerrain = terrain;}
+        void setTerrain(Environment * terrain){mTerrain = terrain;}
 
 
     protected:
@@ -63,7 +63,7 @@ class GPUSimulation: public SimulationClass
         void replaceSimulationTexture(GLuint texid,const char* uniformName);
 
         FBOstruct* simulate(GLuint numIterations);
-         Terrain* mTerrain;
+         Environment* mTerrain;
         GLuint* mScreenWidth;
         GLuint* mScreenHeight;
 
