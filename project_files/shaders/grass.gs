@@ -141,7 +141,7 @@ void createGrassStraw1(inout vec3 grassVertices[NUM_OF_GRASS_VERTICES], in float
 	float grassDeltaZLast = 0.001 + 0.25*grassNoise;
 	float grassDeltaZ = 0.001 + 0.05*grassNoise;
 
-	float scaleGrass = 0.3;
+	float scaleGrass = 0.8;
 
 	grassVertices[0] = scaleGrass*vec3(0.0);
 	grassVertices[1] = scaleGrass*vec3(3.0*grassBaseWidth, 0.0, grassDeltaZ);

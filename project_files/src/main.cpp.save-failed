@@ -26,7 +26,7 @@
 #include "PostProcessing.h"
 
 #include "GrassSimulation.h"
-#include "Environment.h"
+#include "Terrain.h"
 #include "TerrainLOD.h"
 #include "KeyMouseHandler.h"
 
@@ -48,23 +48,22 @@ GPUSimulation* clothSimulation;
 GrassSimulation* mGrassSimulation;
 GPUWaterSimulation* waterSimulation;
 PostProcessing* postProcessing;
-Environment* mEnvironment;
+Terrain* mTerrain;
 TerrainLOD* mTerrainLOD;
 
 void init(void)
 {
 	//dumpInfo();  // shader info
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// GL inits
 	glClearColor(0.1, 0.1, 0.3, 0);
 	glClearDepth(1.0);
 	glEnable(GL_DEPTH_TEST);
 	printError("GL inits");
+
+	//mTerrain = new Terrain(&WIDTH,&HEIGHT);
 	mTerrainLOD = new TerrainLOD();
 	mTerrainLOD->initialize();
-	mEnvironment = new Environment(&WIDTH,&HEIGHT);
-
 /*
 	postProcessing = new PostProcessing(&WIDTH,&HEIGHT);
     postProcessing->setTerrin(mTerrain);
@@ -117,7 +116,7 @@ void display(void)
 
     viewMatrix = mKeyMouseHandler.getViewMatrix();
 
-   // mTerrain->draw(projectionMatrix,viewMatrix);
+  //  mTerrain->draw(projectionMatrix,viewMatrix);
 
     mTerrainLOD->draw(projectionMatrix,viewMatrix);
 

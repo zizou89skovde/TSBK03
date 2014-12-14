@@ -55,7 +55,7 @@ void Terrain::initializeTerrain(){
 
 
     /** Load shader, one Phong shader, and shader without any shading ( for depth rendering ) */
-    GLuint shader = loadShaders("shaders/terrain.vert", "shaders/terrain.frag");
+    GLuint shader = loadShadersG("shaders/terrain.vert", "shaders/terrain.frag", "shaders/terrain.gs");
 	mTerrainModel->setShader(shader,TERRAIN_SHADER);
 
     GLuint shaderSimple = loadShaders("shaders/simple.vert", "shaders/simple.frag");
@@ -66,7 +66,7 @@ void Terrain::initializeTerrain(){
 
     /** Load Texture **/
     mTerrainTextureData = new TextureData;
-    LoadTGATextureData((char*)"textures/fft-terrain4.tga", mTerrainTextureData);
+    LoadTGATextureData((char*)"textures/fft-terrain5.tga", mTerrainTextureData);
 
     /** Generate terrain from height map **/
     GenerateTerrain(mTerrainTextureData);

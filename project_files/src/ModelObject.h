@@ -24,7 +24,9 @@
 
 typedef enum{
 	ARRAYS,
-	A_POINTS
+	POINTSTEST,
+	PATCHES,
+	INSTANCED
 }DrawMethod_Type;
 
 typedef enum{
@@ -92,6 +94,9 @@ typedef struct{
 	/** Draw method type **/
 	DrawMethod_Type sDrawMethod;
 
+	/** Number of instances (uses if INSTANCE-draw method is selected **/
+	GLuint sNumInstances;
+
 
     Model_Type * sModelData;
 
@@ -137,7 +142,8 @@ class ModelObject
         void setUniformMatrix(mat4 data, GLuint shaderId, const char* uniformName);
         void setUniformFloat(const GLfloat data, GLuint shaderId, const char* uniformName);
         void setTransform(mat4 transf,GLuint id);
-		void setDrawMethod(GLuint shaderId, DrawMethod_Type method);
+		void setDrawMethod(DrawMethod_Type method, GLuint shaderId);
+		void setNumInstances(GLuint numInstances, GLuint shaderId);
 
 
 		/* Get functions */
@@ -169,6 +175,8 @@ class ModelObject
         void drawModel(Shader_Type* shader);
 		void drawPoints(Shader_Type *  shader,mat4 projectionMatrix, mat4 viewMatrix);
 		void drawArrays(Shader_Type *  shader,mat4 projectionMatrix, mat4 viewMatrix);
+		void drawPatches(Shader_Type * shader,mat4 projectionMatrix, mat4 viewMatrix);
+		void drawInstanced(Shader_Type * shader,mat4 projectionMatrix, mat4 viewMatrix);
 
 
 

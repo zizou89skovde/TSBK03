@@ -404,7 +404,7 @@ void ModelObject::drawPoints(Shader_Type * shader,mat4 projectionMatrix, mat4 vi
 	glBindVertexArray(m->vao);	// Select VAO
     #ifdef MODEL_OBJECT_VERBOSE
     printError("VAO");
-    #endisf
+    #endif
 
 	selectTexture(shader);
 
@@ -482,10 +482,10 @@ void ModelObject::drawPatches(Shader_Type * shader,mat4 projectionMatrix, mat4 v
 	else
 		fprintf(stderr, "DrawModel warning: '%s' not found in shader!\n", "in_Position");
 
-	loc = glGetAttribLocation(program, "in_TextureCoord");
+	GLuint loc = glGetAttribLocation(program, "in_Position");
 	if (loc >= 0)
 	{
-		glVertexAttribPointer(loc, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, 0, 0);
 		glEnableVertexAttribArray(loc);
 	}
 	else

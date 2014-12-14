@@ -38,7 +38,7 @@ void GrassSimulation::initialize(){
 	/***** START WATCH OUT **********************************************************************************/
 
     /** Upload terrain parameters **/
-    /*TerrainMetaData* terrainData = mTerrain->getTerrainMetaData();
+    TerrainMetaData* terrainData = mTerrain->getTerrainMetaData();
     GLfloat * gridOffset = (GLfloat*)malloc(sizeof(GLfloat)*3);
     gridOffset[0] = -terrainData->TerrainSize/2.0;
     gridOffset[1] = 0;
@@ -47,13 +47,13 @@ void GrassSimulation::initialize(){
     //mGrassScene->setUniform(terrainData->TerrainResolution,"u_GridResolution");
     mGrassScene->setUniformFloat(terrainData->TerrainSize,GRASS_SHADER_ID,"u_GridSize");
     mGrassScene->setUniformFloat(terrainData->HeightScale,GRASS_SHADER_ID,"u_GridHeightScale");
-*/
+
     /** Set hight map texture **/
 /*
 	GLuint heightMapTexture;
-	LoadTGATextureSimple("textures/fft-terrain4.tga",&heightMapTexture);
+	LoadTGATextureSimple("textures/fft-terrain4.tga",&heightMapTexture);*/
     mGrassScene->setTexture(mTerrain->getTextureData()->texID,GRASS_SHADER_ID,"u_HeightMap");
-*/
+
 	/***** END WATCH OUT **********************************************************************************/
 
 
