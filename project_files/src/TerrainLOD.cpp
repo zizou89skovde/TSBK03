@@ -71,8 +71,8 @@ void TerrainLOD::generateLODBuffers(ModelObject * modelObj, GLuint shaderId){
     GLfloat RES_X = 1.0f/(DIM_X-1);
     GLfloat RES_Z = 1.0f/(DIM_Z-1);
 
-    GLfloat sizeZ  = 20;
-    GLfloat sizeX = 20;
+    GLfloat sizeZ  = 100;
+    GLfloat sizeX = 100;
 
     GLfloat STEP_X =  sizeX*RES_X;
     GLfloat STEP_Z =  sizeX*RES_Z;
@@ -216,3 +216,9 @@ void TerrainLOD::uploadSquareModelData(ModelObject * modelObj,GLuint shaderId){
 
     printError("Cloth Gen Position Buffer Coordinates ");
 }
+/*
+void TerrainLOD::setCameraInfo(vec3 * cameraEye, vec3* cameraCenter){
+    mCameraCenter  = cameraCenter;
+    mCameraEye     = cameraEye;
+}
+*/

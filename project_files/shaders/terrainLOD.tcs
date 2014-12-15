@@ -2,16 +2,38 @@
 
 layout (vertices = 3) out;
 
+uniform mat4 MV_Matrix;
+
+
+float calc_LoD(vec3 v0, vec3 v1)
+{
+	float LoD_Factor = 100;
+	float LoD_Levels = 64;
+	float dist_v0_v1 = distance(v0, v1);
+	float tessFactor = LoD_Factor/dist_v0_v1;
+    return clamp(tessFactor, 1, LoD_Levels);
+}
+
+
 void main(void)
 {
-	
     if (gl_InvocationID == 0)
     {
-        gl_TessLevelInner[0] = 3.0;
-        gl_TessLevelOuter[0] = 8.0;
-        gl_TessLevelOuter[1] = 3.0;
-        gl_TessLevelOuter[2] = 3.0;
-
+		// Convert vertices to camera view
+		vec4 v0 = MV_Matrix*gl_in[0].gl_Position;
+		vec4 v1 = MV_Matrix*gl_in[1].gl_Position;
+		vec4 v2 = MV_Matrix*gl_in[2].gl_Position;
+		
+		// Calculate Level of Detail
+		float lod0 = calc_LoD(vec3(v0), vec3(0.0));
+		float lod1 = calc_LoD(vec3(v1), vec3(0.0));
+		float lod2 = calc_LoD(vec3(v2), vec3(0.0));
+		
+		// Set Tessellation level
+		gl_TessLevelOuter[0] = lod0;
+		gl_TessLevelOuter[1] = lod1;
+		gl_TessLevelOuter[2] = lod2;
+		gl_TessLevelInner[0] = max(max(lod0, lod1), lod2);
     }
     gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
 }

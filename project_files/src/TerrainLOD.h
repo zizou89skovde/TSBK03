@@ -27,6 +27,7 @@ class TerrainLOD{
         void draw(mat4 projectionMatrix,mat4 viewMatrix);
         TextureData * getTextureData();
         TerrainMetaData * getTerrainMetaData();
+        //void TerrainLOD::setCameraInfo(vec3 * cameraEye, vec3* cameraCenter);
     protected:
 
     private:

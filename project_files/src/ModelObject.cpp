@@ -404,7 +404,7 @@ void ModelObject::drawPoints(Shader_Type * shader,mat4 projectionMatrix, mat4 vi
 	glBindVertexArray(m->vao);	// Select VAO
     #ifdef MODEL_OBJECT_VERBOSE
     printError("VAO");
-    #endisf
+    #endif
 
 	selectTexture(shader);
 
