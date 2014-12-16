@@ -24,6 +24,7 @@
 #include "GPUClothSimulation.h"
 #include "GPUWaterSimulation.h"
 #include "PostProcessing.h"
+#include "CelShading.h"
 
 #include "GrassSimulation.h"
 #include "Terrain.h"
@@ -38,6 +39,7 @@ KeyMouseHandler mKeyMouseHandler;
 //----------------------Globals-------------------------------------------------
 mat4 projectionMatrix;
 mat4 viewMatrix;
+FBOstruct* fbo1;
 //-------------------------------------------------------------------------------------
 
 GLuint WIDTH;
@@ -48,6 +50,7 @@ GPUSimulation * clothSimulation;
 GrassSimulation * mGrassSimulation;
 GPUWaterSimulation * waterSimulation;
 PostProcessing * postProcessing;
+CelShading * celShading;
 Terrain *mTerrain;
 void init(void)
 {
@@ -59,8 +62,10 @@ void init(void)
 	glEnable(GL_DEPTH_TEST);
 	printError("GL inits");
 
-	mTerrain = new Terrain(&WIDTH,&HEIGHT);
+    // Set up FBO with depth buffer
+	fbo1 = initFBO2(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 1);
 
+/*	mTerrain = new Terrain(&WIDTH,&HEIGHT);
 
 	postProcessing = new PostProcessing(&WIDTH,&HEIGHT);
     postProcessing->setTerrin(mTerrain);
@@ -70,9 +75,9 @@ void init(void)
     clothSimulation->setTerrain(mTerrain);
     clothSimulation->initialize();
 
-      waterSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
+    waterSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
     waterSimulation->setTerrain(mTerrain);
-    waterSimulation->initialize();
+    waterSimulation->initialize();*/
 
 /*
 
@@ -86,6 +91,8 @@ void init(void)
     mGrassSimulation->initialize();
 */
 
+    celShading = new CelShading(&WIDTH, &HEIGHT);
+    celShading->initialize(fbo1);
 
     // Create key/mouse handler
     //mKeyMouseHandler = KeyMouseHandler();
@@ -106,6 +113,9 @@ void display(void)
 	//  a new frame; due to the idle()-function below, this
 	//  function will get called several times per second
 
+	// Render to fbo1
+	useFBO(fbo1, 0L, 0L);
+
 	// Enable Z-buffering
 	glEnable(GL_DEPTH_TEST);
 	// Enable backface culling
@@ -113,26 +123,22 @@ void display(void)
 	glCullFace(GL_BACK);
     //glDisable(GL_CULL_FACE);
 	//	glFlush(); // Can cause flickering on some systems. Can also be necessary to make drawing complete.
-	glClearColor(0.0, 0.0, 0.0, 0);
+	glClearColor(1.0, 1.0, 1.0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-
     viewMatrix = mKeyMouseHandler.getViewMatrix();
-    mTerrain->draw(projectionMatrix,viewMatrix);
+    //mTerrain->draw(projectionMatrix,viewMatrix);
 
 
 /*
    	mGrassSimulation->draw(projectionMatrix,viewMatrix);
 	mGrassSimulation->update();
 
-
 	*/
-	  waterSimulation->draw(projectionMatrix,viewMatrix);
-    clothSimulation->draw(projectionMatrix,viewMatrix);
-	postProcessing->draw(projectionMatrix,viewMatrix);
-
-
+	//waterSimulation->draw(projectionMatrix,viewMatrix);
+    //clothSimulation->draw(projectionMatrix,viewMatrix);
+	//postProcessing->draw(projectionMatrix,viewMatrix);
+    celShading->draw(projectionMatrix, viewMatrix);
 
 	glutSwapBuffers();
 }
