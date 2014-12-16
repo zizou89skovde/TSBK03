@@ -37,6 +37,8 @@
 
 //#define CEL_SHADING
 
+
+
 void OnTimer(int value);
 KeyMouseHandler mKeyMouseHandler;
 //----------------------Globals-------------------------------------------------
@@ -78,7 +80,7 @@ void init(void)
 	mTerrainLOD = new TerrainLOD();
 	mTerrainLOD->setEnvironment(mEnvironment);
 	mTerrainLOD->initialize();
-
+/*
     clothSimulation = new GPUClothSimulation(&WIDTH,&HEIGHT);
     clothSimulation->setEnvironment(mEnvironment);
     clothSimulation->initialize();
@@ -87,6 +89,7 @@ void init(void)
     waterSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
     waterSimulation->setEnvironment(mEnvironment);
     waterSimulation->initialize();
+    */
 /*
 */
 
@@ -95,6 +98,7 @@ void init(void)
     postProcessing->setTerrin(mEnvironment);
     mKeyMouseHandler.setPostProcessing(postProcessing);
 */
+
     mGrassSimulation = new GrassSimulation();
     mGrassSimulation->setEnvironment(mEnvironment);
     mGrassSimulation->initialize();
@@ -142,8 +146,8 @@ void display(void)
 
     mEnvironment->draw(projectionMatrix,viewMatrix);
 
-    waterSimulation->draw(projectionMatrix,viewMatrix);
-    clothSimulation->draw(projectionMatrix,viewMatrix);
+    //waterSimulation->draw(projectionMatrix,viewMatrix);
+    //clothSimulation->draw(projectionMatrix,viewMatrix);
 //    postProcessing->draw(projectionMatrix,viewMatrix);
 
 
