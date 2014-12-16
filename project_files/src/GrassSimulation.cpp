@@ -20,7 +20,7 @@ void GrassSimulation::initialize(){
 	mGrassScene->setShader(grassShader, GRASS_SHADER_ID, MVP); //mGrassScene->setShader(grassShader, GRASS_SHADER_ID,VP);
 	mGrassScene->setTransform(IdentityMatrix(), GRASS_SHADER_ID);
 	//mGrassScene->setDrawMethod(PATCHES, GRASS_SHADER_ID);
-	//mGrassScene->setDrawMethod(POINTSTEST, GRASS_SHADER_ID);
+
 
 	mEnvironment->setReflectedModels(mGrassScene,GRASS_SHADER_ID);
 
