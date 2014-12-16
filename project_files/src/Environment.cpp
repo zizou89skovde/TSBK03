@@ -213,7 +213,7 @@ void Environment::drawDepthModels(mat4 projectionMatrix,mat4 viewMatrix){
 
 void Environment::draw(mat4 proj, mat4 view){
     mEnvironmentModel->draw(SKYBOX_SHADER,proj,view);
-    drawRefractedModels(proj,view);
+   // drawRefractedModels(proj,view);
     drawReflectedModels(proj,view);
 
 }

@@ -7,7 +7,7 @@ uniform mat4 MV_Matrix;
 
 float calc_LoD(vec3 v0, vec3 v1)
 {
-	float LoD_Factor = 60;
+	float LoD_Factor = 20;
 	float LoD_Levels = 64;
 	float dist_v0_v1 = distance(v0, v1);
 	float tessFactor = LoD_Factor/dist_v0_v1;
