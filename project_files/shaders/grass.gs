@@ -5,7 +5,7 @@
 
 #define PI 3.141592653589793
 
-layout (points, invocations = NUM_OF_GRASS_STRAWS_PER_TRIANGLE) in;
+layout (triangles, invocations = NUM_OF_GRASS_STRAWS_PER_TRIANGLE) in;
 //layout (points) in;
 layout (triangle_strip, max_vertices = NUM_OF_GRASS_VERTICES) out;
 
@@ -21,12 +21,12 @@ uniform mat4 MV_Matrix;
 uniform mat4 P_Matrix;
 
 uniform float u_Wind;
-/*
+
 in vec2 g_TextureCoord[3];
 in float g_Height[3];
-*/
-in vec2 g_TextureCoord[1];
-in float g_Height[1];
+
+//in vec2 g_TextureCoord[1];
+//in float g_Height[1];
 
 out vec3 f_Normal;
 
@@ -46,17 +46,27 @@ void main()
 	float height = 0;
 	vec2 texCoord = vec2(0.0);
 	
-	//	getPosition(position, height, texCoord);
-	position = gl_in[0].gl_Position.xyz; 
-
-	vec3 viewPosition = (MV_Matrix * vec4(position,1.0)).xyz;
+	// Get position of input triangle primitive //
+	for (int i = 0; i < 3; ++i) {
+		position += gl_in[i].gl_Position.xyz; 
+		height += g_Height[i];
+		texCoord += g_TextureCoord[i];
+	}
+	position /= 3.0;
+	height /= 3.0;
+	texCoord /= 3.0;
 	
-
+	
+	//	getPosition(position, height, texCoord);
+	//position = gl_in[0].gl_Position.xyz; 
+	//height = g_Height[0]; //+10.0;
+	//texCoord = g_TextureCoord[0];
+	
+	//vec3 viewPosition = (MV_Matrix * vec4(position,1.0)).xyz;
 	//Längden från ögat/kameran till vertex :
-	float distance = length(viewPosition);
+	//float distance = length(viewPosition);
 
-	height = g_Height[0]; //+10.0;
-	texCoord = g_TextureCoord[0];
+
 
 
 	// Read grass mask from texture, returns value between 0 and 1 

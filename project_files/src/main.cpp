@@ -67,7 +67,7 @@ void init(void)
 	mTerrainLOD->setEnvironment(mEnvironment);
 	mTerrainLOD->initialize();
 
-
+/*
     clothSimulation = new GPUClothSimulation(&WIDTH,&HEIGHT);
     clothSimulation->setEnvironment(mEnvironment);
     clothSimulation->initialize();
@@ -80,7 +80,7 @@ void init(void)
     postProcessing = new PostProcessing(&WIDTH,&HEIGHT);
     postProcessing->setTerrin(mEnvironment);
     mKeyMouseHandler.setPostProcessing(postProcessing);
-
+*/
 
 
 
@@ -126,13 +126,13 @@ void display(void)
     mEnvironment->draw(projectionMatrix,viewMatrix);
 
     mTerrainLOD->draw(projectionMatrix,viewMatrix);
-
+/*
     clothSimulation->draw(projectionMatrix,viewMatrix);
     waterSimulation->draw(projectionMatrix,viewMatrix);
-
+*/
     mGrassSimulation->draw(projectionMatrix,viewMatrix);
 	mGrassSimulation->update();
-	postProcessing->draw(projectionMatrix,viewMatrix);
+	//postProcessing->draw(projectionMatrix,viewMatrix);
 
 
 

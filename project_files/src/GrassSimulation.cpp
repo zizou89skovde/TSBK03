@@ -14,11 +14,13 @@ void GrassSimulation::initialize(){
 
 	/** Load shader **/
 	GLuint grassShader = loadShadersG("shaders/grass.vert", "shaders/grass.frag", "shaders/grass.gs");
+	//GLuint grassShader = loadShadersGT("shaders/grass.vert", "shaders/grass.frag", "shaders/grass.gs", "shaders/grass.tcs", "shaders/grass.tes");
 	//GLuint grassShader = loadShaders("shaders/grass.vert", "shaders/grass.frag");
 
 	mGrassScene->setShader(grassShader, GRASS_SHADER_ID, MVP); //mGrassScene->setShader(grassShader, GRASS_SHADER_ID,VP);
 	mGrassScene->setTransform(IdentityMatrix(), GRASS_SHADER_ID);
-	mGrassScene->setDrawMethod(POINTSTEST, GRASS_SHADER_ID);
+	mGrassScene->setDrawMethod(PATCHES, GRASS_SHADER_ID);
+	//mGrassScene->setDrawMethod(POINTSTEST, GRASS_SHADER_ID);
 
 	mEnvironment->setReflectedModels(mGrassScene,GRASS_SHADER_ID);
 
@@ -28,8 +30,8 @@ void GrassSimulation::initialize(){
     LoadTGATextureData((char*)"textures/test2.tga", &textureData);
 
     /**  Upload buffer coordinates **/
-    uploadBufferCoordinates(mGrassScene,&textureData,GRASS_SHADER_ID);
-
+    //uploadBufferCoordinates(mGrassScene,&textureData,GRASS_SHADER_ID);
+    generateGrassMesh();
 
     mGrassScene->setUniformFloat(1.0f, GRASS_SHADER_ID, "u_Wind");
 
@@ -67,32 +69,22 @@ void GrassSimulation::setEnvironment(Environment * environment){
 }
 */
 
-
-
+/*
 void GrassSimulation::uploadBufferCoordinates(ModelObject * modelobject,TextureData* maskTexture, GLuint shaderId){
-
 
 	GLuint textureWidth = maskTexture->width; // OBS 256!
 	GLuint textureHeight = maskTexture->height;
-
-    GLuint DIM = 600; /* Antal vertices per rad*/
-
+    GLuint DIM = 600; // Antal vertices per rad
     GLuint vertexCount = DIM*DIM;
     GLfloat *vertexArray = (GLfloat *) malloc(sizeof(GLfloat) * (FLOATS_PER_TEXEL) * vertexCount);
 	GLuint indexCount = 0;
 
-     for(GLuint y = 0; y < DIM; ++y)			//y = [0, 99]
-        for(GLuint x = 0; x < DIM; ++x){		//x = [0, 99]
-            float xPos = x/(float)(DIM-1);		//xPos = [0, 1]
-		//	printf("x = %d, xPos = %f \n", x, xPos);
-            float yPos = y/(float)(DIM-1);		//yPos = [0, 1]
-		//	printf("y = %d, yPos = %f \n", y, yPos);
-
-			GLuint texCoordX = (int)(xPos*(textureWidth-1)); //OBS texCoordX = [0, 256] ta minus 1?
-			//printf("texCoordX = %d \n", texCoordX);
+     for(GLuint y = 0; y < DIM; ++y)
+        for(GLuint x = 0; x < DIM; ++x){
+            float xPos = x/(float)(DIM-1);
+            float yPos = y/(float)(DIM-1);
+			GLuint texCoordX = (int)(xPos*(textureWidth-1));
 			GLuint texCoordY = (int)(yPos*(textureHeight - 1));
-
-
 			GLuint mask = maskTexture->imageData[(texCoordX + texCoordY * maskTexture->width) * (maskTexture->bpp/8)]; // 0 -> 255
 			if(mask == 255){
             	vertexArray[indexCount++] = xPos;
@@ -100,92 +92,109 @@ void GrassSimulation::uploadBufferCoordinates(ModelObject * modelobject,TextureD
             	vertexArray[indexCount++] = 0;
 			}
         }
-
 	size_t numBytes = sizeof(GLfloat) * indexCount;
 
 	// DEBUG
 	printf("GrassSimulation information: \n");
 	printf("number of masked grass vertices = %d \n", (int) indexCount/3);
-    //printf("indexCount = %d \n", (int) indexCount);
-	//printf("numBytes = %d \n", (int)numBytes);
 
-	/** Create array with a length that matches the number of masked vertices **/
+	// Create array with a length that matches the number of masked vertices
 	GLfloat * maskedArray = (GLfloat *) malloc(numBytes);
 
-	/** Copy masked vertices **/
+	// Copy masked vertices
 	memcpy(maskedArray,vertexArray,numBytes);
 
-	/** Free original buffer **/
+	// Free original buffer
 	free(vertexArray);
 
-
-
 	Model * m = new Model();
-
 	glGenVertexArrays(1,&m->vao);
 	glBindVertexArray(m->vao);
-
 	glGenBuffers(1, &m->vb);
 	glBindBuffer(GL_ARRAY_BUFFER, m->vb);
 	glBufferData(GL_ARRAY_BUFFER, numBytes, maskedArray, GL_STATIC_DRAW);
-
-
 	m->numVertices = indexCount/3;
 
-	/** Free data */
+	// Free data
 	free(maskTexture->imageData);
 	free(maskedArray);
-
 	modelobject->setModel(m,shaderId);
+}
+*/
 
+void GrassSimulation::generateGrassMesh() {
 
+    GLuint  dimension  = GrassMeshBaseDimension;
+    GLfloat resolution = 1.0f/((GLfloat)GrassMeshBaseDimension-1.0f);
+    GLuint vertexCount = dimension*dimension;
+    GLuint triangleCount = (dimension-1) * (dimension-1)* 2;
+    GLuint indexCount    = triangleCount*VERTICES_PER_TRIANGLE;
+    GLfloat vertexArray[FLOATS_PER_POSITION * vertexCount];
 
+    for(GLuint z = 0; z < dimension; ++z)
+        for(GLuint x = 0; x < dimension; ++x){
+            GLfloat xPos = (GLfloat)x*resolution;
+            GLfloat zPos = (GLfloat)z*resolution;
+            vertexArray[(x + z * dimension)*3 + 0] = xPos;
+            vertexArray[(x + z * dimension)*3 + 1] = 0;
+            vertexArray[(x + z * dimension)*3 + 2] = zPos;
+    }
+
+    GLuint indexArray[indexCount];
+    for (GLuint y = 0; y < dimension-1; y++)
+        for (GLuint x = 0; x < dimension-1; x++)
+        {
+        // Triangle 1
+            indexArray[(x + y * (dimension-1))*INDICES_PER_QUAD + 0] = x + y * dimension;
+            indexArray[(x + y * (dimension-1))*INDICES_PER_QUAD + 1] = x + (y+1) * dimension;
+            indexArray[(x + y * (dimension-1))*INDICES_PER_QUAD + 2] = x+1 + y * dimension;
+        // Triangle 2
+            indexArray[(x + y *  (dimension-1))*INDICES_PER_QUAD + 3] = x+1 + y * dimension;
+            indexArray[(x + y *  (dimension-1))*INDICES_PER_QUAD + 4] = x + (y+1) * dimension;
+            indexArray[(x + y *  (dimension-1))*INDICES_PER_QUAD + 5] = x+1 + (y+1) * dimension;
+        }
+
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    GLuint positions;
+    glGenBuffers(1, &positions);
+    glBindBuffer(GL_ARRAY_BUFFER, positions);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexArray), vertexArray, GL_STATIC_DRAW);
+
+    GLuint indices;
+    glGenBuffers(1, &indices);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexArray), indexArray, GL_STATIC_DRAW);
+
+    Model * model = new Model();
+    model->numIndices = indexCount;
+    model->ib = indices;
+    model->vao = vao;
+    model->vb = positions;
+    mGrassScene->setModel(model,GRASS_SHADER_ID);
+    printError("generateGrassMesh");
 }
 
-void GrassSimulation::draw(mat4 projectionMatrix,mat4 viewMatrix){
+void GrassSimulation::draw(mat4 projectionMatrix,mat4 viewMatrix) {
 
 	glDisable(GL_CULL_FACE);
 	mGrassScene->draw(GRASS_SHADER_ID,projectionMatrix,viewMatrix);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
-
-
 }
 
-void GrassSimulation::update(){
-
-	//GLfloat temp = 2.0f;
-	//mGrassScene->replaceUniform(&temp,"u_Wind");
-
-
-   /* if(previousTime < 0){
-        previousTime = glutGet(GLUT_ELAPSED_TIME);
-        return;
-    }
-
-    GLfloat newTime = (GLfloat) glutGet(GLUT_ELAPSED_TIME);
-    GLfloat elapsedTime = newTime-previousTime;
-	*/
-
+void GrassSimulation::update() {
 	GLfloat dt = 0.0005f;
 	GLfloat pi = 3.141592653589793;
-
 	angle += dt;
+
 	if (angle >= 2*pi) {
 		angle = 0;
 	}
-	//printf("Vind: %f \n", angle);
-	mGrassScene->replaceUniformFloat(&angle,GRASS_SHADER_ID,"u_Wind");
-/*
-    GLuint numIterations = (GLuint)(elapsedTime/(dt*1.0f));
-    if(numIterations > 0){
-        previousTime = newTime;
-        applyForces();
-        integrate();
-        checkCollision();
 
-    }
-*/
+	mGrassScene->replaceUniformFloat(&angle,GRASS_SHADER_ID,"u_Wind");
 }
 
 GrassSimulation::~GrassSimulation()

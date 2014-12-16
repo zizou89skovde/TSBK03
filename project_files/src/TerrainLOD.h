@@ -37,10 +37,6 @@ class TerrainLOD{
         Environment * mEnvironment;
 
         static const GLuint TerrainBaseDimension = 64;
-
-
-
-
 };
 
 
