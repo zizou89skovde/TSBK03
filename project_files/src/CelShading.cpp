@@ -27,7 +27,7 @@ void CelShading::initialize(FBOstruct* fbo_in)
     // Sphere Shader
     GLuint sphereShader = loadShaders("shaders/sphere.vert", "shaders/sphere.frag");
     mCelObject->setShader(sphereShader, CEL_SPHERE_SHADER_ID);
-    mCelObject->setDrawMethod(CEL_SPHERE_SHADER_ID, ARRAYS);
+//    mCelObject->setDrawMethod(CEL_SPHERE_SHADER_ID, ARRAYS);
 
     // Sphere data
     Sphere* sphere = new Sphere();
@@ -80,7 +80,7 @@ void CelShading::initialize(FBOstruct* fbo_in)
 void CelShading::draw(mat4 projectionMatrix, mat4 viewMatrix)
 {
     // Draw debug sphere to previously chosen fbo (both texture & depth)
-	mCelObject->draw(CEL_SPHERE_SHADER_ID, projectionMatrix, viewMatrix);
+	//mCelObject->draw(CEL_SPHERE_SHADER_ID, projectionMatrix, viewMatrix);
 
     useFBO(mContourFBO, 0L, 0L);
     glClearColor(0.0, 0.0, 0.0, 0);

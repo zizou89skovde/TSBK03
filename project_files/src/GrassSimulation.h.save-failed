@@ -34,8 +34,8 @@ class GrassSimulation
         GLfloat previousTime;
 		GLfloat angle;
         static const GLuint GrassMeshBaseDimension = 64;
-        void generateGrassMesh();
-    	//void uploadBufferCoordinates(ModelObject * modelobject,TextureData * maskTexture,GLuint shaderId);
+        //void generateGrassMesh();
+    	void uploadBufferCoordinates(ModelObject * modelobject,TextureData * maskTexture,GLuint shaderId);
 };
 
 #endif // GRASSSIMULATION_H

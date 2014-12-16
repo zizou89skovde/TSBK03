@@ -1,8 +1,8 @@
 #ifndef SCREEN_SIZE_H
 #define SCREEN_SIZE_H
 
-#define SCREEN_HEIGHT 512
-#define SCREEN_WIDTH 512
+#define SCREEN_HEIGHT 720
+#define SCREEN_WIDTH 720
 
 #endif // SCREEN_SIZE_H
 

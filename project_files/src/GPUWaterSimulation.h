@@ -55,6 +55,8 @@ class GPUWaterSimulation:public GPUSimulation
 		GLuint mPreviousScreenWidth;
 		GLuint mPreviousScreenHeight;
 
+
+
     private:
         void configureSimulation();
         void raindrops();

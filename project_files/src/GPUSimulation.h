@@ -5,7 +5,7 @@
 #include "GL_utilities.h"
 #include "VectorUtils3.h"
 #include "SimulationClass.h"
-#include "Terrain.h"
+#include "Environment.h"
 
 #include <math.h>
 #include <vector>
@@ -43,8 +43,8 @@ class GPUSimulation: public SimulationClass
         virtual ~GPUSimulation();
         virtual void initialize(){};
 
-
-        void setTerrain(Terrain * terrain){mTerrain = terrain;}
+        void setDefaultFBO(FBOstruct* fbo);
+        void setEnvironment(Environment * environment){mEnvironment = environment;}
 
 
     protected:
@@ -58,12 +58,14 @@ class GPUSimulation: public SimulationClass
         void setSimulationConstant(GLfloat* constant,GLuint sizeConstant, const char *uniformName);
         void setSimulationTexture(GLuint texid,const char* uniformName);
 
+    
+
         void replaceSimulationConstant(GLfloat constant, const char *uniformName);
         void replaceSimulationConstant(GLfloat* constant, const char *uniformName);
         void replaceSimulationTexture(GLuint texid,const char* uniformName);
 
         FBOstruct* simulate(GLuint numIterations);
-         Terrain* mTerrain;
+        Environment* mEnvironment;
         GLuint* mScreenWidth;
         GLuint* mScreenHeight;
 
@@ -92,6 +94,8 @@ class GPUSimulation: public SimulationClass
         /** FBO Stuff **/
         void shiftFBO();
         void enableFbo(FBOstruct * fbo);
+
+        FBOstruct * mDefaultFBO;
 
 
         /** Index where the most recent comptution is done **/

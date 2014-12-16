@@ -24,7 +24,6 @@
 #include "GPUClothSimulation.h"
 #include "GPUWaterSimulation.h"
 #include "PostProcessing.h"
-#include "CelShading.h"
 
 #include "GrassSimulation.h"
 #include "Environment.h"
@@ -35,25 +34,20 @@
 #define W SCREEN_WIDTH
 #define H SCREEN_HEIGHT
 
-//#define CEL_SHADING 
-
 void OnTimer(int value);
 KeyMouseHandler mKeyMouseHandler;
 //----------------------Globals-------------------------------------------------
 mat4 projectionMatrix;
 mat4 viewMatrix;
-FBOstruct* fbo1;
 //-------------------------------------------------------------------------------------
 
 GLuint WIDTH;
 GLuint HEIGHT;
 
-// Cloth simulation
-GPUSimulation * clothSimulation;
-GrassSimulation * mGrassSimulation;
-GPUWaterSimulation * waterSimulation;
-PostProcessing * postProcessing;
-CelShading * celShading;
+GPUSimulation* clothSimulation;
+GrassSimulation* mGrassSimulation;
+GPUWaterSimulation* waterSimulation;
+PostProcessing* postProcessing;
 Environment* mEnvironment;
 TerrainLOD* mTerrainLOD;
 
@@ -66,46 +60,42 @@ void init(void)
 	glClearColor(0.1, 0.1, 0.3, 0);
 	glClearDepth(1.0);
 	glEnable(GL_DEPTH_TEST);
-
-	printError("GL inits");
-#ifdef CEL_SHADING
-    // Set up FBO with depth buffer
-	fbo1 = initFBO2(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 1);
-#endif
 	printError("GL inits");
     mEnvironment = new Environment(&WIDTH,&HEIGHT);
-   
+
 	mTerrainLOD = new TerrainLOD();
 	mTerrainLOD->setEnvironment(mEnvironment);
 	mTerrainLOD->initialize();
 
+/*
     clothSimulation = new GPUClothSimulation(&WIDTH,&HEIGHT);
     clothSimulation->setEnvironment(mEnvironment);
     clothSimulation->initialize();
-    
 
     waterSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
     waterSimulation->setEnvironment(mEnvironment);
     waterSimulation->initialize();
-/*
 */
-
 /*
     postProcessing = new PostProcessing(&WIDTH,&HEIGHT);
     postProcessing->setTerrin(mEnvironment);
     mKeyMouseHandler.setPostProcessing(postProcessing);
-*/
+    */
+
+
+
+
+
+
+
+
+
     mGrassSimulation = new GrassSimulation();
-    mGrassSimulation->setEnvironment(mEnvironment);
+    mGrassSimulation->setTerrain(mTerrain);
     mGrassSimulation->initialize();
 
-#ifdef CEL_SHADING
-    clothSimulation->setDefaultFBO(fbo1);
-    waterSimulation->setDefaultFBO(fbo1);
-    mEnvironment->setDefaultFBO(fbo1);
-    celShading = new CelShading(&WIDTH, &HEIGHT);
-    celShading->initialize(fbo1);
-#endif
+
+
     // Create key/mouse handler
     mKeyMouseHandler = KeyMouseHandler();
 
@@ -124,10 +114,7 @@ void display(void)
 	// This function is called whenever it is time to render
 	//  a new frame; due to the idle()-function below, this
 	//  function will get called several times per second
-#ifdef CEL_SHADING
-	// Render to fbo1
-	useFBO(fbo1, 0L, 0L);
-#endif
+
 	// Enable Z-buffering
 	glEnable(GL_DEPTH_TEST);
 	// Enable backface culling
@@ -135,24 +122,27 @@ void display(void)
 	glCullFace(GL_BACK);
     //glDisable(GL_CULL_FACE);
 	//	glFlush(); // Can cause flickering on some systems. Can also be necessary to make drawing complete.
-	glClearColor(1.0, 1.0, 1.0, 0);
+	glClearColor(0.0, 0.0, 0.0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
 
     viewMatrix = mKeyMouseHandler.getViewMatrix();
 
-    mEnvironment->draw(projectionMatrix,viewMatrix);    
-
-    waterSimulation->draw(projectionMatrix,viewMatrix);
-    clothSimulation->draw(projectionMatrix,viewMatrix);
-//    postProcessing->draw(projectionMatrix,viewMatrix);
-    
+    mEnvironment->draw(projectionMatrix,viewMatrix);
 
     mTerrainLOD->draw(projectionMatrix,viewMatrix);
-    mGrassSimulation->draw(projectionMatrix,viewMatrix);
+
+  //  clothSimulation->draw(projectionMatrix,viewMatrix);
+  //  waterSimulation->draw(projectionMatrix,viewMatrix);
+
+   mGrassSimulation->draw(projectionMatrix,viewMatrix);
 	mGrassSimulation->update();
-#ifdef CEL_SHADING
-    celShading->draw(projectionMatrix, viewMatrix);
-#endif
+	//postProcessing->draw(projectionMatrix,viewMatrix);
+
+
+
+
 	glutSwapBuffers();
 }
 

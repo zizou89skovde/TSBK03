@@ -104,7 +104,7 @@ GLuint compileShaders(const char *vs, const char *fs, const char *gs, const char
 		glShaderSource(g, 1, &gs, NULL);
 		glCompileShader(g);
 	}
-#ifdef GL_TESS_CONTROL_SHADER
+//#ifdef GL_TESS_CONTROL_SHADER
 	if (tcs != NULL)
 	{
 		tc = glCreateShader(GL_TESS_CONTROL_SHADER);
@@ -117,7 +117,7 @@ GLuint compileShaders(const char *vs, const char *fs, const char *gs, const char
 		glShaderSource(te, 1, &tes, NULL);
 		glCompileShader(te);
 	}
-#endif
+//#endif
 	p = glCreateProgram();
 	glAttachShader(p,v);
 	glAttachShader(p,f);

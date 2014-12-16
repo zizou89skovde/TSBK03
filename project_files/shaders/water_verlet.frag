@@ -8,8 +8,8 @@ uniform vec2  u_Meta;
 uniform float u_Gravity;
 uniform float u_DeltaTime;
 uniform float u_SystemDamping;
-uniform float u_TerrainHeight;
-uniform float u_TerrainSize;
+uniform float u_EnvironmentHeight;
+uniform float u_EnvironmentSize;
 uniform vec4 u_RainDrop;
 in vec2 f_TexCoord;
 
@@ -33,8 +33,8 @@ vec3 getVerletVelocity(vec3 position, vec3 previousPosition){
 
 
 float heightOverGround(vec3 position){
-	vec2 mapPosition = 0.5+(position.xz)/u_TerrainSize;
-	float height = (texture(u_HeightMap, mapPosition).x-0.5)*u_TerrainHeight;
+	vec2 mapPosition = 0.5+(position.xz)/u_EnvironmentSize;
+	float height = (texture(u_HeightMap, mapPosition).x-0.5)*u_EnvironmentHeight;
 	return (u_SeaLevel-height);
 }
 
@@ -72,7 +72,7 @@ vec3 applyNeighbourForce(vec3 centerPosition, vec3 velocity,float height){
 	
 	/* FAKE #1337 */
 	float deltaHeight =  u_SeaLevel - centerPosition.y;
-	force.y += 0.004 * deltaHeight;
+	force.y += 0.00004 * deltaHeight;
 
 	if(height <= 1.5){	
 		force *= clamp(height,0.0,1.0);

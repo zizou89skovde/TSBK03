@@ -1,76 +1,69 @@
-#include "GrassSimulation.h"
+#include "TerrainLOD.h"
 
-GrassSimulation::GrassSimulation()
-{
-}
+void TerrainLOD::initialize(){
 
-void GrassSimulation::initialize(){
-
-    /** Assign default values **/
-    previousTime = -1;
-
-	/** Initalize grass model object **/
-    mGrassScene = new ModelObject();
+	mTerrainLODScene = new ModelObject();
 
 	/** Load shader **/
-	//GLuint grassShader = loadShadersG("shaders/grass.vert", "shaders/grass.frag", "shaders/grass.gs");
-	GLuint grassShader = loadShadersGT("shaders/grass.vert", "shaders/grass.frag", "shaders/grass.gs", "shaders/grass.tcs", "shaders/grass.tes");
-	//GLuint grassShader = loadShaders("shaders/grass.vert", "shaders/grass.frag");
-	mGrassScene->setShader(grassShader, GRASS_SHADER_ID, MVP);
 
-	/** Select draw method **/
-	mGrassScene->setDrawMethod(PATCHES, GRASS_SHADER_ID);
+    /** LINE_STRIP **/
+	//GLuint shaderTerrainLOD = loadShadersGT("shaders/terrainLOD2.vert", "shaders/terrainLOD.frag", "shaders/terrainLOD.gs", "shaders/terrainLOD.tcs", "shaders/terrainLOD.tes");
 
-	/** Set grass to be reflected in the water surface **/
-	mEnvironment->setReflectedModels(mGrassScene,GRASS_SHADER_ID);
+    /** TRIANGLAR **/
+	GLuint shaderTerrainLOD = loadShadersGT("shaders/terrainLOD2.vert", "shaders/terrainLOD_diffuse.frag", NULL , "shaders/terrainLOD.tcs", "shaders/terrainLOD.tes");
 
-    /**  Upload buffer coordinates **/
-    generateGrassMesh();
+	mTerrainLODScene->setShader(shaderTerrainLOD,SHADER_TERRAIN_LOD);
 
-    /** Wind input **/
-    mGrassScene->setUniformFloat(1.0f, GRASS_SHADER_ID, "u_Wind");
-	angle = 0.0f;
-
+    /** Upload model data **/
+    generateTerrain();
 
 	/** Load texture **/
     EnvironmentMetaData environmentMetaData = mEnvironment->getMetaData();
-	mGrassScene->setTexture(environmentMetaData.sHeightMapHandleHighRes,GRASS_SHADER_ID,"u_HeightMap");
-	mGrassScene->setTexture(environmentMetaData.sNormalMapHandleHighRes,GRASS_SHADER_ID,"u_NormalMap");
+	mTerrainLODScene->setTexture(environmentMetaData.sHeightMapHandleHighRes,SHADER_TERRAIN_LOD,"u_HeightMap");
+	mTerrainLODScene->setTexture(environmentMetaData.sNormalMapHandleHighRes,SHADER_TERRAIN_LOD,"u_NormalMap");
 
-    /** Noise **/
-    GLuint grassNoiseTexture;
-    LoadTGATextureSimple((char*)"textures/noise.tga", &grassNoiseTexture);
-    mGrassScene->setTexture(grassNoiseTexture,GRASS_SHADER_ID,"u_GrassNoise");
 
-    /** Grass mask **/
-    GLuint grassMaskTexture;
-    LoadTGATextureSimple((char*)"textures/test2.tga", &grassMaskTexture);
-    mGrassScene->setTexture(grassMaskTexture,GRASS_SHADER_ID,"u_GrassMask");
+	/** Select drawInstanced-method and set number of instances **/
+	mTerrainLODScene->setDrawMethod(PATCHES,SHADER_TERRAIN_LOD);
 
-    /** Set model to world transform **/
+
+	/** Set model to world transform **/
 	/** Scale and transform terrain to be centered around zero. And sceled to fit the size of the environment **/
     vec3 translation =vec3(-environmentMetaData.sSize[0],-environmentMetaData.sSize[1],-environmentMetaData.sSize[2])*0.5;
     vec3 scale = vec3(environmentMetaData.sSize[0],environmentMetaData.sSize[1],environmentMetaData.sSize[2]);
     mat4 transf = T(translation.x,translation.y,translation.z)*S(scale.x,scale.y,scale.z);
-	mGrassScene->setTransform(transf,GRASS_SHADER_ID);
+	mTerrainLODScene->setTransform(transf,SHADER_TERRAIN_LOD);
 }
 
-void GrassSimulation::generateGrassMesh() {
+void TerrainLOD::draw(mat4 projectionMatrix, mat4 viewMatrix){
 
-    GLuint  dimension  = GrassMeshBaseDimension;
-    GLfloat resolution = 1.0f/((GLfloat)GrassMeshBaseDimension-1.0f);
+    glDisable(GL_CULL_FACE);
+	mTerrainLODScene->draw(projectionMatrix, viewMatrix);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
+}
+
+void TerrainLOD::generateTerrain(){
+
+    GLuint  dimension  = TerrainBaseDimension;
+    GLfloat resolution = 1.0f/((GLfloat)TerrainBaseDimension-1.0f);
+
     GLuint vertexCount = dimension*dimension;
     GLuint triangleCount = (dimension-1) * (dimension-1)* 2;
     GLuint indexCount    = triangleCount*VERTICES_PER_TRIANGLE;
+
     GLfloat vertexArray[FLOATS_PER_POSITION * vertexCount];
 
     for(GLuint z = 0; z < dimension; ++z)
         for(GLuint x = 0; x < dimension; ++x){
+
             GLfloat xPos = (GLfloat)x*resolution;
             GLfloat zPos = (GLfloat)z*resolution;
             vertexArray[(x + z * dimension)*3 + 0] = xPos;
             vertexArray[(x + z * dimension)*3 + 1] = 0;
             vertexArray[(x + z * dimension)*3 + 2] = zPos;
+
     }
 
     GLuint indexArray[indexCount];
@@ -106,31 +99,9 @@ void GrassSimulation::generateGrassMesh() {
     model->ib = indices;
     model->vao = vao;
     model->vb = positions;
-    mGrassScene->setModel(model,GRASS_SHADER_ID);
-    printError("generateGrassMesh");
+    mTerrainLODScene->setModel(model,SHADER_TERRAIN_LOD);
+    printError("Terrain Buffers");
+
 }
 
-void GrassSimulation::draw(mat4 projectionMatrix,mat4 viewMatrix) {
 
-	glDisable(GL_CULL_FACE);
-	mGrassScene->draw(GRASS_SHADER_ID,projectionMatrix,viewMatrix);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-}
-
-void GrassSimulation::update() {
-	GLfloat dt = 0.0005f;
-	GLfloat pi = 3.141592653589793;
-	angle += dt;
-
-	if (angle >= 2*pi) {
-		angle = 0;
-	}
-
-	mGrassScene->replaceUniformFloat(&angle,GRASS_SHADER_ID,"u_Wind");
-}
-
-GrassSimulation::~GrassSimulation()
-{
-    //dtor
-}

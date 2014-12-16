@@ -1,0 +1,54 @@
+#include "TerrainLOD.h"
+
+void TerrainLOD::initialize(){
+
+	mTerrainLODScene = new ModelObject();
+
+	/** Load shader **/
+	//GLuint shaderTerrainLOD = loadShadersGT("shaders/terrainLOD.vert", "shaders/terrainLOD.frag", "shaders/terrainLOD.gs", "shaders/terrainLOD.tcs", "shaders/terrainLOD.tes");
+	//GLuint shaderTerrainLOD = loadShadersGT("shaders/terrainLOD.vert", "shaders/terrainLOD.frag", NULL , "shaders/terrainLOD.tcs", "shaders/terrainLOD.tes");
+	//GLuint shaderTerrainLOD = loadShadersG("shaders/terrainLOD.vert", "shaders/terrai
+                                          LOD.frag", "shaders/terrainLOD.gs");
+	GLuint shaderTerrainLOD = loadShaders("shaders/terrainLOD.vert", "shaders/terrainLOD.frag");
+	mTerrainLODScene->setShader(shaderTerrainLOD,SHADER_TERRAIN_LOD);
+
+
+
+
+	/** Load texture **/
+
+	/** Load texture from disk **/
+	TextureData heightMapTextureData;
+	LoadTGATexture((const char*)"textures/fft-terrain5.tga",&heightMapTextureData);
+	free(heightMapTextureData.imageData);
+
+	mTerrainLODScene->setTexture(heightMapTextureData.texID,SHADER_TERRAIN_LOD,"u_HeightMap");
+
+	/** Upload size of the texture **/
+	mTextureSize[0] = heightMapTextureData.w;
+	mTextureSize[1] = heightMapTextureData.h;
+	mTerrainLODScene->setUniformFloat(mTextureSize,2,SHADER_TERRAIN_LOD,"u_TextureSize");
+
+	/** Select drawInstanced-method and set number of instances **/
+	//mTerrainLODScene->setDrawMethod(INSTANCED,SHADER_TERRAIN_LOD);
+	mTerrainLODScene->setDrawMethod(ARRAYS,SHADER_TERRAIN_LOD);
+	mTerrainLODScene->setNumInstances(mTextureSize[0]*mTextureSize[1],SHADER_TERRAIN_LOD);
+
+	/** Set model to world transform **/
+	mTerrainLODScene->setTransform(IdentityMatrix(),SHADER_TERRAIN_LOD);
+
+
+}
+
+
+void TerrainLOD::draw(mat4 projectionMatrix, mat4 viewMatrix){
+
+	mTerrainLODScene->draw(projectionMatrix, viewMatrix);
+
+
+}
+
+
+
+
+

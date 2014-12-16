@@ -32,7 +32,7 @@ vec4 sketchColor(vec4 color_in)
 void main(void)
 {
     // Quantize color
-    float steps = 2;
+    float steps = 5;
     vec4 color = texture(u_Texture, f_TexCoord);
     color.x = quantize(color.x, steps);
     color.y = quantize(color.y, steps);
@@ -40,7 +40,7 @@ void main(void)
 
     // Draw contours in image
     vec4 contour = texture(u_Contours, f_TexCoord);
-    if (contour.x > 0.9)
+    if (contour.x > 0.1)
         //color = vec4(1, 1, 1, 1.0); // White contour
         color = vec4(0, 0, 0, 1.0); // Black contour
 

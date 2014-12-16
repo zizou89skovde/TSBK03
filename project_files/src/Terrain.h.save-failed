@@ -14,7 +14,7 @@ typedef struct{
         float TerrainResolution; /* size divided by dimension */
         float HeightScale;
         float TerrainHeightOffset;
-    }TerrainMetaData;
+}TerrainMetaData;
 #define SKYBOX_SHADER 0
 #define TERRAIN_SHADER 1
 #define TERRAIN_SIMPLE_SHADER 2

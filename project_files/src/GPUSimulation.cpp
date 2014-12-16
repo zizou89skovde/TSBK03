@@ -5,6 +5,7 @@ GPUSimulation::GPUSimulation(GLuint* w,GLuint* h)
     mScreenWidth = w;
     mScreenHeight = h;
 	mTimeEnabled = false;
+    mDefaultFBO = NULL;
 }
 
 
@@ -51,6 +52,10 @@ void GPUSimulation::intializeSimulation(SimulationData_Type * simulationData){
 
 }
 
+void GPUSimulation::setDefaultFBO(FBOstruct* fbo){
+    mDefaultFBO = fbo;
+}   
+
 void GPUSimulation::setSimulationTexture(GLuint texid,const char * uniformName){
     mGPUSimulation->setTexture(texid,GPU_SHADER_COMPUTE,uniformName);
 }
@@ -80,9 +85,20 @@ void GPUSimulation::replaceSimulationConstant(GLfloat* constant, const char *uni
 **/
 void GPUSimulation::enableFbo(FBOstruct * fbo){
     if(fbo == NULL){
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        if(mDefaultFBO == NULL){
+          glBindFramebuffer(GL_FRAMEBUFFER, 0);
+          glViewport(0, 0, *mScreenWidth, *mScreenHeight);
+        } else{
+          glBindFramebuffer(GL_FRAMEBUFFER, mDefaultFBO->fb);
+          glViewport(0, 0, mDefaultFBO->width, mDefaultFBO->height);
+        }
+
+
+        /*glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glDrawBuffer(GL_BACK);
         glViewport(0, 0, *mScreenWidth, *mScreenHeight);
+        */
     }else{
         glBindFramebuffer(GL_FRAMEBUFFER, fbo->fb);
         glDrawBuffers(2,FRAME_ATTACHMENT);

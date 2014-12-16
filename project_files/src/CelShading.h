@@ -5,7 +5,6 @@
 #include "GL_utilities.h"
 #include "VectorUtils3.h"
 #include "LoadTGA.h"
-#include "Terrain.h"
 #include "ScreenSize.h"
 
 #define CEL_SPHERE_SHADER_ID 0
