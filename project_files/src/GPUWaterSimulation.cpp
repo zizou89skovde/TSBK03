@@ -84,7 +84,7 @@ void GPUWaterSimulation::configureSimulation(){
     EnvironmentMetaData metaData = mEnvironment->getMetaData();
 
     /** Upload ground heightmap **/
-    setSimulationTexture(metaData.sHeightMapHandle,"u_HeightMap");
+    setSimulationTexture(metaData.sHeightMapHandleHighRes,"u_HeightMap");
 
     /** Upload Rain **/
     GLfloat rain[] = {0.0,0.0,0.02,0.030};

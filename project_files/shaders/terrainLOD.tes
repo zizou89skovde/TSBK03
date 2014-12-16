@@ -5,7 +5,7 @@ uniform mat4 MVP_Matrix;
 
 uniform sampler2D u_HeightMap;
 uniform sampler2D u_NormalMap;
-
+uniform float u_Clip;
 out vec3 g_Normal;
 
 void main(void)
@@ -22,5 +22,14 @@ void main(void)
 	/** Read height from texture **/
 	position.y = texture(u_HeightMap,position.xz).r;
 	
-    gl_Position = MVP_Matrix*position;
+	vec4 outPosition =  MVP_Matrix*position;
+	
+	// Clipping
+	if(u_Clip < 0.0){
+		gl_ClipDistance[0] = position.y-0.5;
+	}else{
+		gl_ClipDistance[0] = 1.0;
+	}
+	
+    gl_Position = outPosition;
 }
