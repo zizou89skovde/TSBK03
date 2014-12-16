@@ -22,5 +22,5 @@ void main(void)
 	/** Read height from texture **/
 	position.y = texture(u_HeightMap,position.xz).r;
 	
-    gl_Position = MVP_Matrix*position;
+    gl_Position = position;
 }

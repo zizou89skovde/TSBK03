@@ -2,6 +2,8 @@
 
 layout (vertices = 3) out;
 
+uniform sampler2D u_GrassMask;
+
 uniform mat4 MV_Matrix;
 
 
@@ -19,6 +21,12 @@ void main(void)
 {
     if (gl_InvocationID == 0)
     {
+		
+		// Read value from the grass mask texture 
+		float mask0 = texture(u_GrassMask,gl_in[0].gl_Position.xz).r;
+		float mask1 = texture(u_GrassMask,gl_in[1].gl_Position.xz).r;
+		float mask2 = texture(u_GrassMask,gl_in[2].gl_Position.xz).r;
+		
 		// Convert vertices to camera view
 		vec4 v0 = MV_Matrix*gl_in[0].gl_Position;
 		vec4 v1 = MV_Matrix*gl_in[1].gl_Position;
@@ -33,10 +41,25 @@ void main(void)
 		float lod1 = calc_LoD(vec3(d2), vec3(0.0));
 		float lod2 = calc_LoD(vec3(d3), vec3(0.0));
 		
+		//Threshold value for the mask
+		float maskThresHold = 0.5;
+		
 		// Set Tessellation level
-		gl_TessLevelOuter[0] = lod0;
-		gl_TessLevelOuter[1] = lod1;
-		gl_TessLevelOuter[2] = lod2;
+		if(mask0 < maskThresHold)
+			gl_TessLevelOuter[0] = 0.0;
+		else
+			gl_TessLevelOuter[0] = lod0;
+			
+		if(mask1 < maskThresHold)
+			gl_TessLevelOuter[1] = 0.0;
+		else
+			gl_TessLevelOuter[1] = lod1;
+			
+		if(mask2 < maskThresHold)
+			gl_TessLevelOuter[2] = 0.0;
+		else
+			gl_TessLevelOuter[2] = lod2;
+			
 		gl_TessLevelInner[0] = max(max(lod0, lod1), lod2);
     }
     gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;

@@ -1,7 +1,7 @@
 #version 400
 
 #define NUM_OF_GRASS_VERTICES 5
-#define NUM_OF_GRASS_STRAWS_PER_TRIANGLE 5
+#define NUM_OF_GRASS_STRAWS_PER_TRIANGLE 1
 
 #define PI 3.141592653589793
 
@@ -239,8 +239,8 @@ void rotateGrass(inout vec3 grassVertices[NUM_OF_GRASS_VERTICES], in float theta
 	for (int i = 0; i < NUM_OF_GRASS_VERTICES; ++i) {
 		grassVertices[i] = rotationMatrix*grassVertices[i];
 		grassVertices[i].xz += grassVertices[i].y * wind;
-		grassVertices[i].xz += position.xz; //Ta bort denna så får man missing In_Position error
-		grassVertices[i].y += height;
+		grassVertices[i].xyz += position.xyz; //Ta bort denna så får man missing In_Position error
+		//grassVertices[i].y += height;
 	}
 }
 

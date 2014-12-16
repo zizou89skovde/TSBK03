@@ -10,130 +10,50 @@ void GrassSimulation::initialize(){
     previousTime = -1;
 
 	/** Initalize grass model object **/
-    mGrassScene = new ModelObject(); //Notera: ModelObject är lite feldöpt. Den borde heta Scene object. Eftersom den kan hålla flera olika modeller/shaders osv.
+    mGrassScene = new ModelObject();
 
 	/** Load shader **/
 	//GLuint grassShader = loadShadersG("shaders/grass.vert", "shaders/grass.frag", "shaders/grass.gs");
 	GLuint grassShader = loadShadersGT("shaders/grass.vert", "shaders/grass.frag", "shaders/grass.gs", "shaders/grass.tcs", "shaders/grass.tes");
 	//GLuint grassShader = loadShaders("shaders/grass.vert", "shaders/grass.frag");
+	mGrassScene->setShader(grassShader, GRASS_SHADER_ID, MVP);
 
-	mGrassScene->setShader(grassShader, GRASS_SHADER_ID, MVP); //mGrassScene->setShader(grassShader, GRASS_SHADER_ID,VP);
-	mGrassScene->setTransform(IdentityMatrix(), GRASS_SHADER_ID);
+	/** Select draw method **/
 	mGrassScene->setDrawMethod(PATCHES, GRASS_SHADER_ID);
 
-
+	/** Set grass to be reflected in the water surface **/
 	mEnvironment->setReflectedModels(mGrassScene,GRASS_SHADER_ID);
 
-
-    /** Grass mask **/
-	TextureData textureData;
-    LoadTGATextureData((char*)"textures/test2.tga", &textureData);
-
     /**  Upload buffer coordinates **/
-    //uploadBufferCoordinates(mGrassScene,&textureData,GRASS_SHADER_ID);
     generateGrassMesh();
 
+    /** Wind input **/
     mGrassScene->setUniformFloat(1.0f, GRASS_SHADER_ID, "u_Wind");
-
 	angle = 0.0f;
 
-	/***** START WATCH OUT **********************************************************************************/
-
-    /** Upload terrain parameters **/
-    //EnvironmentMetaData metaData = mEnvironment->getMetaData();
-
-    /** Upload offset each grass vertex **/
-    /*
-    GLfloat gridOffset[3];
-    gridOffset[0] = -metaData.sSize[0]/2.0;
-    gridOffset[1] = 0;
-    gridOffset[2] = -metaData.sSize[2]/2.0;
-    */
-    //mGrassScene->setUniformFloat(gridOffset,3,GRASS_SHADER_ID,"u_GridOffset");
-
-   // mGrassScene->setUniformFloat(metaData.sSize[0],GRASS_SHADER_ID,"u_GridSize");
-    //mGrassScene->setUniformFloat(metaData.sSize[1],GRASS_SHADER_ID,"u_GridHeightScale");
-    //mGrassScene->setTexture(metaData.sHeightMapHandle,GRASS_SHADER_ID,"u_HeightMap");
-    /** Set hight map texture **/
-
-	/***** END WATCH OUT **********************************************************************************/
 
 	/** Load texture **/
     EnvironmentMetaData environmentMetaData = mEnvironment->getMetaData();
 	mGrassScene->setTexture(environmentMetaData.sHeightMapHandleHighRes,GRASS_SHADER_ID,"u_HeightMap");
 	mGrassScene->setTexture(environmentMetaData.sNormalMapHandleHighRes,GRASS_SHADER_ID,"u_NormalMap");
 
-
     /** Noise **/
     GLuint grassNoiseTexture;
     LoadTGATextureSimple((char*)"textures/noise.tga", &grassNoiseTexture);
     mGrassScene->setTexture(grassNoiseTexture,GRASS_SHADER_ID,"u_GrassNoise");
 
-    	/** Set model to world transform **/
+    /** Grass mask **/
+    GLuint grassMaskTexture;
+    LoadTGATextureSimple((char*)"textures/test2.tga", &grassMaskTexture);
+    mGrassScene->setTexture(grassMaskTexture,GRASS_SHADER_ID,"u_GrassMask");
+
+    /** Set model to world transform **/
 	/** Scale and transform terrain to be centered around zero. And sceled to fit the size of the environment **/
     vec3 translation =vec3(-environmentMetaData.sSize[0],-environmentMetaData.sSize[1],-environmentMetaData.sSize[2])*0.5;
     vec3 scale = vec3(environmentMetaData.sSize[0],environmentMetaData.sSize[1],environmentMetaData.sSize[2]);
     mat4 transf = T(translation.x,translation.y,translation.z)*S(scale.x,scale.y,scale.z);
 	mGrassScene->setTransform(transf,GRASS_SHADER_ID);
 }
-/*
-void GrassSimulation::setEnvironment(Environment * environment){
-    mEnvironment = environment;
-}
-*/
-
-/*
-void GrassSimulation::uploadBufferCoordinates(ModelObject * modelobject,TextureData* maskTexture, GLuint shaderId){
-
-	GLuint textureWidth = maskTexture->width; // OBS 256!
-	GLuint textureHeight = maskTexture->height;
-    GLuint DIM = 600; // Antal vertices per rad
-    GLuint vertexCount = DIM*DIM;
-    GLfloat *vertexArray = (GLfloat *) malloc(sizeof(GLfloat) * (FLOATS_PER_TEXEL) * vertexCount);
-	GLuint indexCount = 0;
-
-     for(GLuint y = 0; y < DIM; ++y)
-        for(GLuint x = 0; x < DIM; ++x){
-            float xPos = x/(float)(DIM-1);
-            float yPos = y/(float)(DIM-1);
-			GLuint texCoordX = (int)(xPos*(textureWidth-1));
-			GLuint texCoordY = (int)(yPos*(textureHeight - 1));
-			GLuint mask = maskTexture->imageData[(texCoordX + texCoordY * maskTexture->width) * (maskTexture->bpp/8)]; // 0 -> 255
-			if(mask == 255){
-            	vertexArray[indexCount++] = xPos;
-            	vertexArray[indexCount++] = yPos;
-            	vertexArray[indexCount++] = 0;
-			}
-        }
-	size_t numBytes = sizeof(GLfloat) * indexCount;
-
-	// DEBUG
-	printf("GrassSimulation information: \n");
-	printf("number of masked grass vertices = %d \n", (int) indexCount/3);
-
-	// Create array with a length that matches the number of masked vertices
-	GLfloat * maskedArray = (GLfloat *) malloc(numBytes);
-
-	// Copy masked vertices
-	memcpy(maskedArray,vertexArray,numBytes);
-
-	// Free original buffer
-	free(vertexArray);
-
-	Model * m = new Model();
-	glGenVertexArrays(1,&m->vao);
-	glBindVertexArray(m->vao);
-	glGenBuffers(1, &m->vb);
-	glBindBuffer(GL_ARRAY_BUFFER, m->vb);
-	glBufferData(GL_ARRAY_BUFFER, numBytes, maskedArray, GL_STATIC_DRAW);
-	m->numVertices = indexCount/3;
-
-	// Free data
-	free(maskTexture->imageData);
-	free(maskedArray);
-	modelobject->setModel(m,shaderId);
-}
-*/
 
 void GrassSimulation::generateGrassMesh() {
 
