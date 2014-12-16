@@ -1,7 +1,7 @@
 #version 400
 
 #define NUM_OF_GRASS_VERTICES 5
-#define NUM_OF_GRASS_STRAWS_PER_TRIANGLE 1
+#define NUM_OF_GRASS_STRAWS_PER_TRIANGLE 3
 
 #define PI 3.141592653589793
 
@@ -47,34 +47,41 @@ void main()
 
 	// Create grass straw
 	vec3 grassVertices[NUM_OF_GRASS_VERTICES] = vec3[](vec3(0.0),vec3(0.0),vec3(0.0),vec3(0.0),vec3(0.0));
-	createGrassStraw1(grassVertices, grassNoise);
-	float scale = 0.2;
+	/*
+	if (grassNoise > 0.1) {
+		createGrassStraw1(grassVertices, grassNoise);
+	}
+	else {
+		createGrassStraw2(grassVertices, grassNoise);
+	}*/
+	
+	float scale = 1.0;
 
 	// Invocation specifc grass position in one triangle primitive 
-	/*switch (gl_InvocationID) {
+	switch (gl_InvocationID) {
 		case 0:
 			createGrassStraw1(grassVertices, grassNoise);
 			break;
 		case 1:
-			position.x += scale*2.3*grassNoise;
+			position.x -= 0.05*position.x;
 			createGrassStraw1(grassVertices, grassNoise);
 			break;
 		case 2:
-			position.z += scale*2.7*grassNoise;
-			createGrassStraw1(grassVertices, grassNoise);
+			position.x += 0.05*position.x;
+			createGrassStraw2(grassVertices, grassNoise);
 			break;
-		case 3:
+		/*case 3:
 			position.x -= scale*1.6*grassNoise;
 			createGrassStraw2(grassVertices, grassNoise);
 			break;
 		case 4:
 			position.z -= scale*1.9*grassNoise;
 			createGrassStraw2(grassVertices, grassNoise);
-			break;
+			break;*/
 		default:
 			break;
 	}
-	*/
+	
 	// Rotate grass with angle theta 
 	float angle =  5.0*grassNoise*PI;
 	rotateGrass(grassVertices, angle, position, height, grassNoise);
@@ -88,7 +95,7 @@ void main()
 		vec4 fragPos = MVP_Matrix*vec4(grassVertices[i], 1.0); 
 		f_Normal 	= grassNormals[i];
 		gl_Position = fragPos;
-	
+
 		EmitVertex();
 	}
 	EndPrimitive();

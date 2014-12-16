@@ -8,7 +8,7 @@ in vec3 f_Normal;
 void main()
 {
 	// Read grass noise from texture, returns value between 0 and 1
-	float grassNoise = texture(u_GrassNoise, gl_FragCoord.xy).x;
+	float grassNoise = 5.0*texture(u_GrassNoise, gl_FragCoord.xy).x;
 	
 	vec3 light = vec3(0.2,1.0,0.0);
 	float diffuse  = abs(dot(normalize(light),normalize(f_Normal)));
