@@ -529,7 +529,6 @@ void ModelObject::drawModel(Shader_Type* shader){
     char* textureAttributeString = NULL;
     if(m->sModel->texCoordArray != NULL) textureAttributeString = (char *)"in_TextureCoord";
 
-
     DrawModel(m->sModel, program,(char *)"in_Position" ,normalAttributeString , textureAttributeString);
 
 
