@@ -35,7 +35,7 @@
 #define W SCREEN_WIDTH
 #define H SCREEN_HEIGHT
 
-//#define CEL_SHADING 
+//#define CEL_SHADING
 
 void OnTimer(int value);
 KeyMouseHandler mKeyMouseHandler;
@@ -74,7 +74,7 @@ void init(void)
 #endif
 	printError("GL inits");
     mEnvironment = new Environment(&WIDTH,&HEIGHT);
-   
+
 	mTerrainLOD = new TerrainLOD();
 	mTerrainLOD->setEnvironment(mEnvironment);
 	mTerrainLOD->initialize();
@@ -82,7 +82,7 @@ void init(void)
     clothSimulation = new GPUClothSimulation(&WIDTH,&HEIGHT);
     clothSimulation->setEnvironment(mEnvironment);
     clothSimulation->initialize();
-    
+
 
     waterSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
     waterSimulation->setEnvironment(mEnvironment);
@@ -140,16 +140,17 @@ void display(void)
 
     viewMatrix = mKeyMouseHandler.getViewMatrix();
 
-    mEnvironment->draw(projectionMatrix,viewMatrix);    
+    mEnvironment->draw(projectionMatrix,viewMatrix);
 
     waterSimulation->draw(projectionMatrix,viewMatrix);
     clothSimulation->draw(projectionMatrix,viewMatrix);
 //    postProcessing->draw(projectionMatrix,viewMatrix);
-    
+
 
     mTerrainLOD->draw(projectionMatrix,viewMatrix);
     mGrassSimulation->draw(projectionMatrix,viewMatrix);
 	mGrassSimulation->update();
+
 #ifdef CEL_SHADING
     celShading->draw(projectionMatrix, viewMatrix);
 #endif
