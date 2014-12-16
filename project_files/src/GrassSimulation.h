@@ -21,6 +21,7 @@ class GrassSimulation
         void draw(mat4 projectionMatrix,mat4 viewMatrix);
         void setTerrain(Environment * terrain);
         void update();
+       void setEnvironment(Environment * environment){mEnvironment = environment;}
 
     protected:
 

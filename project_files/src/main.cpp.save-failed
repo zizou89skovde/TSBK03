@@ -26,7 +26,7 @@
 #include "PostProcessing.h"
 
 #include "GrassSimulation.h"
-#include "Terrain.h"
+#include "Environment.h"
 #include "TerrainLOD.h"
 #include "KeyMouseHandler.h"
 
@@ -48,39 +48,52 @@ GPUSimulation* clothSimulation;
 GrassSimulation* mGrassSimulation;
 GPUWaterSimulation* waterSimulation;
 PostProcessing* postProcessing;
-Terrain* mTerrain;
+Environment* mEnvironment;
 TerrainLOD* mTerrainLOD;
 
 void init(void)
 {
 	//dumpInfo();  // shader info
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// GL inits
 	glClearColor(0.1, 0.1, 0.3, 0);
 	glClearDepth(1.0);
 	glEnable(GL_DEPTH_TEST);
 	printError("GL inits");
+    mEnvironment = new Environment(&WIDTH,&HEIGHT);
 
-	//mTerrain = new Terrain(&WIDTH,&HEIGHT);
 	mTerrainLOD = new TerrainLOD();
+	mTerrainLOD->setEnvironment(mEnvironment);
 	mTerrainLOD->initialize();
-/*
-	postProcessing = new PostProcessing(&WIDTH,&HEIGHT);
-    postProcessing->setTerrin(mTerrain);
-    mKeyMouseHandler.setPostProcessing(postProcessing);
 
+/*
     clothSimulation = new GPUClothSimulation(&WIDTH,&HEIGHT);
-    clothSimulation->setTerrain(mTerrain);
+    clothSimulation->setEnvironment(mEnvironment);
     clothSimulation->initialize();
 
     waterSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
-    waterSimulation->setTerrain(mTerrain);
+    waterSimulation->setEnvironment(mEnvironment);
     waterSimulation->initialize();
+*/
+/*
+    postProcessing = new PostProcessing(&WIDTH,&HEIGHT);
+    postProcessing->setTerrin(mEnvironment);
+    mKeyMouseHandler.setPostProcessing(postProcessing);
+    */
+
+
+
+
+
+
+
+
 
     mGrassSimulation = new GrassSimulation();
     mGrassSimulation->setTerrain(mTerrain);
     mGrassSimulation->initialize();
-*/
+
 
 
     // Create key/mouse handler
@@ -116,18 +129,18 @@ void display(void)
 
     viewMatrix = mKeyMouseHandler.getViewMatrix();
 
-  //  mTerrain->draw(projectionMatrix,viewMatrix);
+    mEnvironment->draw(projectionMatrix,viewMatrix);
 
     mTerrainLOD->draw(projectionMatrix,viewMatrix);
 
+  //  clothSimulation->draw(projectionMatrix,viewMatrix);
+  //  waterSimulation->draw(projectionMatrix,viewMatrix);
 
-/*
-   	mGrassSimulation->draw(projectionMatrix,viewMatrix);
+   mGrassSimulation->draw(projectionMatrix,viewMatrix);
 	mGrassSimulation->update();
-    waterSimulation->draw(projectionMatrix,viewMatrix);
-    clothSimulation->draw(projectionMatrix,viewMatrix);
-	postProcessing->draw(projectionMatrix,viewMatrix);
-*/
+	//postProcessing->draw(projectionMatrix,viewMatrix);
+
+
 
 
 	glutSwapBuffers();

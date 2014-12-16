@@ -13,8 +13,8 @@ void GrassSimulation::initialize(){
     mGrassScene = new ModelObject(); //Notera: ModelObject är lite feldöpt. Den borde heta Scene object. Eftersom den kan hålla flera olika modeller/shaders osv.
 
 	/** Load shader **/
-	//GLuint grassShader = loadShadersG("shaders/grass.vert", "shaders/grass.frag", "shaders/grass.gs");
-	GLuint grassShader = loadShaders("shaders/grass.vert", "shaders/grass.frag");
+	GLuint grassShader = loadShadersG("shaders/grass.vert", "shaders/grass.frag", "shaders/grass.gs");
+	//GLuint grassShader = loadShaders("shaders/grass.vert", "shaders/grass.frag");
 
 	mGrassScene->setShader(grassShader, GRASS_SHADER_ID, MVP); //mGrassScene->setShader(grassShader, GRASS_SHADER_ID,VP);
 	mGrassScene->setTransform(IdentityMatrix(), GRASS_SHADER_ID);
@@ -61,10 +61,11 @@ void GrassSimulation::initialize(){
     LoadTGATextureSimple((char*)"textures/noise.tga", &grassNoiseTexture);
     mGrassScene->setTexture(grassNoiseTexture,GRASS_SHADER_ID,"u_GrassNoise");
 }
-
-void GrassSimulation::setTerrain(Environment * environment){
+/*
+void GrassSimulation::setEnvironment(Environment * environment){
     mEnvironment = environment;
 }
+*/
 
 
 
@@ -103,13 +104,10 @@ void GrassSimulation::uploadBufferCoordinates(ModelObject * modelobject,TextureD
 	size_t numBytes = sizeof(GLfloat) * indexCount;
 
 	// DEBUG
-	printf("sizeof(GLfloat) = %d \n", (int) sizeof(GLfloat));
-	printf("indexCount = %d \n", (int) indexCount);
-	printf("numBytes = %d \n", (int)numBytes);
-	printf("maskTexure->width = %d \n", maskTexture->width);
-	printf("maskTexure->bpp = %d \n", maskTexture->bpp);
-	printf("maskTexure->bpp/8 = %d \n", maskTexture->bpp/8);
-	printf("textureWidth = %d \n", textureWidth);
+	printf("GrassSimulation information: \n");
+	printf("number of masked grass vertices = %d \n", (int) indexCount/3);
+    //printf("indexCount = %d \n", (int) indexCount);
+	//printf("numBytes = %d \n", (int)numBytes);
 
 	/** Create array with a length that matches the number of masked vertices **/
 	GLfloat * maskedArray = (GLfloat *) malloc(numBytes);
@@ -169,7 +167,7 @@ void GrassSimulation::update(){
     GLfloat elapsedTime = newTime-previousTime;
 	*/
 
-	GLfloat dt = 0.005f;
+	GLfloat dt = 0.0005f;
 	GLfloat pi = 3.141592653589793;
 
 	angle += dt;
