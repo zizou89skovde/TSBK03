@@ -7,10 +7,10 @@ void TerrainLOD::initialize(){
 	/** Load shader **/
 
     /** LINE_STRIP **/
-	GLuint shaderTerrainLOD = loadShadersGT("shaders/terrainLOD2.vert", "shaders/terrainLOD.frag", "shaders/terrainLOD.gs", "shaders/terrainLOD.tcs", "shaders/terrainLOD.tes");
+	//GLuint shaderTerrainLOD = loadShadersGT("shaders/terrainLOD2.vert", "shaders/terrainLOD.frag", "shaders/terrainLOD.gs", "shaders/terrainLOD.tcs", "shaders/terrainLOD.tes");
 
     /** TRIANGLAR **/
-	//GLuint shaderTerrainLOD = loadShadersGT("shaders/terrainLOD2.vert", "shaders/terrainLOD_diffuse.frag", NULL , "shaders/terrainLOD.tcs", "shaders/terrainLOD.tes");
+	GLuint shaderTerrainLOD = loadShadersGT("shaders/terrainLOD2.vert", "shaders/terrainLOD_diffuse.frag", NULL , "shaders/terrainLOD.tcs", "shaders/terrainLOD.tes");
 
 	mTerrainLODScene->setShader(shaderTerrainLOD,SHADER_TERRAIN_LOD);
 
