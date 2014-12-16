@@ -2,21 +2,47 @@
 
 Environment::Environment(GLuint * w, GLuint * h)
 {
+
     mScreenWitdh = w;
     mScreenHeight = h;
     mEnvironmentModel = new ModelObject();
-
-
     /** Initialize FBO's  used for rendering the water reflection **/
-    mEnvironmentReflectionFBO   = initFBO(mFBOWidth,mFBOHeight,0);
-    mEnvironmentFBO             = initFBO(mFBOWidth,mFBOHeight, 0);
-
+    mReflectionFBO    = initFBO(mFBOWidth,mFBOHeight,0);
+    mRefractedFBO     = initFBO(mFBOWidth,mFBOHeight, 0);
     initializeSkyBox();
+    initializeEnvironment();
+
+}
+
+void Environment::initializeEnvironment(){
+
+    /**
+        These are common resource. Used by multiple classes. Environment-class
+        holds this  terrain meta data so it can be distributes among other classes
+    **/
+
+    /** Load texture **/
+    TextureData texData;
+    LoadTGATexture((char *)"textures/fft-terrain4.tga",&texData);
+    mEnvironmentMetaData.sHeightMapHandle = texData.texID;
+    mEnvironmentMetaData.setTextureSize(texData.w,texData.h);
+    LoadTGATextureSimple((char *)"textures/fft-terrain4_hd.tga",&mEnvironmentMetaData.sHeightMapHandleHighRes);
+    LoadTGATextureSimple((char *)"textures/fft-terrain4_normal_hd.tga",&mEnvironmentMetaData.sNormalMapHandleHighRes);
+
+    free(texData.imageData);
+
+    /** Set size of the environment **/
+    mEnvironmentMetaData.setSize(20.0f,5.0f,20.0f);
+
+    /** Set offset of the environment **/
+    mEnvironmentMetaData.setOffset(.0f,.0f,.0f);
 
 
 }
 
-
+EnvironmentMetaData Environment::getMetaData(){
+    return mEnvironmentMetaData;
+}
 
 void Environment::initializeSkyBox(){
     /** Setting Sky dome shader **/
@@ -34,9 +60,12 @@ void Environment::initializeSkyBox(){
 	modelSkyDome->normalArray = NULL;
     mEnvironmentModel->setModel(modelSkyDome,SKYBOX_SHADER);
     mEnvironmentModel->freeModelData(modelSkyDome);
+
     /** Set flip **/
     mEnvironmentModel->setUniformFloat(1.0f,SKYBOX_SHADER,"u_Flip");
 
+
+   // setReflectedModels(mEnvironmentModel,SKYBOX_SHADER);
 
 }
 
@@ -53,27 +82,46 @@ void Environment::setDepthModels(ModelObject * modelObj,GLuint shaderId){
     mDepthModelMap.push_back(std::make_pair(shaderId,modelObj));
 }
 
+
+void Environment::setRefractedModels(ModelObject * modelObj,GLuint shaderId){
+    mRefracedModelMap.push_back(std::make_pair(shaderId,modelObj));
+}
+
+FBOstruct * Environment::getReflectedFBO(){
+    return mReflectionFBO;
+}
+FBOstruct * Environment::getRefractionFBO(){
+    return mRefractedFBO;
+}
+
+void Environment::setClip(bool enabled){
+    GLfloat flip = -1.0;
+    if(enabled){
+        mEnvironmentModel->replaceUniformFloat(&flip,SKYBOX_SHADER,"u_Flip");
+    }else{
+        flip = 1.0;
+        mEnvironmentModel->replaceUniformFloat(&flip,SKYBOX_SHADER,"u_Flip");
+    }
+}
+
+
 void Environment::drawReflectedModels(mat4 projectionMatrix,mat4 viewMatrix){
     ModelObject * modelObject;
     GLuint shaderId;
-        /** Draw reflected ***/
-/*    useFBO(mEnvirioReflectionFBO,NULL,NULL);
+    /** Draw reflected ***/
+    useFBO(mReflectionFBO,NULL,NULL);
     glClearColor(0.0, 0.0, 0.0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    mat4* transformTerrain = mTerrainModel->getTransform(TERRAIN_SHADER);
-  // Draw scene upside down //
-    *transformTerrain = S(1,-1,1);
+
     glEnable(GL_CLIP_DISTANCE0);
-    setClip(true);
     glDisable(GL_CULL_FACE);
-    mTerrainModel->draw(SKYBOX_SHADER,proj,view);
 
-    drawReflectedModels(proj,view);
+    /** Draw skybox upside down. Cliped at the Y-axis **/
+    setClip(true);
+    mEnvironmentModel->draw(SKYBOX_SHADER,projectionMatrix,viewMatrix);
+    setClip(false);
 
-    glDisable(GL_CLIP_DISTANCE0);
-    glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-*/
+
     for(ModelIterator it = mReflectionModelMap.begin(); it != mReflectionModelMap.end(); ++it) {
 
         ModelItem item = *it;
@@ -90,32 +138,37 @@ void Environment::drawReflectedModels(mat4 projectionMatrix,mat4 viewMatrix){
         /** Reset model to its original direction **/
         modelObject->flipModels(shaderId);
     }
+    glDisable(GL_CLIP_DISTANCE0);
+    glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, *mScreenWitdh, *mScreenHeight);
+
 }
 
-FBOstruct * Environment::getEnvironmentReflectedFBO(){
-    return mEnvironmentReflectionFBO;
-}
-
-FBOstruct * Environment::getEnvironmentFBO(){
-    return mEnvironmentFBO;
-}
 
 
 void Environment::drawRefractedModels(mat4 projectionMatrix,mat4 viewMatrix){
     /** Draw to Offscreen fbo */
-    /*setClip(false);
-    useFBO(mTerrainFBO,NULL,NULL);
+    useFBO(mRefractedFBO,NULL,NULL);
+
+	ModelObject * modelObject;
+    GLuint shaderId;
+
     glClearColor(0.0, 0.0, 0.0, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	GLfloat sizeTerrain = 1.00;
-    *transformTerrain = S(sizeTerrain,sizeTerrain,sizeTerrain);
-    mTerrainModel->draw(TERRAIN_SHADER,proj,view);
-    */
+	glClear(GL_COLOR_BUFFER_BIT);
+
+    for(ModelIterator it = mRefracedModelMap.begin(); it != mRefracedModelMap.end(); ++it) {
+        ModelItem item = *it;
+        /** Read pair **/
+        shaderId    = item.first;
+        modelObject = item.second;
+        modelObject->draw(shaderId,projectionMatrix,viewMatrix);
+    }
 }
 
 void Environment::drawDepthModels(mat4 projectionMatrix,mat4 viewMatrix){
-
-  //  mTerrainDepthModel->draw(TERRAIN_SIMPLE_SHADER,projectionMatrix,viewMatrix);
 
     ModelObject * modelObject;
     GLuint shaderId;
@@ -123,7 +176,7 @@ void Environment::drawDepthModels(mat4 projectionMatrix,mat4 viewMatrix){
     for(ModelIterator it = mDepthModelMap.begin(); it != mDepthModelMap.end(); ++it) {
 
         ModelItem item = *it;
-        // Read pair //
+        /** Read pair **/
         shaderId    = item.first;
         modelObject = item.second;
 
@@ -135,11 +188,11 @@ void Environment::drawDepthModels(mat4 projectionMatrix,mat4 viewMatrix){
 }
 
 void Environment::draw(mat4 proj, mat4 view){
-    /** Draw to screen **/
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, *mScreenWitdh, *mScreenHeight);
     mEnvironmentModel->draw(SKYBOX_SHADER,proj,view);
+
+   // drawReflectedModels(proj,view);
 }
+
 
 
 

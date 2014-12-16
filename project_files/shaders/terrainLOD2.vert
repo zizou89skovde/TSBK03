@@ -1,15 +1,12 @@
 #version 430 core
-
-uniform sampler2D u_HeightMap;
-
 in vec3 in_Position;
-in vec2 in_TextureCoord;
-
+uniform sampler2D u_HeightMap;
 
 void main(void)
 {
-	float height = texture(u_HeightMap,(in_Position.zx/20.0+1.0)/2.0).r*20.0;
-	gl_Position = vec4(in_Position,1.0)+vec4(0.0,height,0.0,1.0);
+	vec4 position = vec4(in_Position,1.0);
+	position.y  = texture(u_HeightMap,in_Position.xz).r;
+	gl_Position = position;
 }
 
 

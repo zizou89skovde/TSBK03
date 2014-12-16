@@ -467,21 +467,21 @@ void ModelObject::drawPatches(Shader_Type * shader,mat4 projectionMatrix, mat4 v
 
 	selectTexture(shader);
 
-	glBindBuffer(GL_ARRAY_BUFFER, m->vb); // Select VBO
+	glBindBuffer(GL_ARRAY_BUFFER, m->vb);
 
     #ifdef MODEL_OBJECT_VERBOSE
-    printError("VBO");
+    printError("Vertex buffer");
     #endif
 
-	GLuint loc = glGetAttribLocation(program, "in_Position");
+	GLint loc = glGetAttribLocation(program, "in_Position");
 	if (loc >= 0)
 	{
-		glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), 0);
 		glEnableVertexAttribArray(loc);
 	}
 	else
 		fprintf(stderr, "DrawModel warning: '%s' not found in shader!\n", "in_Position");
-
+/*
 	loc = glGetAttribLocation(program, "in_TextureCoord");
 	if (loc >= 0)
 	{
@@ -490,14 +490,14 @@ void ModelObject::drawPatches(Shader_Type * shader,mat4 projectionMatrix, mat4 v
 	}
 	else
 		fprintf(stderr, "DrawModel warning: '%s' not found in shader!\n", "in_TextureCoord");
-
+*/
 	glPatchParameteri(GL_PATCH_VERTICES, 3);
 
     #ifdef MODEL_OBJECT_VERBOSE
     printError("Draw Patches 1");
     #endif
-
-    glDrawArrays(GL_PATCHES, 0, m->numVertices);
+    glDrawElements(GL_PATCHES, m->numIndices, GL_UNSIGNED_INT, 0);
+    //glDrawArrays(GL_PATCHES, 0, m->numVertices);
 
     #ifdef MODEL_OBJECT_VERBOSE
     printError("Draw Patches 2");
@@ -519,8 +519,10 @@ void ModelObject::drawArrays(Shader_Type * shader,mat4 projectionMatrix,mat4 vie
 }
 
 void ModelObject::drawModel(Shader_Type* shader){
+
     Model_Type * m = shader->sModelData;
     GLuint program = shader->sProgramHandle;
+
     char* normalAttributeString= NULL;
     if(m->sModel->normalArray != NULL) normalAttributeString = (char *)"in_Normal";
 

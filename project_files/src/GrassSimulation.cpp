@@ -20,7 +20,7 @@ void GrassSimulation::initialize(){
 	mGrassScene->setTransform(IdentityMatrix(), GRASS_SHADER_ID);
 	mGrassScene->setDrawMethod(POINTSTEST, GRASS_SHADER_ID);
 
-	mTerrain->setReflectedModels(mGrassScene,GRASS_SHADER_ID);
+	mEnvironment->setReflectedModels(mGrassScene,GRASS_SHADER_ID);
 
 
     /** Grass mask **/
@@ -38,22 +38,20 @@ void GrassSimulation::initialize(){
 	/***** START WATCH OUT **********************************************************************************/
 
     /** Upload terrain parameters **/
-    /*TerrainMetaData* terrainData = mTerrain->getTerrainMetaData();
-    GLfloat * gridOffset = (GLfloat*)malloc(sizeof(GLfloat)*3);
-    gridOffset[0] = -terrainData->TerrainSize/2.0;
+    EnvironmentMetaData metaData = mEnvironment->getMetaData();
+
+    /** Upload offset each grass vertex **/
+    GLfloat gridOffset[3];
+    gridOffset[0] = -metaData.sSize[0]/2.0;
     gridOffset[1] = 0;
-    gridOffset[2] = -terrainData->TerrainSize/2.0;
+    gridOffset[2] = -metaData.sSize[2]/2.0;
     mGrassScene->setUniformFloat(gridOffset,3,GRASS_SHADER_ID,"u_GridOffset");
-    //mGrassScene->setUniform(terrainData->TerrainResolution,"u_GridResolution");
-    mGrassScene->setUniformFloat(terrainData->TerrainSize,GRASS_SHADER_ID,"u_GridSize");
-    mGrassScene->setUniformFloat(terrainData->HeightScale,GRASS_SHADER_ID,"u_GridHeightScale");
-*/
+
+    mGrassScene->setUniformFloat(metaData.sSize[0],GRASS_SHADER_ID,"u_GridSize");
+    mGrassScene->setUniformFloat(metaData.sSize[1],GRASS_SHADER_ID,"u_GridHeightScale");
+    mGrassScene->setTexture(metaData.sHeightMapHandle,GRASS_SHADER_ID,"u_HeightMap");
     /** Set hight map texture **/
-/*
-	GLuint heightMapTexture;
-	LoadTGATextureSimple("textures/fft-terrain4.tga",&heightMapTexture);
-    mGrassScene->setTexture(mTerrain->getTextureData()->texID,GRASS_SHADER_ID,"u_HeightMap");
-*/
+
 	/***** END WATCH OUT **********************************************************************************/
 
 
@@ -64,8 +62,8 @@ void GrassSimulation::initialize(){
     mGrassScene->setTexture(grassNoiseTexture,GRASS_SHADER_ID,"u_GrassNoise");
 }
 
-void GrassSimulation::setTerrain(Environment * terrain){
-    mTerrain = terrain;
+void GrassSimulation::setTerrain(Environment * environment){
+    mEnvironment = environment;
 }
 
 

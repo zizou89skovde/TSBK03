@@ -5,54 +5,35 @@ void TerrainLOD::initialize(){
 	mTerrainLODScene = new ModelObject();
 
 	/** Load shader **/
-	GLuint shaderTerrainLOD = loadShadersGT("shaders/terrainLOD2.vert", "shaders/terrainLOD.frag", "shaders/terrainLOD.gs", "shaders/terrainLOD.tcs", "shaders/terrainLOD.tes");
-	//GLuint shaderTerrainLOD = loadShadersGT("shaders/terrainLOD.vert", "shaders/terrainLOD.frag", NULL , "shaders/terrainLOD.tcs", "shaders/terrainLOD.tes");
-	//GLuint shaderTerrainLOD = loadShadersG("shaders/terrainLOD.vert", "shaders/terrainLOD.frag", "shaders/terrainLOD.gs");
 
-	//GLuint shaderTerrainLOD = loadShadersG("shaders/terrainLOD2.vert", "shaders/terrainLOD.frag", "shaders/terrainLOD.gs");
+    /** LINE_STRIP **/
+	GLuint shaderTerrainLOD = loadShadersGT("shaders/terrainLOD2.vert", "shaders/terrainLOD.frag", "shaders/terrainLOD.gs", "shaders/terrainLOD.tcs", "shaders/terrainLOD.tes");
+
+    /** TRIANGLAR **/
+	//GLuint shaderTerrainLOD = loadShadersGT("shaders/terrainLOD2.vert", "shaders/terrainLOD_diffuse.frag", NULL , "shaders/terrainLOD.tcs", "shaders/terrainLOD.tes");
+
 	mTerrainLODScene->setShader(shaderTerrainLOD,SHADER_TERRAIN_LOD);
 
-
-
+    /** Upload model data **/
+    generateTerrain();
 
 	/** Load texture **/
+    EnvironmentMetaData environmentMetaData = mEnvironment->getMetaData();
+	mTerrainLODScene->setTexture(environmentMetaData.sHeightMapHandleHighRes,SHADER_TERRAIN_LOD,"u_HeightMap");
+	mTerrainLODScene->setTexture(environmentMetaData.sNormalMapHandleHighRes,SHADER_TERRAIN_LOD,"u_NormalMap");
 
-	/** Load texture from disk **/
-
-	TextureData heightMapTextureData;
-	LoadTGATextureData((char*)"textures/fft-terrain4.tga",&heightMapTextureData);
-	free(heightMapTextureData.imageData);
-	mTerrainLODScene->setTexture(heightMapTextureData.texID,SHADER_TERRAIN_LOD,"u_HeightMap");
-
-    /** Upload model data **/
-    //uploadSquareModelData(mTerrainLODScene,SHADER_TERRAIN_LOD);
-    generateLODBuffers(mTerrainLODScene,SHADER_TERRAIN_LOD);
-
-	/** Upload size of the texture **/
-	mTextureSize[0] = heightMapTextureData.w;
-	mTextureSize[1] = heightMapTextureData.h;
-	mTerrainLODScene->setUniformFloat(mTextureSize,2,SHADER_TERRAIN_LOD,"u_TextureSize");
 
 	/** Select drawInstanced-method and set number of instances **/
-	//mTerrainLODScene->setDrawMethod(INSTANCED,SHADER_TERRAIN_LOD);
 	mTerrainLODScene->setDrawMethod(PATCHES,SHADER_TERRAIN_LOD);
-	//mTerrainLODScene->setNumInstances(mTextureSize[0]*mTextureSize[1],SHADER_TERRAIN_LOD);
+
 
 	/** Set model to world transform **/
-	mTerrainLODScene->setTransform(IdentityMatrix(),SHADER_TERRAIN_LOD);
-
-
+	/** Scale and transform terrain to be centered around zero. And sceled to fit the size of the environment **/
+    vec3 translation =vec3(-environmentMetaData.sSize[0],-environmentMetaData.sSize[1],-environmentMetaData.sSize[2])*0.5;
+    vec3 scale = vec3(environmentMetaData.sSize[0],environmentMetaData.sSize[1],environmentMetaData.sSize[2]);
+    mat4 transf = T(translation.x,translation.y,translation.z)*S(scale.x,scale.y,scale.z);
+	mTerrainLODScene->setTransform(transf,SHADER_TERRAIN_LOD);
 }
-
-TerrainMetaData * TerrainLOD::getTerrainMetaData(){
-    return mTerrainMetaData;
-}
-
-TextureData * TerrainLOD::getTextureData()
-{
-    return mTerrainTextureData;
-}
-
 
 void TerrainLOD::draw(mat4 projectionMatrix, mat4 viewMatrix){
 
@@ -63,162 +44,64 @@ void TerrainLOD::draw(mat4 projectionMatrix, mat4 viewMatrix){
 
 }
 
-void TerrainLOD::generateLODBuffers(ModelObject * modelObj, GLuint shaderId){
+void TerrainLOD::generateTerrain(){
 
-    GLuint DIM_X = 64;
-    GLuint DIM_Z = 64;
+    GLuint  dimension  = TerrainBaseDimension;
+    GLfloat resolution = 1.0f/((GLfloat)TerrainBaseDimension-1.0f);
 
-    GLfloat RES_X = 1.0f/(DIM_X-1);
-    GLfloat RES_Z = 1.0f/(DIM_Z-1);
+    GLuint vertexCount = dimension*dimension;
+    GLuint triangleCount = (dimension-1) * (dimension-1)* 2;
+    GLuint indexCount    = triangleCount*VERTICES_PER_TRIANGLE;
 
-    GLfloat sizeZ  = 100;
-    GLfloat sizeX = 100;
+    GLfloat vertexArray[FLOATS_PER_POSITION * vertexCount];
 
-    GLfloat STEP_X =  sizeX*RES_X;
-    GLfloat STEP_Z =  sizeX*RES_Z;
+    for(GLuint z = 0; z < dimension; ++z)
+        for(GLuint x = 0; x < dimension; ++x){
 
-    GLuint x,z;
-    GLfloat xPos,yPos,zPos;
-
-
-    GLuint VERTICES_PER_QUAD = 6;
-    GLuint FLOATS_PER_POSITION = 3; // X,Y,Z
-    GLuint NUM_VERTICES = VERTICES_PER_QUAD*(DIM_X-1)*(DIM_Z-1);
-    GLfloat * vertexBuffer = (GLfloat *) malloc(sizeof(GLfloat)*FLOATS_PER_POSITION*NUM_VERTICES);
-
-    GLuint FLOATS_PER_TEXEL = 2;
-    GLfloat * textureCoordBuffer = (GLfloat *) malloc(sizeof(GLfloat)*FLOATS_PER_TEXEL*NUM_VERTICES);
-    GLuint index = 0;
-    GLuint textureIndex = 0;
-    for(z = 0; z < DIM_Z-1; z++)
-    for(x = 0; x < DIM_X-1; x++){
-
-        xPos = (x*RES_X - 0.5)*sizeX;
-        yPos = 0.0;
-        zPos = (z*RES_Z - 0.5)*sizeZ;
-
-        /**  0  **/
-        vertexBuffer[index++] = xPos;
-        vertexBuffer[index++] = yPos;
-        vertexBuffer[index++] = zPos;
-
-        textureCoordBuffer[textureIndex++] = x*RES_X;
-        textureCoordBuffer[textureIndex++] = z*RES_Z;
-
-        /**  1 **/
-        vertexBuffer[index++] = xPos;
-        vertexBuffer[index++] = yPos;
-        vertexBuffer[index++] = zPos+STEP_Z;
-
-        textureCoordBuffer[textureIndex++] = x*RES_X;
-        textureCoordBuffer[textureIndex++] = (z+1)*RES_Z;
-
-        /**  2 **/
-        vertexBuffer[index++] = xPos+STEP_X;
-        vertexBuffer[index++] = yPos;
-        vertexBuffer[index++] = zPos+STEP_Z;
-
-
-        textureCoordBuffer[textureIndex++] = (x+1)*RES_X;
-        textureCoordBuffer[textureIndex++] = (z+1)*RES_Z;
-
-        /**  3 **/
-        vertexBuffer[index++] = xPos+STEP_X;
-        vertexBuffer[index++] = yPos;
-        vertexBuffer[index++] = zPos+STEP_Z;
-
-        textureCoordBuffer[textureIndex++] = (x+1)*RES_X;
-        textureCoordBuffer[textureIndex++] = (z+1)*RES_Z;
-
-
-        /**  4 **/
-        vertexBuffer[index++] = xPos;
-        vertexBuffer[index++] = yPos;
-        vertexBuffer[index++] = zPos;
-
-        textureCoordBuffer[textureIndex++] = x*RES_X;
-        textureCoordBuffer[textureIndex++] = z*RES_Z;
-
-
-        /**  5 **/
-        vertexBuffer[index++] = xPos + STEP_X;
-        vertexBuffer[index++] = yPos;
-        vertexBuffer[index++] = zPos;
-
-        textureCoordBuffer[textureIndex++] = (x+1)*RES_X;
-        textureCoordBuffer[textureIndex++] = z*RES_Z;
-
+            GLfloat xPos = (GLfloat)x*resolution;
+            GLfloat zPos = (GLfloat)z*resolution;
+            vertexArray[(x + z * dimension)*3 + 0] = xPos;
+            vertexArray[(x + z * dimension)*3 + 1] = 0;
+            vertexArray[(x + z * dimension)*3 + 2] = zPos;
 
     }
 
-    GLuint squareIndices[] = {0, 2, 1, 0};
-    size_t numBytes = sizeof(GLuint)* 4;
-    GLuint * squareIndicesData = (GLuint * )malloc(numBytes);
-    memcpy(squareIndicesData,squareIndices,numBytes);
+    GLuint indexArray[indexCount];
+    for (GLuint y = 0; y < dimension-1; y++)
+        for (GLuint x = 0; x < dimension-1; x++)
+        {
+        // Triangle 1
+            indexArray[(x + y * (dimension-1))*INDICES_PER_QUAD + 0] = x + y * dimension;
+            indexArray[(x + y * (dimension-1))*INDICES_PER_QUAD + 1] = x + (y+1) * dimension;
+            indexArray[(x + y * (dimension-1))*INDICES_PER_QUAD + 2] = x+1 + y * dimension;
+        // Triangle 2
+            indexArray[(x + y *  (dimension-1))*INDICES_PER_QUAD + 3] = x+1 + y * dimension;
+            indexArray[(x + y *  (dimension-1))*INDICES_PER_QUAD + 4] = x + (y+1) * dimension;
+            indexArray[(x + y *  (dimension-1))*INDICES_PER_QUAD + 5] = x+1 + (y+1) * dimension;
+        }
 
-    modelObj->LoadDataToModel(
-        vertexBuffer,
-        NULL,
-        textureCoordBuffer,
-        NULL,
-        squareIndicesData,
-        NUM_VERTICES,
-        2*3*2,
-        shaderId);
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    GLuint positions;
+    glGenBuffers(1, &positions);
+    glBindBuffer(GL_ARRAY_BUFFER, positions);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexArray), vertexArray, GL_STATIC_DRAW);
+
+    GLuint indices;
+    glGenBuffers(1, &indices);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexArray), indexArray, GL_STATIC_DRAW);
+
+    Model * model = new Model();
+    model->numIndices = indexCount;
+    model->ib = indices;
+    model->vao = vao;
+    model->vb = positions;
+    mTerrainLODScene->setModel(model,SHADER_TERRAIN_LOD);
+    printError("Terrain Buffers");
 
 }
 
 
-void TerrainLOD::uploadSquareModelData(ModelObject * modelObj,GLuint shaderId){
-    GLfloat square [] = {
-                    -1,-1,0,
-                    -1,1, 0,
-                    1,1, 0,
-                    1,1, 0,
-                    -1,-1, 0,
-                    1,-1, 0};
-
-    size_t numBytes = sizeof(GLfloat)* 18;
-    GLfloat * squareData = (GLfloat * ) malloc(numBytes);
-    memcpy(squareData,square,numBytes);
-
-    GLfloat squareTexCoord[] = {
-                     0, 0,
-                     0, 1,
-                     1, 1,
-                     1, 0,
-                     0, 0,
-                     0, 0
-    };
-
-    numBytes = sizeof(GLfloat)* 12;
-    GLfloat * squareTexCoordData = (GLfloat * ) malloc(numBytes);
-    memcpy(squareTexCoordData,squareTexCoord,numBytes);
-
-    GLuint squareIndices[] = {0, 2, 1, 0, 3, 2,4, 6, 5, 4, 7, 6};
-    numBytes = sizeof(GLuint)* 12;
-    GLuint * squareIndicesData = (GLuint * )malloc(numBytes);
-    memcpy(squareIndicesData,squareIndices,numBytes);
-
-    modelObj->LoadDataToModel(
-        squareData,
-        NULL,
-        squareTexCoordData,
-        NULL,
-        squareIndicesData,
-        18,
-        2*3*2,
-        shaderId);
-
-    free(squareData);
-    free(squareTexCoordData);
-    free(squareIndicesData);
-
-    printError("Cloth Gen Position Buffer Coordinates ");
-}
-/*
-void TerrainLOD::setCameraInfo(vec3 * cameraEye, vec3* cameraCenter){
-    mCameraCenter  = cameraCenter;
-    mCameraEye     = cameraEye;
-}
-*/

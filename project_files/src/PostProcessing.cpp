@@ -57,6 +57,15 @@ void PostProcessing::initializePostProcessing(){
     mPostProcessingModel->setUniformFloat(1,SHADER_LIGHT_VOLUME,"u_CameraNear");
     mPostProcessingModel->setUniformFloat(80,SHADER_LIGHT_VOLUME,"u_CameraFar");
 #endif
+    /** Full-screen shader**/
+    GLuint quadShader = loadShaders("shaders/screen_quad.vert", "shaders/screen_quad.frag");
+    mPostProcessingModel->setShader(quadShader,SHADER_LIGHT_EFFECT,NONE);
+
+  	/** Full-screen quad model **/
+    uploadSquareModelData(mPostProcessingModel,SHADER_LIGHT_EFFECT);
+
+    /** Set texture **/
+    mPostProcessingModel->setTexture(mLightFBO->texid,SHADER_LIGHT_EFFECT,"u_Texture");
 
 #ifdef SHADOW_MAP
    /*************************************************************************************/
@@ -156,11 +165,8 @@ void PostProcessing::drawShadows(mat4 proj, mat4 view){
     mPostProcessingModel->replaceUniformMatrix(shadowTextureMatrix,SHADER_SHADOW_MAP,"LightTextureMatrix");
 
     /** Enable blend **/
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST);
     mPostProcessingModel->draw(SHADER_SHADOW_MAP,proj,view);
-    glDisable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
 }
 
@@ -175,14 +181,19 @@ void PostProcessing::draw(mat4 proj, mat4 view){
 #ifndef DEBUG
     drawLightVolume(proj,view);
 
- //  mPostProcessingModel->draw(SHADER_SPHERE,proj,view);
 
 	/** Select screen as render target*/
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
     glViewport(0, 0, *mScreenWidth, *mScreenHeight);
 
-	/** Draw Shadows  **/
+	/** Render Post processing **/
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	mPostProcessingModel->draw(SHADER_LIGHT_EFFECT,proj,view);
+	#ifdef SHADOW_MAP
     drawShadows(proj,view);
+    #endif
+    glDisable(GL_BLEND);
 
 #else
     /** Select screen as render target*/
@@ -294,7 +305,7 @@ void PostProcessing::generateDepthFBO(FBOstruct * fbo, GLuint w ,GLuint h) {
     FBOstatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if(FBOstatus != GL_FRAMEBUFFER_COMPLETE)
         printf("GL_FRAMEBUFFER_COMPLETE failed, CANNOT use FBO\n");
-    // switch back to window-system-provided framebuffer
+    // switch back to screen
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 void PostProcessing::uploadSquareModelData(ModelObject * modelObj,GLuint shaderId){

@@ -2,6 +2,7 @@
 
 uniform sampler2D u_HeightMap;
 uniform vec2 u_TextureSize;
+uniform vec3 u_TerrainSize;
 uniform mat4 MVP_Matrix;
 
 

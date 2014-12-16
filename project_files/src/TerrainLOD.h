@@ -5,18 +5,14 @@
 #include "GL_utilities.h"
 #include "VectorUtils3.h"
 #include "ScreenSize.h"
+#include "Environment.h"
 #include "LoadTGA.h"
 
 
 #define SHADER_TERRAIN_LOD 0
-typedef struct{
-        float TerrainSize;
-        float TerrainDimension; /*Number of elements per size*/
-        float TerrainResolution; /* size divided by dimension */
-        float HeightScale;
-        float TerrainHeightOffset;
-}TerrainMetaData;
-
+#define VERTICES_PER_TRIANGLE 3
+#define FLOATS_PER_POSITION 3
+#define INDICES_PER_QUAD 6
 class TerrainLOD{
 
     public:
@@ -25,26 +21,26 @@ class TerrainLOD{
 
         void initialize();
         void draw(mat4 projectionMatrix,mat4 viewMatrix);
-        TextureData * getTextureData();
-        TerrainMetaData * getTerrainMetaData();
+        void setEnvironment(Environment * environment){mEnvironment = environment;}
+
         //void TerrainLOD::setCameraInfo(vec3 * cameraEye, vec3* cameraCenter);
     protected:
 
     private:
+        void generateTerrain();
         void generateLODBuffers(ModelObject * modelObj,GLuint shaderId);
         void uploadSquareModelData(ModelObject * modelObj,GLuint shaderId);
+        void debug();
+
         ModelObject * mTerrainLODScene;
         GLfloat mTextureSize[2];
+        Environment * mEnvironment;
 
-        /** Ny meta **/
-        static const GLfloat TerrainHeightOffset = 0.0;
-        static const GLfloat TerrainHeightScale =  5.0;
-        static const GLfloat TerrainPlaneScale =  20.0;
+        static const GLuint TerrainBaseDimension = 64;
 
 
-        /** Two types of terrain data containers **/
-        TerrainMetaData * mTerrainMetaData;
-        TextureData* mTerrainTextureData;
+
+
 };
 
 

@@ -25,7 +25,7 @@ class GrassSimulation
     protected:
 
     private:
-        Environment * mTerrain;
+        Environment * mEnvironment;
     	ModelObject * mGrassScene;
         GLfloat previousTime;
 		GLfloat angle;

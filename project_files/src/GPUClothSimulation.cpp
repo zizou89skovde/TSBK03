@@ -76,11 +76,11 @@ void GPUClothSimulation::initialize(){
     mat4 transform2 = T(pos.x,pos.y,pos.z)*S(r,r,r);
     mGPUClothScene->setTransform(transform2,GPU_SHADER_SPHERE);
 
-    mTerrain->setReflectedModels(mGPUClothScene,GPU_SHADER_CLOTH);
-    mTerrain->setReflectedModels(mGPUClothScene,GPU_SHADER_SPHERE);
+    mEnvironment->setReflectedModels(mGPUClothScene,GPU_SHADER_CLOTH);
+    mEnvironment->setReflectedModels(mGPUClothScene,GPU_SHADER_SPHERE);
 
-    mTerrain->setDepthModels(mGPUClothScene,GPU_SHADER_SIMPLE_CLOTH);
-    mTerrain->setDepthModels(mGPUClothScene,GPU_SHADER_SPHERE);
+    mEnvironment->setDepthModels(mGPUClothScene,GPU_SHADER_SIMPLE_CLOTH);
+    mEnvironment->setDepthModels(mGPUClothScene,GPU_SHADER_SPHERE);
 
 }
 

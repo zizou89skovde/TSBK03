@@ -8,11 +8,11 @@
 #include "Environment.h"
 
 //#define DEBUG 0
-#define SHADOW_MAP 1
+//#define SHADOW_MAP 1
 
 #define SHADER_LIGHT_VOLUME 0
 #define SHADER_SPHERE       1
-//#define SHADER_SCREEN_QUAD  2
+#define SHADER_LIGHT_EFFECT  2
 #define SHADER_SHADOW_MAP   3
 class PostProcessing
 {

@@ -44,7 +44,7 @@ class GPUSimulation: public SimulationClass
         virtual void initialize(){};
 
 
-        void setTerrain(Environment * terrain){mTerrain = terrain;}
+        void setEnvironment(Environment * environment){mEnvironment = environment;}
 
 
     protected:
@@ -63,7 +63,7 @@ class GPUSimulation: public SimulationClass
         void replaceSimulationTexture(GLuint texid,const char* uniformName);
 
         FBOstruct* simulate(GLuint numIterations);
-         Environment* mTerrain;
+         Environment* mEnvironment;
         GLuint* mScreenWidth;
         GLuint* mScreenHeight;
 

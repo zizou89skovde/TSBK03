@@ -43,13 +43,12 @@ void GPUWaterSimulation::initialize(){
     /** Set initial textures **/
     mGPUWaterScene->setTexture(DUMMY_TEXTURE,GPU_SHADER_WATER,"u_Position_Texture");
 
-    /** Upload Offscreen rendering of the terrain */
-	FBOstruct * terrainFBO = mTerrain->getEnvironmentFBO();
-    mGPUWaterScene->setTexture(terrainFBO->texid,GPU_SHADER_WATER,"u_TerrainColor");
+
+    /** Upload off screen rendering of the terrain */
+    mGPUWaterScene->setTexture(mEnvironment->getRefractionFBO()->texid,GPU_SHADER_WATER,"u_TerrainColor");
 
     /** Upload upside down rendering of the terrain  **/
-    FBOstruct * terrainReflectionFBO = mTerrain->getEnvironmentReflectedFBO();
-    mGPUWaterScene->setTexture(terrainReflectionFBO->texid,GPU_SHADER_WATER,"u_TerrainReflection");
+    mGPUWaterScene->setTexture(mEnvironment->getReflectedFBO()->texid,GPU_SHADER_WATER,"u_TerrainReflection");
 
     /** Upload grid resolution **/
     GLfloat meta[2];
@@ -71,7 +70,7 @@ void GPUWaterSimulation::initialize(){
     mGPUWaterScene->setShader(waterSimpleShader ,GPU_SHADER_SIMPLE_WATER,VP);
     mGPUWaterScene->clone(GPU_SHADER_WATER,GPU_SHADER_SIMPLE_WATER,false,true);
 
-    mTerrain->setDepthModels(mGPUWaterScene,GPU_SHADER_SIMPLE_WATER);
+    mEnvironment->setDepthModels(mGPUWaterScene,GPU_SHADER_SIMPLE_WATER);
 
 }
 
@@ -81,12 +80,12 @@ GPUWaterSimulation::~GPUWaterSimulation(){
 
 void GPUWaterSimulation::configureSimulation(){
 
-
+    /** Environment meta data **/
+    EnvironmentMetaData metaData = mEnvironment->getMetaData();
 
     /** Upload ground heightmap **/
-  /* TextureData* textureData = mTerrain->getTextureData();
-    setSimulationTexture(textureData->texID,"u_HeightMap");
-*/
+    setSimulationTexture(metaData.sHeightMapHandle,"u_HeightMap");
+
     /** Upload Rain **/
     GLfloat rain[] = {0.0,0.0,0.02,0.030};
     setSimulationConstant(rain,4,"u_RainDrop");
@@ -94,11 +93,10 @@ void GPUWaterSimulation::configureSimulation(){
     /** Upload system props **/
     setSimulationConstant(GpuSystemDeltaTime,"u_DeltaTime");
     setSimulationConstant(GpuSystemDamping,"u_SystemDamping");
-/*
-    TerrainMetaData* terrainMeta = mTerrain->getTerrainMetaData();
-    setSimulationConstant(terrainMeta->HeightScale, "u_TerrainHeight");
-    setSimulationConstant(terrainMeta->TerrainSize, "u_TerrainSize");
-*/
+
+    setSimulationConstant(metaData.sSize[1], "u_EnvironmentHeight");
+    setSimulationConstant(metaData.sSize[2], "u_EnvironmentSize");
+
     mPreviousTime = 0.0f;
     /** Upload wind **/
 	//uploadTime(0.0079);
@@ -142,7 +140,6 @@ void GPUWaterSimulation::draw(mat4 projectionMatrix, mat4 viewMatrix){
 
     	mGPUWaterScene->replaceUniformFloat(screenSize,GPU_SHADER_WATER,"u_ScreenSize");
 	}
-
 
     raindrops();
 
