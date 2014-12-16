@@ -14,6 +14,7 @@ Environment::Environment(GLuint * w, GLuint * h)
     initializeSkyBox();
     initializeEnvironment();
 
+
 }
 
 void Environment::initializeEnvironment(){
@@ -119,10 +120,11 @@ void Environment::drawReflectedModels(mat4 projectionMatrix,mat4 viewMatrix){
     glClearColor(0.0, 0.0, 0.0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glEnable(GL_CLIP_DISTANCE0);
+
     glDisable(GL_CULL_FACE);
 
     /** Draw skybox upside down. Clipped at the Y-axis **/
+    glEnable(GL_CLIP_DISTANCE0);
     setClip(true);
     mEnvironmentModel->draw(SKYBOX_SHADER,projectionMatrix,viewMatrix);
     setClip(false);
@@ -156,6 +158,7 @@ void Environment::drawReflectedModels(mat4 projectionMatrix,mat4 viewMatrix){
           glBindFramebuffer(GL_FRAMEBUFFER, mDefaultFBO->fb);
           glViewport(0, 0, mDefaultFBO->width, mDefaultFBO->height);
     }
+
 
 
 }
@@ -210,8 +213,9 @@ void Environment::drawDepthModels(mat4 projectionMatrix,mat4 viewMatrix){
 
 void Environment::draw(mat4 proj, mat4 view){
     mEnvironmentModel->draw(SKYBOX_SHADER,proj,view);
+    drawRefractedModels(proj,view);
     drawReflectedModels(proj,view);
-  //  drawRefractedModels(proj,view);
+
 }
 
 

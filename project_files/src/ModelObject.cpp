@@ -86,7 +86,7 @@ void ModelObject::draw(mat4 projectionMatrix, mat4 viewMatrix){
 
 void ModelObject::draw(GLuint shaderId,mat4 projectionMatrix, mat4 viewMatrix){
 	selectDrawMethod(mShaderMap[shaderId],projectionMatrix,viewMatrix);
-    
+
     if (!mShaderMap[shaderId]->sSpeedlines.sMovementPoints.empty()) {
         drawSpeedlines(mShaderMap[shaderId], projectionMatrix, viewMatrix);
         updateSpeedlines(mShaderMap[shaderId]);
@@ -120,6 +120,12 @@ void ModelObject::selectDrawMethod(Shader_Type * shader, mat4 projectionMatrix, 
 void ModelObject::flipModels(GLuint shaderId){
     Shader_Type * shader = mShaderMap[shaderId];
     shader->sTransform = S(1,-1,1)*shader->sTransform;
+
+    if(shader->sUniformFloatMap.find("u_Clip") != shader->sUniformFloatMap.end()){
+        shader->sUniformFloatMap["u_Clip"]->sData[0] *= -1;
+        uploadUniformFloat(shader->sUniformFloatMap["u_Clip"]);
+    }
+
 }
 
 
