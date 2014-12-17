@@ -75,9 +75,7 @@ void init(void)
 	printError("GL inits");
     mEnvironment = new Environment(&WIDTH,&HEIGHT);
 
-	mTerrainLOD = new TerrainLOD();
-	mTerrainLOD->setEnvironment(mEnvironment);
-	mTerrainLOD->initialize();
+
 
     clothSimulation = new GPUClothSimulation(&WIDTH,&HEIGHT);
     clothSimulation->setEnvironment(mEnvironment);
@@ -87,17 +85,28 @@ void init(void)
     waterSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
     waterSimulation->setEnvironment(mEnvironment);
     waterSimulation->initialize();
-/*
-*/
+
+    mTerrainLOD = new TerrainLOD();
+	mTerrainLOD->setEnvironment(mEnvironment);
+	mTerrainLOD->initialize();
+
+
 
 /*
-    postProcessing = new PostProcessing(&WIDTH,&HEIGHT);
-    postProcessing->setTerrin(mEnvironment);
-    mKeyMouseHandler.setPostProcessing(postProcessing);
-*/
+
+
     mGrassSimulation = new GrassSimulation();
     mGrassSimulation->setEnvironment(mEnvironment);
     mGrassSimulation->initialize();
+
+*/
+
+    postProcessing = new PostProcessing(&WIDTH,&HEIGHT);
+    postProcessing->setTerrin(mEnvironment);
+
+    mKeyMouseHandler = KeyMouseHandler();
+    mKeyMouseHandler.setPostProcessing(postProcessing);
+
 
 #ifdef CEL_SHADING
     clothSimulation->setDefaultFBO(fbo1);
@@ -107,7 +116,6 @@ void init(void)
     celShading->initialize(fbo1);
 #endif
     // Create key/mouse handler
-    mKeyMouseHandler = KeyMouseHandler();
 
 	glutTimerFunc(5, &OnTimer, 0);
 }
@@ -141,15 +149,18 @@ void display(void)
     viewMatrix = mKeyMouseHandler.getViewMatrix();
 
     mEnvironment->draw(projectionMatrix,viewMatrix);
-
+mTerrainLOD->draw(projectionMatrix,viewMatrix);
     waterSimulation->draw(projectionMatrix,viewMatrix);
     clothSimulation->draw(projectionMatrix,viewMatrix);
-//    postProcessing->draw(projectionMatrix,viewMatrix);
+
+    postProcessing->draw(projectionMatrix,viewMatrix);
 
 
-    mTerrainLOD->draw(projectionMatrix,viewMatrix);
+
+ /*
     mGrassSimulation->draw(projectionMatrix,viewMatrix);
 	mGrassSimulation->update();
+*/
 
 #ifdef CEL_SHADING
     celShading->draw(projectionMatrix, viewMatrix);

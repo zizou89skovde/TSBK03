@@ -1,8 +1,8 @@
 #version 400 core
 layout (triangles) in;
 
-layout(triangle_strip, max_vertices = 3) out;
-//layout(line_strip, max_vertices =3) out;
+//layout(triangle_strip, max_vertices = 3) out;
+layout(line_strip, max_vertices =3) out;
 
 uniform mat4 VP_Matrix;
 

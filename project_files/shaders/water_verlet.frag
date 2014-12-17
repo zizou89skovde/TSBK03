@@ -82,19 +82,19 @@ vec3 applyNeighbourForce(vec3 centerPosition, vec3 velocity,float height){
 	return  force;
 }
 
-int rainDrop(vec3 position,float height,out vec3 out1,out vec3 out2){
-	int afftected = 0;
+int rainDrop(vec3 position,float height,out vec3 v1,out vec3 v2){
+	int affected = 0;
 	if(height > 0.2){
 		float radius = u_RainDrop.z;
 		float distance = length(u_RainDrop.xy - position.xz);	
 		if(distance < radius ){
-			afftected = 1;
+			affected = 1;
 			float amplitude = min(u_RainDrop.w,abs(height));
-			out1 = position - vec3(0.0,amplitude,0.0);
-			out2 = position - vec3(0.0,amplitude,0.0);
+			v1 = position - vec3(0.0,amplitude,0.0);
+			v2 = position - vec3(0.0,amplitude,0.0);
 		}
 	}
-	return afftected;
+	return affected;
 }
 
 /* GPU implementation of the applyForces in CPUClothsimulation.cpp */
