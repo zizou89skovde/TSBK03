@@ -44,7 +44,7 @@ void GrassSimulation::initialize(){
 
     /** Grass mask **/
     GLuint grassMaskTexture;
-    LoadTGATextureSimple((char*)"textures/test2.tga", &grassMaskTexture);
+    LoadTGATextureSimple((char*)"textures/test3.tga", &grassMaskTexture);
     mGrassScene->setTexture(grassMaskTexture,GRASS_SHADER_ID,"u_GrassMask");
 
     /** Set model to world transform **/

@@ -32,14 +32,27 @@ void main(void)
 		vec4 v1 = MV_Matrix*gl_in[1].gl_Position;
 		vec4 v2 = MV_Matrix*gl_in[2].gl_Position;
 		
+		// Calculate middle point of each line of the triangle
 		vec3 d1= v1.xyz +(v2.xyz-v1.xyz)/2;
 		vec3 d2= v0.xyz+(v2.xyz-v0.xyz)/2;
 		vec3 d3= v0.xyz+(v1.xyz-v0.xyz)/2;
 		
+		// Frustum culling
+		vec3 refVec = vec3(0.0, 0.0, 1.0);
+		float dotProd1 = dot(v0.xyz, refVec);
+		float dotProd2 = dot(v1.xyz, refVec);
+		float dotProd3 = dot(v2.xyz, refVec);
+		
 		// Calculate Level of Detail
-		float lod0 = calc_LoD(vec3(d1), vec3(0.0));
-		float lod1 = calc_LoD(vec3(d2), vec3(0.0));
-		float lod2 = calc_LoD(vec3(d3), vec3(0.0));
+		float lod0 = 0.0;
+		float lod1 = 0.0;
+		float lod2 = 0.0;
+		if (dotProd1 < 0.0) 
+			lod0 = calc_LoD(vec3(d1), vec3(0.0));
+		if (dotProd2 < 0.0) 
+			lod1 = calc_LoD(vec3(d2), vec3(0.0));
+		if (dotProd3 < 0.0) 
+			lod2 = calc_LoD(vec3(d3), vec3(0.0));
 		
 		//Threshold value for the mask
 		float maskThresHold = 0.5;

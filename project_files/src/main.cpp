@@ -81,14 +81,14 @@ void init(void)
 	mTerrainLOD->setEnvironment(mEnvironment);
 	mTerrainLOD->initialize();
 
-    //clothSimulation = new GPUClothSimulation(&WIDTH,&HEIGHT);
-  //  clothSimulation->setEnvironment(mEnvironment);
-   // clothSimulation->initialize();
+  //  clothSimulation = new GPUClothSimulation(&WIDTH,&HEIGHT);
+ //   clothSimulation->setEnvironment(mEnvironment);
+  // clothSimulation->initialize();
 
 
- //   waterSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
+  //  waterSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
  //   waterSimulation->setEnvironment(mEnvironment);
- // waterSimulation->initialize();
+//  waterSimulation->initialize();
 
 /*
 */
@@ -98,9 +98,9 @@ void init(void)
  //   mKeyMouseHandler.setPostProcessing(postProcessing);
 
 
-   // mGrassSimulation = new GrassSimulation();
-   // mGrassSimulation->setEnvironment(mEnvironment);
-  //  mGrassSimulation->initialize();
+    mGrassSimulation = new GrassSimulation();
+    mGrassSimulation->setEnvironment(mEnvironment);
+    mGrassSimulation->initialize();
 
 #ifdef CEL_SHADING
     clothSimulation->setDefaultFBO(fbo1);
@@ -145,8 +145,8 @@ void display(void)
 
     mEnvironment->draw(projectionMatrix,viewMatrix);
 
- //  waterSimulation->draw(projectionMatrix,viewMatrix);
-  //  clothSimulation->draw(projectionMatrix,viewMatrix);
+//   waterSimulation->draw(projectionMatrix,viewMatrix);
+//   clothSimulation->draw(projectionMatrix,viewMatrix);
    // postProcessing->draw(projectionMatrix,viewMatrix);
 
 
@@ -174,8 +174,8 @@ void display(void)
     printf("Primitives count: %d\n", queryResult);
 */
 
-  //  mGrassSimulation->draw(projectionMatrix,viewMatrix);
-//	mGrassSimulation->update();
+    mGrassSimulation->draw(projectionMatrix,viewMatrix);
+	mGrassSimulation->update();
 
 #ifdef CEL_SHADING
     celShading->draw(projectionMatrix, viewMatrix);
