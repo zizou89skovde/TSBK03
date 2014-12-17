@@ -1,7 +1,7 @@
 #version 400
 
 #define NUM_OF_GRASS_VERTICES 5
-#define NUM_OF_GRASS_STRAWS_PER_TRIANGLE 3
+#define NUM_OF_GRASS_STRAWS_PER_TRIANGLE 5
 
 #define PI 3.141592653589793
 
@@ -63,21 +63,21 @@ void main()
 			createGrassStraw1(grassVertices, grassNoise);
 			break;
 		case 1:
-			position.x -= 0.05*position.x;
+			position.x -= 0.01*position.x;
 			createGrassStraw1(grassVertices, grassNoise);
 			break;
 		case 2:
-			position.x += 0.05*position.x;
+			position.x += 0.01*position.x;
 			createGrassStraw2(grassVertices, grassNoise);
 			break;
-		/*case 3:
-			position.x -= scale*1.6*grassNoise;
+		case 3:
+			position.z -= 0.01*position.z;
 			createGrassStraw2(grassVertices, grassNoise);
 			break;
 		case 4:
-			position.z -= scale*1.9*grassNoise;
+			position.z -= 0.01*position.z;
 			createGrassStraw2(grassVertices, grassNoise);
-			break;*/
+			break;
 		default:
 			break;
 	}
@@ -112,7 +112,7 @@ void createGrassStraw1(inout vec3 grassVertices[NUM_OF_GRASS_VERTICES], in float
 	float grassDeltaZLast = 0.001 + 0.05*grassNoise;
 	float grassDeltaZ = 0.001 + 0.01*grassNoise;
 
-	float scaleGrass1 = 0.1;
+	float scaleGrass1 = 0.05;
 
 	grassVertices[0] = scaleGrass1*vec3(0.0);
 	grassVertices[1] = scaleGrass1*vec3(grassBaseWidth, 0.0, grassDeltaZ);
@@ -130,7 +130,7 @@ void createGrassStraw2(inout vec3 grassVertices[NUM_OF_GRASS_VERTICES], in float
 	float grassDeltaZLast = 0.001 + 0.35*grassNoise;
 	float grassDeltaZ = 0.001 + 0.05*grassNoise;
 
-	float scaleGrass2 = 0.1;
+	float scaleGrass2 = 0.05;
 	
 	grassVertices[0] = scaleGrass2*vec3(0.0);
 	grassVertices[1] = scaleGrass2*vec3(-2.0*grassBaseWidth, 1.5*grassDeltaHeight, 0.0);
