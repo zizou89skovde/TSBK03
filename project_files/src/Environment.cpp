@@ -173,7 +173,7 @@ void Environment::drawRefractedModels(mat4 projectionMatrix,mat4 viewMatrix){
     GLuint shaderId;
 
     glClearColor(0.0, 0.0, 0.0, 0);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
 
     for(ModelIterator it = mRefracedModelMap.begin(); it != mRefracedModelMap.end(); ++it) {
         ModelItem item = *it;
@@ -196,7 +196,7 @@ void Environment::drawDepthModels(mat4 projectionMatrix,mat4 viewMatrix){
 
     ModelObject * modelObject;
     GLuint shaderId;
-   // glDisable(GL_CULL_FACE);
+    glDisable(GL_CULL_FACE);
     for(ModelIterator it = mDepthModelMap.begin(); it != mDepthModelMap.end(); ++it) {
 
         ModelItem item = *it;
@@ -206,14 +206,14 @@ void Environment::drawDepthModels(mat4 projectionMatrix,mat4 viewMatrix){
 
         modelObject->draw(shaderId,projectionMatrix,viewMatrix);
     }
-   // glEnable(GL_CULL_FACE);
-	//glCullFace(GL_BACK);
+    glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 
 }
 
 void Environment::draw(mat4 proj, mat4 view){
     mEnvironmentModel->draw(SKYBOX_SHADER,proj,view);
-   // drawRefractedModels(proj,view);
+ //   drawRefractedModels(proj,view);
     drawReflectedModels(proj,view);
 
 }

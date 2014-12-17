@@ -191,10 +191,12 @@ void PostProcessing::draw(mat4 proj, mat4 view){
 	/** Render Post processing **/
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	mPostProcessingModel->draw(SHADER_LIGHT_EFFECT,proj,view);
-	#ifdef SHADOW_MAP
+    mPostProcessingModel->draw(SHADER_LIGHT_EFFECT,proj,view);
+    #ifdef SHADOW_MAP
     drawShadows(proj,view);
     #endif
+
+
     glDisable(GL_BLEND);
 
 #else
