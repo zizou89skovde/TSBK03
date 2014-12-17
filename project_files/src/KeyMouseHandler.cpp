@@ -105,6 +105,18 @@ void KeyMouseHandler::keyPress(unsigned char key, int x, int y)
                 mCelShading->fireObject();
             }
         break;
+        case 'j':
+        case 'J':
+            if (mCelShading != NULL) {
+                mCelShading->changeSpeedlines();
+            }
+        break;
+        case 'm':
+        case 'M':
+            if (mCelShading != NULL) {
+                mCelShading->changeGravity();
+            }
+        break;
     }
     if(DotProduct(sphereDeltaPos,sphereDeltaPos) != 0){
         if (mClothSimulation != NULL)

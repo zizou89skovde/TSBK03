@@ -28,6 +28,8 @@ class CelShading
 
         // Fire away object
         void fireObject();
+        void changeSpeedlines();
+        void changeGravity();
 
     private:
         // Generate a depth FBO to derive
@@ -75,6 +77,7 @@ class CelShading
         static const GLfloat mObjectOffsetX = 0.0;
         static const GLfloat mObjectOffsetY = 0.0;
         static const GLfloat mObjectOffsetZ = 3.0;
+        GLfloat mGravity;
 
 };
 

@@ -8,6 +8,7 @@
 #include "loadobj.h"
 #include "VectorUtils3.h"
 #include "GL_utilities.h"
+#include "milli.h"
 #include<stdio.h>
 
 /**
@@ -22,7 +23,7 @@
 
 #define MODEL_OBJECT_VERBOSE
 
-#define NUMBER_OF_SPEEDPOINTS 50 // temp placement
+#define NUMBER_OF_SPEEDPOINTS 20 // temp placement
 
 typedef enum{
 	ARRAYS,
@@ -67,21 +68,27 @@ typedef struct{
 }UniformMatrix_Type;
 
 typedef struct{
+    double s;
+    int ms;
+}Timestamp_Type;
+
+typedef struct{
     GLuint sShaderId;
     Model* sModel;
 }Model_Type;
 
 typedef struct{
     GLuint sSpeedlinesShader;
+    /** Speed line timestamp vector **/
+    std::vector<Timestamp_Type> sTimestamps;
     /** Speed line point vector (world coordinates). Empty if not used. **/
     std::vector<vec3> sMovementPoints;
     /** Speed line transform vector. Empty if not used **/
     std::vector<mat4> sMovementTransforms;
     /** Model to hold VAO & VBO **/
     Model* m;
-    /** Switches on/off for line & model drawing **/
-    GLbool sSpeedlinesSwitch = false;
-    GLbool sSpeedModelSwitch = false;
+    /** Switch for line (1), model (2) or no (0) speedline drawing **/
+    int sSpeedlineSwitch;
 }Speed_Lines;
 
 typedef struct{
@@ -161,6 +168,8 @@ class ModelObject
         void setTransform(mat4 transf,GLuint id);
         void setSpeedlinesInit(GLuint shaderId);
         void setSpeedModelsInit(GLuint shaderId);
+        void setNoSpeedlines(GLuint shaderId);
+        void registerTimeSpeedlines(GLuint shaderId);
 		void setDrawMethod(DrawMethod_Type method, GLuint shaderId);
 		void setNumInstances(GLuint numInstances, GLuint shaderId);
 
@@ -168,6 +177,7 @@ class ModelObject
 
 		/* Get functions */
 		DrawMethod_Type getDrawMethod(GLuint shaderId);
+        int getSpeedlineMode(GLuint shaderId);
 
 
         void replaceTexture(GLuint handle,GLuint shaderId,const char* uniformName);

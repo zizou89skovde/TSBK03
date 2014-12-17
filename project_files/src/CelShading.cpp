@@ -7,6 +7,7 @@ CelShading::CelShading(GLuint* w, GLuint* h)
     mCelShadingSwitch = 0.0;
     mCelShadingSteps = 5.0;
     mCelShadingContourThresh = 0.3;
+    mGravity = 0.0;
 
     srand (static_cast <unsigned> (time(0)));
 }
@@ -29,15 +30,15 @@ void CelShading::initialize(FBOstruct* fbo_in)
 
 
     // Object Shader
-    GLuint objectShader = loadShaders("shaders/sphere.vert", "shaders/object_speed.frag");
+    GLuint objectShader = loadShaders("shaders/object_speed.vert", "shaders/object_speed.frag");
     mCelObject->setShader(objectShader, CEL_OBJECT_SHADER_ID);
 
     // Object data
     Object* object = new Object();
     object->position = new vec3(mObjectOffsetX, mObjectOffsetY, mObjectOffsetZ);
     object->velocity = new vec3(0.0, 0.0, 0.0);
-    object->rotation = new vec3(0.0, 0.5, 0.5);
-    object->angular = new vec3(0.05, 0.0, 0.0);
+    object->rotation = new vec3(0.0, 3.14/2, 0.0);
+    object->angular = new vec3(0.0, 0.0, 0.0);
     object->radius = mObjectRadius;
     mObject = object;
 
@@ -52,8 +53,8 @@ void CelShading::initialize(FBOstruct* fbo_in)
     mat4 objectTransform = T(pos.x, pos.y, pos.z) * S(r, r, r);
     mCelObject->setTransform(objectTransform, CEL_OBJECT_SHADER_ID);
 
-    mCelObject->setSpeedlinesInit(CEL_OBJECT_SHADER_ID);
-    mCelObject->setSpeedModelsInit(CEL_OBJECT_SHADER_ID);
+    //mCelObject->setSpeedlinesInit(CEL_OBJECT_SHADER_ID); // This is now done through keyboard presses
+    //mCelObject->setSpeedModelsInit(CEL_OBJECT_SHADER_ID);
     GLfloat speedlinesAlpha = 1.0;
     mCelObject->setUniformFloat(&speedlinesAlpha, 1, CEL_OBJECT_SHADER_ID, "u_SpeedlinesAlpha");
 
@@ -129,6 +130,7 @@ void CelShading::draw(mat4 projectionMatrix, mat4 viewMatrix)
     // Draw debug object to previously chosen fbo (both texture & depth)
 	mCelObject->draw(CEL_OBJECT_SHADER_ID, projectionMatrix, viewMatrix);
 
+    // Sobel depth buffer
     useFBO(mContourFBO, 0L, 0L);
     glClearColor(0.0, 0.0, 0.0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -150,8 +152,6 @@ void CelShading::draw(mat4 projectionMatrix, mat4 viewMatrix)
 	mCelObject->draw(CEL_SCREEN_QUAD_ID, projectionMatrix, viewMatrix);
 
     // Update object position
-    //vec3 deltaPos = vec3(mObjectSpeed, 0.0, 0.0);
-    //updateObjectPosition(deltaPos);
     updateObjectTransform();
 }
 
@@ -186,7 +186,7 @@ void CelShading::uploadSquareModelData(ModelObject* modelObj, GLuint shaderId)
         2*3,
         shaderId);
 
-    printError("Cloth Gen Position Buffer Coordinates ");
+    printError("Celshading Position Buffer Coordinates ");
 }
 
 void CelShading::fireObject()
@@ -195,14 +195,47 @@ void CelShading::fireObject()
     vec3* rot = mObject->rotation;
 
     // Reset positions and velocities
-    *pos = vec3(mObjectOffsetX, mObjectOffsetY, mObjectOffsetZ);
-    *rot = vec3(0.0, 0.5, 0.5);
-    *mObject->velocity = vec3(randFloat(0.0, 0.5), randFloat(0.3, 0.6), 0.0);
-    *mObject->angular = vec3(randFloat(0.0, 0.3), 0.0, 0.0);
+    *pos = vec3(mObjectOffsetX, -0.5, mObjectOffsetZ);
+    *rot = vec3(0.0, 3.14/2, 0.0);
+    *mObject->velocity = vec3(randFloat(0.0, 0.25), randFloat(0.1, 0.4), 0.0);
+    *mObject->angular = vec3(randFloat(0.0, 0.1), 0.0, 0.0);
 
     // Update transform
     mat4* transf = mCelObject->getTransform(CEL_OBJECT_SHADER_ID);
     *transf = T(pos->x, pos->y, pos->z) * Rx(rot->x) * Ry(rot->y) * Rz(rot->z);
+
+    // Reset speedlines
+    int mode = mCelObject->getSpeedlineMode(CEL_OBJECT_SHADER_ID);
+    if (mode == 1) {
+        mCelObject->setSpeedlinesInit(CEL_OBJECT_SHADER_ID);
+    }
+    else if (mode == 2) {
+        mCelObject->setSpeedModelsInit(CEL_OBJECT_SHADER_ID);
+
+    }
+}
+
+void CelShading::changeSpeedlines()
+{
+    int mode = mCelObject->getSpeedlineMode(CEL_OBJECT_SHADER_ID);
+    if (mode == 0) {
+        mCelObject->setSpeedlinesInit(CEL_OBJECT_SHADER_ID);
+    }
+    else if (mode == 1) {
+        mCelObject->setSpeedModelsInit(CEL_OBJECT_SHADER_ID);
+
+    }
+    else if (mode == 2) {
+        mCelObject->setNoSpeedlines(CEL_OBJECT_SHADER_ID);
+    }
+}
+
+void CelShading::changeGravity()
+{
+    if (mGravity > 0.0)
+        mGravity = 0.0;
+    else
+        mGravity = 0.0035;
 }
 
 GLfloat CelShading::randFloat(GLfloat min, GLfloat max)
@@ -221,24 +254,10 @@ void CelShading::updateObjectTransform()
     // Change velocities due to drag and gravity
     *mObject->velocity *= 0.97;
     *mObject->angular *= 0.99;
-    mObject->velocity->y -= 0.0035;
+    mObject->velocity->y -= mGravity;
 
     // Update transform
     mat4* transf = mCelObject->getTransform(CEL_OBJECT_SHADER_ID);
     *transf = T(pos->x, pos->y, pos->z) * Rx(rot->x) * Ry(rot->y) * Rz(rot->z);
-}
-
-void CelShading::updateObjectPosition(vec3 deltaPos)
-{
-    /** Update position of object **/
-    Object * s = mObject;
-    *s->position += deltaPos;
-    s->position->y = sin(s->position->x);
-    /** Update model transform **/
-    mat4 * transf = mCelObject->getTransform(CEL_OBJECT_SHADER_ID);
-    GLfloat r = s->radius;
-    vec3  pos = *s->position;
-
-    *transf = T(pos.x,pos.y,pos.z)*S(r,r,r);
 }
 

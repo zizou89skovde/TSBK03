@@ -89,23 +89,22 @@ void ModelObject::draw(GLuint shaderId,mat4 projectionMatrix, mat4 viewMatrix){
     
     // Draw & update speedlines if point vector not empty.
     // Draw & update models/transforms if transform vector not empty.
-    if (!mShaderMap[shaderId]->sSpeedlines.sMovementPoints.empty()) {
-
+    if (mShaderMap[shaderId]->sSpeedlines.sSpeedlineSwitch != 0) {
         updateSpeedlines(mShaderMap[shaderId]);
 
-        if (!mShaderMap[shaderId]->sSpeedlines.sMovementTransforms.empty())
+        if (mShaderMap[shaderId]->sSpeedlines.sSpeedlineSwitch == 2)
             updateSpeedModels(mShaderMap[shaderId]);
 
-        if (mShaderMap[shaderId]->sSpeedlines.sSpeedlineSwitch)
+        if (mShaderMap[shaderId]->sSpeedlines.sSpeedlineSwitch == 1)
             drawSpeedlines(mShaderMap[shaderId], projectionMatrix, viewMatrix);
-        else {
-            // Lines switched off. Clear vectors.
-            mShaderMap[shaderId]->sSpeedlines.sMovementPoints.
-            mShaderMap[shaderId]->sSpeedlines.sMovementTransforms.
-        }
 
-        if (!mShaderMap[shaderId]->sSpeedlines.sMovementTransforms.empty())
+        if (mShaderMap[shaderId]->sSpeedlines.sSpeedlineSwitch == 2)
             drawSpeedModels(shaderId, projectionMatrix, viewMatrix);
+    }
+    else {
+        mShaderMap[shaderId]->sSpeedlines.sMovementPoints.clear();
+        mShaderMap[shaderId]->sSpeedlines.sMovementTransforms.clear();
+        mShaderMap[shaderId]->sSpeedlines.sTimestamps.clear();
     }
 }
 
@@ -136,6 +135,12 @@ void ModelObject::selectDrawMethod(Shader_Type * shader, mat4 projectionMatrix, 
 void ModelObject::flipModels(GLuint shaderId){
     Shader_Type * shader = mShaderMap[shaderId];
     shader->sTransform = S(1,-1,1)*shader->sTransform;
+
+    if(shader->sUniformFloatMap.find("u_Clip") != shader->sUniformFloatMap.end()){
+        shader->sUniformFloatMap["u_Clip"]->sData[0] *= -1;
+        uploadUniformFloat(shader->sUniformFloatMap["u_Clip"]);
+    }
+
 }
 
 
@@ -187,10 +192,21 @@ void ModelObject::updateSpeedlines(Shader_Type* shader)
     vec3 pos = shader->sTransform * vec3(0, 0, 0);
     std::vector<vec3>* points = &(shader->sSpeedlines.sMovementPoints);
     points->push_back(pos);
+    registerTimeSpeedlines(shader->sShaderId);
 
     if (points->size() > NUMBER_OF_SPEEDPOINTS) {
         points->erase(points->begin());
+        shader->sSpeedlines.sTimestamps.erase(shader->sSpeedlines.sTimestamps.begin());
     }
+
+    // Go through all points, erase if point has lived too long
+    // NOT USED ATM
+    /*Timestamp_Type* time;
+    int numberOfPoints = shader->sSpeedlines.sMovementPoints.size();
+    for (int i = 0; i < numberOfPoints; ++i) {
+        time = &(shader->sSpeedlines.sTimestamps)[i];
+        
+    }*/
 }
 
 void ModelObject::updateSpeedModels(Shader_Type * shader)
@@ -377,9 +393,19 @@ void ModelObject::setDrawMethod(DrawMethod_Type method,GLuint shaderId){
 // Initializes speed lines. Requires initial transform to be set.
 void ModelObject::setSpeedlinesInit(GLuint shaderId)
 {
+    mShaderMap[shaderId]->sSpeedlines.sSpeedlineSwitch = 1;
+
+    // Clear vectors to be sure it's empty
+    mShaderMap[shaderId]->sSpeedlines.sMovementPoints.clear();
+    mShaderMap[shaderId]->sSpeedlines.sTimestamps.clear();
+
     // Get object start position as first point in vector
     vec3 startPos = mShaderMap[shaderId]->sTransform * vec3(0, 0, 0);
     mShaderMap[shaderId]->sSpeedlines.sMovementPoints.push_back(startPos);
+
+    // Save timestamp
+    ResetMilli();
+    registerTimeSpeedlines(shaderId);
 
     // Compile and set the speed lines shader
    	GLuint speedlineShader = loadShaders("shaders/speedlineshader.vert", "shaders/speedlineshader.frag");
@@ -396,16 +422,37 @@ void ModelObject::setSpeedlinesInit(GLuint shaderId)
     mShaderMap[shaderId]->sSpeedlines.m = m;
 }
 
-// Initializes speed models. Requires initial transform to be set.
+// Initializes speed models. Requires initial transform to be set and setSpeedlinesInit() to be run.
 void ModelObject::setSpeedModelsInit(GLuint shaderId)
 {
+    // Clear vector to be sure it's empty
+    mShaderMap[shaderId]->sSpeedlines.sMovementTransforms.clear();
+
+    mShaderMap[shaderId]->sSpeedlines.sSpeedlineSwitch = 2;
     mat4 startTrans = mShaderMap[shaderId]->sTransform;
     mShaderMap[shaderId]->sSpeedlines.sMovementTransforms.push_back(startTrans);
+}
 
+void ModelObject::setNoSpeedlines(GLuint shaderId)
+{
+    mShaderMap[shaderId]->sSpeedlines.sSpeedlineSwitch = 0;
+}
+
+void ModelObject::registerTimeSpeedlines(GLuint shaderId)
+{
+    Timestamp_Type time;
+    time.s = GetSeconds();
+    time.ms = GetMilliseconds();
+    mShaderMap[shaderId]->sSpeedlines.sTimestamps.push_back(time);
 }
 
 DrawMethod_Type ModelObject::getDrawMethod(GLuint shaderId){
 	return mShaderMap[shaderId]->sDrawMethod;
+}
+
+int ModelObject::getSpeedlineMode(GLuint shaderId)
+{
+    return mShaderMap[shaderId]->sSpeedlines.sSpeedlineSwitch;
 }
 
 void ModelObject::replaceTexture(GLuint handle,GLuint shaderId,const char* uniformName){

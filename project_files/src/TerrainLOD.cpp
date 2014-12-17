@@ -33,6 +33,13 @@ void TerrainLOD::initialize(){
     vec3 scale = vec3(environmentMetaData.sSize[0],environmentMetaData.sSize[1],environmentMetaData.sSize[2]);
     mat4 transf = T(translation.x,translation.y,translation.z)*S(scale.x,scale.y,scale.z);
 	mTerrainLODScene->setTransform(transf,SHADER_TERRAIN_LOD);
+
+
+	mEnvironment->setReflectedModels(mTerrainLODScene,SHADER_TERRAIN_LOD);
+	mTerrainLODScene->setUniformFloat(1,SHADER_TERRAIN_LOD,"u_Clip");
+
+	mEnvironment->setRefractedModels(mTerrainLODScene,SHADER_TERRAIN_LOD);
+
 }
 
 void TerrainLOD::draw(mat4 projectionMatrix, mat4 viewMatrix){

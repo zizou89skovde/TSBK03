@@ -7,7 +7,7 @@ in vec3 v_Position;
 in vec3 v_LightPos;
 void main(void)
 {
-	vec4 color = vec4(1.0,1.0,1.0,u_SpeedlinesAlpha);
+	vec4 color = vec4(.3,1.0,.3,u_SpeedlinesAlpha);
     
 	vec3 normal = v_Normal;
 	
@@ -21,7 +21,7 @@ void main(void)
 	specular = pow(specular,40.0);
 	
 	float diffuse = max(dot(n,l),0.0);
-	float ambient = 0.0;
+	float ambient = 0.1;
 
-	out_Color = (specular+diffuse+ambient)*color;
+	out_Color = (0.6*specular+0.8*diffuse+ambient)*color;
 }

@@ -26,7 +26,7 @@ float quantize(float color, float steps)
 
 vec4 sketchColor(vec4 color_in)
 {
-    if (sqrt(dot(color_in, color_in)) > 0.5)
+    if (sqrt(dot(color_in, color_in)) < 0.5)
         return texture(u_SketchTexture, f_TexCoord);
     else
         return vec4(1.0, 1.0, 1.0, 1.0);
