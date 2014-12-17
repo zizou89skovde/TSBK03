@@ -8,7 +8,7 @@
 #include "Environment.h"
 
 //#define DEBUG 0
-//#define SHADOW_MAP 1
+#define SHADOW_MAP 1
 
 #define SHADER_LIGHT_VOLUME 0
 #define SHADER_SPHERE       1
@@ -68,7 +68,7 @@ class PostProcessing
 		static const GLfloat mOffsetNear = 1;
 
 		/** Light Source Position **/
-		static const GLfloat mLightRadius = 3.0;
+		static const GLfloat mLightRadius = 2.0;
 		static const GLfloat mLightHeight = 6.0;
 		static const GLfloat mLightSpeed =  0.0005;
 		static const GLfloat mLightResolutiuon = 64.0;

@@ -27,3 +27,5 @@ openoliver/openoliver/Debug/openoliver.tlog/cl.command.1.tlog
 
 *.depend
 *.dll
+/project_files/Light_Shadows
+project_files/Light_Shadows.rar

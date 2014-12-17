@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Debug" />
+	<File name="..\project_files\src\TerrainLOD.cpp" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="351" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\src\main.cpp" open="1" top="1" tabpos="6" split="0" active="1" splitpos="0" zoom_1="-1" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1122" topLine="29" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\common\GL_utilities.c" open="0" top="0" tabpos="13" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="3572" topLine="96" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\src\KeyMouseHandler.cpp" open="0" top="0" tabpos="16" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="2447" topLine="86" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\src\ModelObject.cpp" open="1" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="18156" topLine="509" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\src\GPUWaterSimulation.h" open="1" top="0" tabpos="15" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="406" topLine="10" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\common\GL_utilities.h" open="1" top="0" tabpos="8" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1261" topLine="18" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\common\LoadTGA.h" open="1" top="0" tabpos="10" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1219" topLine="22" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\src\TerrainLOD.h" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="691" topLine="2" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\src\PostProcessing.cpp" open="1" top="0" tabpos="12" split="0" active="1" splitpos="0" zoom_1="-2" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="17637" topLine="355" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\src\GrassSimulation.h" open="1" top="0" tabpos="18" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="758" topLine="6" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\common\VectorUtils3.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="15293" topLine="619" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\src\GPUWaterSimulation.cpp" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="-1" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="3513" topLine="58" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\common\LoadTGA.c" open="0" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="1" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="6698" topLine="186" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\src\GPUSimulation.cpp" open="0" top="0" tabpos="8" split="0" active="1" splitpos="0" zoom_1="-1" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="7779" topLine="220" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\src\GPUClothSimulation.h" open="1" top="0" tabpos="16" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1509" topLine="35" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\src\Environment.h" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1016" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\src\GPUSimulation.h" open="1" top="0" tabpos="19" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="584" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\src\CPUClothSimulation.h" open="1" top="0" tabpos="17" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="733" topLine="69" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\common\loadobj.c" open="1" top="0" tabpos="11" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="24353" topLine="977" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\src\GrassSimulation.cpp" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="4443" topLine="65" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\common\loadobj.h" open="1" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1170" topLine="24" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\src\GPUClothSimulation.cpp" open="1" top="0" tabpos="14" split="0" active="1" splitpos="0" zoom_1="-2" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="3520" topLine="41" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\src\PostProcessing.h" open="1" top="0" tabpos="13" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="903" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\src\ModelObject.h" open="0" top="0" tabpos="10" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="376" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\common\VectorUtils3.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="3526" topLine="109" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\src\SimulationClass.cpp" open="1" top="0" tabpos="22" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="0" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\src\SimulationClass.h" open="1" top="0" tabpos="21" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="126" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\src\Environment.cpp" open="1" top="0" tabpos="20" split="0" active="1" splitpos="0" zoom_1="-1" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1379" topLine="2" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\src\CPUClothSimulation.cpp" open="0" top="0" tabpos="12" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="886" topLine="20" />
+		</Cursor>
+	</File>
+	<File name="..\project_files\src\KeyMouseHandler.h" open="0" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="518" topLine="7" />
+		</Cursor>
+	</File>
+</CodeBlocks_layout_file>

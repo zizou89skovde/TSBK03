@@ -39,6 +39,7 @@ void TerrainLOD::initialize(){
 	mTerrainLODScene->setUniformFloat(1,SHADER_TERRAIN_LOD,"u_Clip");
 
 	mEnvironment->setRefractedModels(mTerrainLODScene,SHADER_TERRAIN_LOD);
+	mEnvironment->setDepthModels(mTerrainLODScene,SHADER_TERRAIN_LOD);
 
 }
 

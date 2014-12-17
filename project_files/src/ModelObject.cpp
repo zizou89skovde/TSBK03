@@ -104,7 +104,7 @@ void ModelObject::draw(GLuint shaderId,mat4 projectionMatrix, mat4 viewMatrix){
     else {
         mShaderMap[shaderId]->sSpeedlines.sMovementPoints.clear();
         mShaderMap[shaderId]->sSpeedlines.sMovementTransforms.clear();
-        mShaderMap[shaderId]->sSpeedlines.sTimestamps.clear();
+        //mShaderMap[shaderId]->sSpeedlines.sTimestamps.clear();
     }
 }
 
@@ -192,11 +192,11 @@ void ModelObject::updateSpeedlines(Shader_Type* shader)
     vec3 pos = shader->sTransform * vec3(0, 0, 0);
     std::vector<vec3>* points = &(shader->sSpeedlines.sMovementPoints);
     points->push_back(pos);
-    registerTimeSpeedlines(shader->sShaderId);
+    //registerTimeSpeedlines(shader->sShaderId);
 
     if (points->size() > NUMBER_OF_SPEEDPOINTS) {
         points->erase(points->begin());
-        shader->sSpeedlines.sTimestamps.erase(shader->sSpeedlines.sTimestamps.begin());
+        //shader->sSpeedlines.sTimestamps.erase(shader->sSpeedlines.sTimestamps.begin());
     }
 
     // Go through all points, erase if point has lived too long
@@ -397,15 +397,15 @@ void ModelObject::setSpeedlinesInit(GLuint shaderId)
 
     // Clear vectors to be sure it's empty
     mShaderMap[shaderId]->sSpeedlines.sMovementPoints.clear();
-    mShaderMap[shaderId]->sSpeedlines.sTimestamps.clear();
+    //mShaderMap[shaderId]->sSpeedlines.sTimestamps.clear();
 
     // Get object start position as first point in vector
     vec3 startPos = mShaderMap[shaderId]->sTransform * vec3(0, 0, 0);
     mShaderMap[shaderId]->sSpeedlines.sMovementPoints.push_back(startPos);
 
     // Save timestamp
-    ResetMilli();
-    registerTimeSpeedlines(shaderId);
+    //ResetMilli();
+    //registerTimeSpeedlines(shaderId);
 
     // Compile and set the speed lines shader
    	GLuint speedlineShader = loadShaders("shaders/speedlineshader.vert", "shaders/speedlineshader.frag");
@@ -440,10 +440,10 @@ void ModelObject::setNoSpeedlines(GLuint shaderId)
 
 void ModelObject::registerTimeSpeedlines(GLuint shaderId)
 {
-    Timestamp_Type time;
+    /*Timestamp_Type time;
     time.s = GetSeconds();
     time.ms = GetMilliseconds();
-    mShaderMap[shaderId]->sSpeedlines.sTimestamps.push_back(time);
+    mShaderMap[shaderId]->sSpeedlines.sTimestamps.push_back(time);*/
 }
 
 DrawMethod_Type ModelObject::getDrawMethod(GLuint shaderId){

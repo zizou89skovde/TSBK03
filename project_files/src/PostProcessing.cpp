@@ -7,6 +7,7 @@ PostProcessing::PostProcessing(GLuint * w, GLuint * h)
 
     initializePostProcessing();
 
+    mTime = 0;
 
 }
 
@@ -138,8 +139,9 @@ void PostProcessing::lightLookAt(vec3 lightPos, vec3 lightCenter){
 	mPostProcessingModel->replaceUniformMatrix(mLightTextureMatrix,SHADER_LIGHT_VOLUME,"LightTextureMatrix");
 
     /** Update model to world matrix for the light volume model **/
-    mat4 * lightTransform = mPostProcessingModel->getTransform(SHADER_LIGHT_VOLUME);
-    *lightTransform = mModelLightMatrix;
+    /*mat4 * lightTransform = mPostProcessingModel->getTransform(SHADER_LIGHT_VOLUME);
+    *lightTransform = mModelLightMatrix;*/
+    mPostProcessingModel->setTransform(mModelLightMatrix,SHADER_LIGHT_VOLUME);
 
 }
 
@@ -189,10 +191,12 @@ void PostProcessing::draw(mat4 proj, mat4 view){
 	/** Render Post processing **/
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	mPostProcessingModel->draw(SHADER_LIGHT_EFFECT,proj,view);
-	#ifdef SHADOW_MAP
+    mPostProcessingModel->draw(SHADER_LIGHT_EFFECT,proj,view);
+    #ifdef SHADOW_MAP
     drawShadows(proj,view);
     #endif
+
+
     glDisable(GL_BLEND);
 
 #else
@@ -229,14 +233,12 @@ void PostProcessing::drawLightVolume(mat4 proj, mat4 view){
     glDisable(GL_CULL_FACE);
 
     /** Enable blend function, with additive blending **/
-
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
 
 	mPostProcessingModel->draw(SHADER_LIGHT_VOLUME,proj,view);
 
 	/** Reset settings **/
-
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);

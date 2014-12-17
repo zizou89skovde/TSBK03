@@ -45,7 +45,7 @@ mat4 projectionMatrix;
 mat4 viewMatrix;
 FBOstruct* fbo1;
 //-------------------------------------------------------------------------------------
-
+int frame=0,time_,timebase=0, fps;
 GLuint WIDTH;
 GLuint HEIGHT;
 
@@ -76,7 +76,7 @@ void init(void)
 	printError("GL inits");
     mEnvironment = new Environment(&WIDTH,&HEIGHT);
 
-	mTerrainLOD = new TerrainLOD();
+/*	mTerrainLOD = new TerrainLOD();
 	mTerrainLOD->setEnvironment(mEnvironment);
 	mTerrainLOD->initialize();
 
@@ -84,26 +84,25 @@ void init(void)
     clothSimulation->setEnvironment(mEnvironment);
     clothSimulation->initialize();
 
-
     waterSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
     waterSimulation->setEnvironment(mEnvironment);
-    waterSimulation->initialize();
-    
-
+    waterSimulation->initialize();*/
 /*
-    postProcessing = new PostProcessing(&WIDTH,&HEIGHT);
-    postProcessing->setTerrin(mEnvironment);
-    mKeyMouseHandler.setPostProcessing(postProcessing);
 */
 
-    mGrassSimulation = new GrassSimulation();
+  //  postProcessing = new PostProcessing(&WIDTH,&HEIGHT);
+  //  postProcessing->setTerrin(mEnvironment);
+ //   mKeyMouseHandler.setPostProcessing(postProcessing);
+
+
+/*    mGrassSimulation = new GrassSimulation();
     mGrassSimulation->setEnvironment(mEnvironment);
-    mGrassSimulation->initialize();
+    mGrassSimulation->initialize();*/
 
 #ifdef CEL_SHADING
-    clothSimulation->setDefaultFBO(fbo1);
+/*    clothSimulation->setDefaultFBO(fbo1);
     waterSimulation->setDefaultFBO(fbo1);
-    mEnvironment->setDefaultFBO(fbo1);
+    mEnvironment->setDefaultFBO(fbo1);*/
     celShading = new CelShading(&WIDTH, &HEIGHT);
     celShading->initialize(fbo1);
 #endif
@@ -142,17 +141,39 @@ void display(void)
 
     viewMatrix = mKeyMouseHandler.getViewMatrix();
 
-    mEnvironment->draw(projectionMatrix,viewMatrix);
+/*    mEnvironment->draw(projectionMatrix,viewMatrix);
 
     waterSimulation->draw(projectionMatrix,viewMatrix);
     clothSimulation->draw(projectionMatrix,viewMatrix);
 //    postProcessing->draw(projectionMatrix,viewMatrix);
 
+    mTerrainLOD->draw(projectionMatrix,viewMatrix);*/
 
-    mTerrainLOD->draw(projectionMatrix,viewMatrix);
+/*
+    frame++;
+	time_=glutGet(GLUT_ELAPSED_TIME);
+
+	if (time_ - timebase > 1000) {
+		fps = frame*1000.0/(time_-timebase);
+	 	timebase = time_;
+		frame = 0;
+	}
+    printf("fps: %d \n", fps);
+    GLint queryResult = 0;
+    GLuint query;
+    glGenQueries(1, &query);
+    glBeginQuery(GL_PRIMITIVES_GENERATED, query);
+*/
+    //mTerrainLOD->draw(projectionMatrix,viewMatrix);
+/*
+    glEndQuery(GL_PRIMITIVES_GENERATED);
+    glGetQueryObjectiv(query, GL_QUERY_RESULT, &queryResult);
+    printf("Primitives count: %d\n", queryResult);
+*/
+/*
     mGrassSimulation->draw(projectionMatrix,viewMatrix);
 	mGrassSimulation->update();
-
+*/
 #ifdef CEL_SHADING
     celShading->draw(projectionMatrix, viewMatrix);
 #endif
