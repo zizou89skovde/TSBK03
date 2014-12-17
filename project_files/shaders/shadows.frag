@@ -1,7 +1,6 @@
 #version 400
 uniform sampler2D u_SceneDepth;
 uniform sampler2D u_LightDepth;
-uniform sampler2D u_LightColor;
 
 uniform mat4 LightTextureMatrix;
 
@@ -71,7 +70,6 @@ void main(void)
 	float redValueX   = 0.0;
 	float greenValueZ = 0.0;
 	float grayValueY  =  0.0;
-	vec4  lightColor  = texture(u_LightColor,f_TexCoord);
 	if(sceneDepth < u_CameraFar*0.9){
 		
 		/**  Compute ~world position of the current pixel **/
@@ -121,6 +119,6 @@ void main(void)
 #else
 	shadowColor.a = shadowing;
 #endif
-    out_Color = lightColor + shadowColor;
+    out_Color = shadowColor;
 
 }
