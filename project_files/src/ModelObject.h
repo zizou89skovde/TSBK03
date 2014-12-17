@@ -22,7 +22,7 @@
 
 #define MODEL_OBJECT_VERBOSE
 
-#define NUMBER_OF_SPEEDPOINTS 100 // temp placement
+#define NUMBER_OF_SPEEDPOINTS 50 // temp placement
 
 typedef enum{
 	ARRAYS,
@@ -75,8 +75,13 @@ typedef struct{
     GLuint sSpeedlinesShader;
     /** Speed line point vector (world coordinates). Empty if not used. **/
     std::vector<vec3> sMovementPoints;
+    /** Speed line transform vector. Empty if not used **/
+    std::vector<mat4> sMovementTransforms;
     /** Model to hold VAO & VBO **/
     Model* m;
+    /** Switches on/off for line & model drawing **/
+    GLbool sSpeedlinesSwitch = false;
+    GLbool sSpeedModelSwitch = false;
 }Speed_Lines;
 
 typedef struct{
@@ -155,6 +160,7 @@ class ModelObject
         void setUniformFloat(const GLfloat data, GLuint shaderId, const char* uniformName);
         void setTransform(mat4 transf,GLuint id);
         void setSpeedlinesInit(GLuint shaderId);
+        void setSpeedModelsInit(GLuint shaderId);
 		void setDrawMethod(DrawMethod_Type method, GLuint shaderId);
 		void setNumInstances(GLuint numInstances, GLuint shaderId);
 
@@ -181,6 +187,7 @@ class ModelObject
         void   selectTexture(Shader_Type * shader);
         void   uploadTransform(Shader_Type * shader,mat4 projectionMatrix,mat4 viewMatrix);
         void   updateSpeedlines(Shader_Type * shader);
+        void   updateSpeedModels(Shader_Type * shader);
 
         /** Private data containers **/
         std::map<GLuint,Shader_Type*> mShaderMap;
@@ -191,6 +198,7 @@ class ModelObject
 		void drawPoints(Shader_Type *  shader,mat4 projectionMatrix, mat4 viewMatrix);
 		void drawArrays(Shader_Type *  shader,mat4 projectionMatrix, mat4 viewMatrix);
         void drawSpeedlines(Shader_Type* shader, mat4 projectionMatrix, mat4 viewMatrix);
+        void drawSpeedModels(GLuint shaderId, mat4 projectionMatrix, mat4 viewMatrix);
 		void drawPatches(Shader_Type * shader,mat4 projectionMatrix, mat4 viewMatrix);
 		void drawInstanced(Shader_Type * shader,mat4 projectionMatrix, mat4 viewMatrix);
 

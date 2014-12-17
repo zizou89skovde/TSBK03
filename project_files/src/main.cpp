@@ -35,7 +35,7 @@
 #define W SCREEN_WIDTH
 #define H SCREEN_HEIGHT
 
-//#define CEL_SHADING 
+#define CEL_SHADING 1
 
 void OnTimer(int value);
 KeyMouseHandler mKeyMouseHandler;
@@ -87,8 +87,6 @@ void init(void)
     waterSimulation =  new GPUWaterSimulation(&WIDTH,&HEIGHT);
     waterSimulation->setEnvironment(mEnvironment);
     waterSimulation->initialize();
-/*
-*/
 
 /*
     postProcessing = new PostProcessing(&WIDTH,&HEIGHT);
@@ -108,6 +106,7 @@ void init(void)
 #endif
     // Create key/mouse handler
     mKeyMouseHandler = KeyMouseHandler();
+    mKeyMouseHandler.setCelShading(celShading);
 
 	glutTimerFunc(5, &OnTimer, 0);
 }

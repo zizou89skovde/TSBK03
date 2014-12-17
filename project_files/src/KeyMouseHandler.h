@@ -5,6 +5,7 @@
 #include "VectorUtils3.h"
 #include "CPUClothSimulation.h"
 #include "PostProcessing.h"
+#include "CelShading.h"
 class KeyMouseHandler
 {
     public:
@@ -16,6 +17,7 @@ class KeyMouseHandler
         void keyPress(unsigned char key, int x, int y);
         void mouseHandle(int x, int y);
         void setPostProcessing(PostProcessing* postProcessing){mPostProcessing = postProcessing;};
+        void setCelShading(CelShading* celShading){mCelShading = celShading;};
         mat4 getViewMatrix();
 
         //void mouseDown(int x, int y);
@@ -24,6 +26,7 @@ class KeyMouseHandler
     protected:
     private:
         PostProcessing* mPostProcessing;
+        CelShading* mCelShading;
 
         vec3 *cameraEye;
         vec3 *cameraCenter;

@@ -11,6 +11,8 @@ KeyMouseHandler::KeyMouseHandler()
     cameraCenter = new vec3(0.0f, 0.0f, 1.0f);
     cameraUp = new vec3(0.0f, 1.0f, 0.0f);
 
+    mCelShading = NULL;
+
     xPrev = -1;
     yPrev = -1;
 }
@@ -65,11 +67,48 @@ void KeyMouseHandler::keyPress(unsigned char key, int x, int y)
             sphereDeltaPos = sphereSpeed*up;
         break;
         case 'X':
-             sphereDeltaPos = -sphereSpeed*up;
+            sphereDeltaPos = -sphereSpeed*up;
+        break;
+        case 'p':
+        case 'P':
+            if (mCelShading != NULL) {
+                mCelShading->switchCelShading();
+            }
+        break;
+        case 'o':
+        case 'O':
+            if (mCelShading != NULL) {
+                mCelShading->increaseSteps();
+            }
+        break;
+        case 'l':
+        case 'L':
+            if (mCelShading != NULL) {
+                mCelShading->decreaseSteps();
+            }
+        break;
+        case 'i':
+        case 'I':
+            if (mCelShading != NULL) {
+                mCelShading->increaseContourThresh();
+            }
+        break;
+        case 'k':
+        case 'K':
+            if (mCelShading != NULL) {
+                mCelShading->decreaseContourThresh();
+            }
+        break;
+        case 'u':
+        case 'U':
+            if (mCelShading != NULL) {
+                mCelShading->fireObject();
+            }
         break;
     }
     if(DotProduct(sphereDeltaPos,sphereDeltaPos) != 0){
-        mClothSimulation->updateSpherePosition(sphereDeltaPos);
+        if (mClothSimulation != NULL)
+            mClothSimulation->updateSpherePosition(sphereDeltaPos);
     }
 
 }

@@ -87,9 +87,25 @@ void ModelObject::draw(mat4 projectionMatrix, mat4 viewMatrix){
 void ModelObject::draw(GLuint shaderId,mat4 projectionMatrix, mat4 viewMatrix){
 	selectDrawMethod(mShaderMap[shaderId],projectionMatrix,viewMatrix);
     
+    // Draw & update speedlines if point vector not empty.
+    // Draw & update models/transforms if transform vector not empty.
     if (!mShaderMap[shaderId]->sSpeedlines.sMovementPoints.empty()) {
-        drawSpeedlines(mShaderMap[shaderId], projectionMatrix, viewMatrix);
+
         updateSpeedlines(mShaderMap[shaderId]);
+
+        if (!mShaderMap[shaderId]->sSpeedlines.sMovementTransforms.empty())
+            updateSpeedModels(mShaderMap[shaderId]);
+
+        if (mShaderMap[shaderId]->sSpeedlines.sSpeedlineSwitch)
+            drawSpeedlines(mShaderMap[shaderId], projectionMatrix, viewMatrix);
+        else {
+            // Lines switched off. Clear vectors.
+            mShaderMap[shaderId]->sSpeedlines.sMovementPoints.
+            mShaderMap[shaderId]->sSpeedlines.sMovementTransforms.
+        }
+
+        if (!mShaderMap[shaderId]->sSpeedlines.sMovementTransforms.empty())
+            drawSpeedModels(shaderId, projectionMatrix, viewMatrix);
     }
 }
 
@@ -174,6 +190,18 @@ void ModelObject::updateSpeedlines(Shader_Type* shader)
 
     if (points->size() > NUMBER_OF_SPEEDPOINTS) {
         points->erase(points->begin());
+    }
+}
+
+void ModelObject::updateSpeedModels(Shader_Type * shader)
+{
+    // Get object current position and add to vector
+    mat4 trans = shader->sTransform;
+    std::vector<mat4>* transforms = &(shader->sSpeedlines.sMovementTransforms);
+    transforms->push_back(trans);
+
+    if (transforms->size() > NUMBER_OF_SPEEDPOINTS) {
+        transforms->erase(transforms->begin());
     }
 }
 
@@ -353,12 +381,6 @@ void ModelObject::setSpeedlinesInit(GLuint shaderId)
     vec3 startPos = mShaderMap[shaderId]->sTransform * vec3(0, 0, 0);
     mShaderMap[shaderId]->sSpeedlines.sMovementPoints.push_back(startPos);
 
-    // Loop to push in a bunch of test points
-    /*for (int k = 1; k < 10; ++k) {
-        vec3 pos = vec3(k*0.1, 0, k*0.1);
-        mShaderMap[shaderId]->sSpeedlines.sMovementPoints.push_back(pos);
-    }*/
-
     // Compile and set the speed lines shader
    	GLuint speedlineShader = loadShaders("shaders/speedlineshader.vert", "shaders/speedlineshader.frag");
     mShaderMap[shaderId]->sSpeedlines.sSpeedlinesShader = speedlineShader;
@@ -372,6 +394,14 @@ void ModelObject::setSpeedlinesInit(GLuint shaderId)
 	glBindBuffer(GL_ARRAY_BUFFER, m->vb);
 
     mShaderMap[shaderId]->sSpeedlines.m = m;
+}
+
+// Initializes speed models. Requires initial transform to be set.
+void ModelObject::setSpeedModelsInit(GLuint shaderId)
+{
+    mat4 startTrans = mShaderMap[shaderId]->sTransform;
+    mShaderMap[shaderId]->sSpeedlines.sMovementTransforms.push_back(startTrans);
+
 }
 
 DrawMethod_Type ModelObject::getDrawMethod(GLuint shaderId){
@@ -584,7 +614,7 @@ void ModelObject::drawSpeedlines(Shader_Type* shader, mat4 projectionMatrix, mat
 	GLuint program = shader->sSpeedlines.sSpeedlinesShader;
     glUseProgram(program);
 
-    // Transformen behövs, men bara view&projection, inte model2world. Gör manuellt.
+    // Upload view and projection matrices
     mat4 vpMatrix;
     mat3 normalMatrix;
     vpMatrix = Mult(projectionMatrix,viewMatrix);
@@ -601,18 +631,16 @@ void ModelObject::drawSpeedlines(Shader_Type* shader, mat4 projectionMatrix, mat
     GLfloat* pointArray = new GLfloat[numberOfPoints*3];
     for (int i = 0; i < numberOfPoints; ++i) {
         point = &(shader->sSpeedlines.sMovementPoints)[i];
-        //point = &shader->sSpeedlines.sMovementPoints.at(7);
         pointArray[i*3 + 0] = point->x;
         pointArray[i*3 + 1] = point->y;
         pointArray[i*3 + 2] = point->z;
-        //printf("Number of Points: %d, Point %d: x: %f y: %f z: %f\n", numberOfPoints, i, pointArray[i*3 + 0], pointArray[i*3 + 1], pointArray[i*3 + 2]);
+        //printf("Lines Number of Points: %d, Point %d: x: %f y: %f z: %f\n", numberOfPoints, i, pointArray[i*3 + 0], pointArray[i*3 + 1], pointArray[i*3 + 2]);
     }
 
 	glBindVertexArray(m->vao);	// Select VAO
 
     // Upload points data
 	glBindBuffer(GL_ARRAY_BUFFER, m->vb); // Select VBO
-
     glBufferData(GL_ARRAY_BUFFER, numberOfPoints * 3 * sizeof(GLfloat), pointArray, GL_STATIC_DRAW);
 
     GLuint loc = glGetAttribLocation(program, "in_Position");
@@ -624,10 +652,51 @@ void ModelObject::drawSpeedlines(Shader_Type* shader, mat4 projectionMatrix, mat
 	else
 		fprintf(stderr, "DrawModel warning: '%s' not found in shader!\n", "in_Position");
 
-    glDrawArrays(GL_POINTS, 0, numberOfPoints);
+    glDrawArrays(GL_LINE_STRIP, 0, numberOfPoints);
 
     delete[] pointArray;
 }
+
+void ModelObject::drawSpeedModels(GLuint shaderId, mat4 projectionMatrix, mat4 viewMatrix)
+{
+    mat4* transformTempPtr = getTransform(shaderId);
+    mat4 transformTemp = *transformTempPtr;
+
+    // For all points, upload new transform and draw a model
+    vec3* point;
+    vec3 lastDrawPoint(100000, 100000, 100000);
+    mat4* trans;
+    int numberOfTransforms = mShaderMap[shaderId]->sSpeedlines.sMovementTransforms.size();
+    GLfloat speedlinesAlpha[numberOfTransforms];
+    GLfloat speedlinesAlphaCurrent = 1.0;
+
+    for (int i = 0; i < numberOfTransforms; ++i) {
+
+        point = &(mShaderMap[shaderId]->sSpeedlines.sMovementPoints)[i];
+        float distanceToLastPoint = sqrt(pow(point->x - lastDrawPoint.x ,2) + pow(point->y - lastDrawPoint.y ,2) + pow(point->z - lastDrawPoint.z ,2));
+        
+        if (distanceToLastPoint > 0.1) {
+            trans = &(mShaderMap[shaderId]->sSpeedlines.sMovementTransforms)[i];
+            setTransform(*trans, shaderId);
+
+            // Transparency stuff
+            speedlinesAlphaCurrent -= 0.2;
+            speedlinesAlpha[i] = speedlinesAlphaCurrent;
+            setUniformFloat(&(speedlinesAlpha[i]), 1, shaderId, "u_SpeedlinesAlpha");
+            glEnable(GL_BLEND); // Blending, for transparency
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+            selectDrawMethod(mShaderMap[shaderId], projectionMatrix, viewMatrix);
+
+            glDisable(GL_BLEND);
+            lastDrawPoint = *point;
+        }
+    }
+
+    // Reset transform for shader (doesn't seem to make a difference...?)
+    setTransform(transformTemp, shaderId);
+}
+
 
 mat4 * ModelObject::getTransform(GLuint shaderId){
     return &(mShaderMap[shaderId]->sTransform);

@@ -13,6 +13,7 @@ uniform mat4 MVP_Matrix;
 uniform mat4 VP_Matrix;
 uniform mat4 V_Matrix;
 
+// This could be simplified since only lines are drawn between points
 void main(void)
 {
 

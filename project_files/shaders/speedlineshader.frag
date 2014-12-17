@@ -5,6 +5,8 @@ out vec4 out_Color;
 in vec3 v_Normal;
 in vec3 v_Position;
 in vec3 v_LightPos;
+
+// This could be simplified since only lines are drawn between points
 void main(void)
 {
 	vec4 color = vec4(0.0,0.0,1.0,1.0);

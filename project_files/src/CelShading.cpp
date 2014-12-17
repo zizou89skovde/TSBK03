@@ -4,7 +4,11 @@ CelShading::CelShading(GLuint* w, GLuint* h)
 {
     mScreenWidth = w;
     mScreenHeight = h;
+    mCelShadingSwitch = 0.0;
+    mCelShadingSteps = 5.0;
+    mCelShadingContourThresh = 0.3;
 
+    srand (static_cast <unsigned> (time(0)));
 }
 
 CelShading::~CelShading()
@@ -24,29 +28,34 @@ void CelShading::initialize(FBOstruct* fbo_in)
     mCelObject = new ModelObject();
 
 
-    // Sphere Shader
-    GLuint sphereShader = loadShaders("shaders/sphere.vert", "shaders/sphere.frag");
-    mCelObject->setShader(sphereShader, CEL_SPHERE_SHADER_ID);
-//    mCelObject->setDrawMethod(CEL_SPHERE_SHADER_ID, ARRAYS);
+    // Object Shader
+    GLuint objectShader = loadShaders("shaders/sphere.vert", "shaders/object_speed.frag");
+    mCelObject->setShader(objectShader, CEL_OBJECT_SHADER_ID);
 
-    // Sphere data
-    Sphere* sphere = new Sphere();
-    sphere->position = new vec3(mSphereOffsetX, mSphereOffsetY, mSphereOffsetZ);
-    sphere->radius = mSphereRadius;
-    mSphere = sphere;
+    // Object data
+    Object* object = new Object();
+    object->position = new vec3(mObjectOffsetX, mObjectOffsetY, mObjectOffsetZ);
+    object->velocity = new vec3(0.0, 0.0, 0.0);
+    object->rotation = new vec3(0.0, 0.5, 0.5);
+    object->angular = new vec3(0.05, 0.0, 0.0);
+    object->radius = mObjectRadius;
+    mObject = object;
 
-    // Sphere Model
-    Model* modelSphere = LoadModelPlus((char *)"models/sphere.obj");
-    mCelObject->setModel(modelSphere, CEL_SPHERE_SHADER_ID);
-    mCelObject->freeModelData(modelSphere);
+    // Object Model
+    Model* modelObject = LoadModelPlus((char *)"models/bunny.obj");
+    mCelObject->setModel(modelObject, CEL_OBJECT_SHADER_ID);
+    mCelObject->freeModelData(modelObject);
 
-    // Sphere Transform
-    GLfloat r = sphere->radius;
-    vec3  pos = *sphere->position; // stjärna?
-    mat4 sphereTransform = T(pos.x, pos.y, pos.z) * S(r, r, r);
-    mCelObject->setTransform(sphereTransform, CEL_SPHERE_SHADER_ID);
+    // Object Transform
+    GLfloat r = object->radius;
+    vec3  pos = *object->position;
+    mat4 objectTransform = T(pos.x, pos.y, pos.z) * S(r, r, r);
+    mCelObject->setTransform(objectTransform, CEL_OBJECT_SHADER_ID);
 
-    mCelObject->setSpeedlinesInit(CEL_SPHERE_SHADER_ID);
+    mCelObject->setSpeedlinesInit(CEL_OBJECT_SHADER_ID);
+    mCelObject->setSpeedModelsInit(CEL_OBJECT_SHADER_ID);
+    GLfloat speedlinesAlpha = 1.0;
+    mCelObject->setUniformFloat(&speedlinesAlpha, 1, CEL_OBJECT_SHADER_ID, "u_SpeedlinesAlpha");
 
 
     // Cel shader
@@ -59,6 +68,10 @@ void CelShading::initialize(FBOstruct* fbo_in)
     // Set texture to cel-shade
     mCelObject->setTexture(fbo_in->texid, CEL_SCREEN_QUAD_ID, "u_Texture");
 
+    // Set uniforms
+    mCelObject->setUniformFloat(&mCelShadingSwitch, 1, CEL_SCREEN_QUAD_ID, "u_CelShadingSwitch");
+    mCelObject->setUniformFloat(&mCelShadingSteps, 1, CEL_SCREEN_QUAD_ID, "u_Steps");
+    mCelObject->setUniformFloat(&mCelShadingContourThresh, 1, CEL_SCREEN_QUAD_ID, "u_ContourThresh");
     // Load sketch image to cel shader
     loadSketch();
 
@@ -70,17 +83,51 @@ void CelShading::initialize(FBOstruct* fbo_in)
 	// Full-screen quad model
 	uploadSquareModelData(mCelObject, CEL_DERIVE_SHADER_ID);
 
-    // Create depth FBO
-	generateDepthFBO(&mDepthFBO, SCREEN_WIDTH, SCREEN_HEIGHT);
-
 	// Set depth buffer as texture for the depth derivation shader
 	mCelObject->setTexture(mFBO->depth, CEL_DERIVE_SHADER_ID , "u_DepthTexture");
 }
 
+void CelShading::switchCelShading()
+{
+    if (mCelShadingSwitch < 1.0) {
+        mCelShadingSwitch = 2.0;
+        printf("Turning cel shading ON\n");
+    }
+    else {
+        mCelShadingSwitch = 0.0;
+        printf("Turning cel shading OFF\n");
+    }
+    mCelObject->setUniformFloat(&mCelShadingSwitch, 1, CEL_SCREEN_QUAD_ID, "u_CelShadingSwitch");
+}
+
+void CelShading::increaseSteps()
+{
+    ++mCelShadingSteps;
+    mCelObject->setUniformFloat(&mCelShadingSteps, 1, CEL_SCREEN_QUAD_ID, "u_Steps");
+}
+
+void CelShading::decreaseSteps()
+{
+    --mCelShadingSteps;
+    mCelObject->setUniformFloat(&mCelShadingSteps, 1, CEL_SCREEN_QUAD_ID, "u_Steps");
+}
+
+void CelShading::increaseContourThresh()
+{
+    mCelShadingContourThresh += 0.05;
+    mCelObject->setUniformFloat(&mCelShadingContourThresh, 1, CEL_SCREEN_QUAD_ID, "u_ContourThresh");
+}
+
+void CelShading::decreaseContourThresh()
+{
+    mCelShadingContourThresh -= 0.05;
+    mCelObject->setUniformFloat(&mCelShadingContourThresh, 1, CEL_SCREEN_QUAD_ID, "u_ContourThresh");
+}
+
 void CelShading::draw(mat4 projectionMatrix, mat4 viewMatrix)
 {
-    // Draw debug sphere to previously chosen fbo (both texture & depth)
-	//mCelObject->draw(CEL_SPHERE_SHADER_ID, projectionMatrix, viewMatrix);
+    // Draw debug object to previously chosen fbo (both texture & depth)
+	mCelObject->draw(CEL_OBJECT_SHADER_ID, projectionMatrix, viewMatrix);
 
     useFBO(mContourFBO, 0L, 0L);
     glClearColor(0.0, 0.0, 0.0, 0);
@@ -102,72 +149,16 @@ void CelShading::draw(mat4 projectionMatrix, mat4 viewMatrix)
 	glDisable(GL_DEPTH_TEST);
 	mCelObject->draw(CEL_SCREEN_QUAD_ID, projectionMatrix, viewMatrix);
 
-    // Update sphere position
-    vec3 deltaPos = vec3(mSphereSpeed, 0.0, 0.0);
-    updateSpherePosition(deltaPos);
-}
-
-// Obsolete! TODO ta bort
-void CelShading::drawDepth(mat4 projectionMatrix, mat4 viewMatrix)
-{
-	// Swap to depth buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, mDepthFBO.fb);
-	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-    // Clear previous frame values
-    glClear(GL_DEPTH_BUFFER_BIT);
-    // Disable color rendering, we only want to write to the Z-Buffer
-    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-	// Render regular scene from camera
-    mCelObject->draw(CEL_SPHERE_SHADER_ID, projectionMatrix, viewMatrix);
-
-	// Enable color rendering again
-    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-}
-
-// Following code comes from TSBK03 literature
-void CelShading::generateDepthFBO(FBOstruct* fbo, GLuint w ,GLuint h)
-{
-    // Try to use a texture depth component
-    glGenTextures(1, &fbo->depth);
-    glBindTexture(GL_TEXTURE_2D, fbo->depth);
-
-    // GL_LINEAR does not make sense for depth texture.
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    // Clamp to avoid artefacts on the edges
-    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, w, h, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    // Create a framebuffer object
-    glGenFramebuffers(1, &fbo->fb);
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo->fb);
-
-    // Instruct OpenGL that we won't bind a color texture to the FBO
-    glDrawBuffer(GL_NONE);
-    glReadBuffer(GL_NONE);
-
-    // Attach the texture to FBO depth attachment point
-    glFramebufferTexture2D(GL_FRAMEBUFFER,
-    GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D, fbo->depth, 0);
-
-    // Check FBO status
-    GLenum FBOstatus;
-    FBOstatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if(FBOstatus != GL_FRAMEBUFFER_COMPLETE)
-        printf("GL_FRAMEBUFFER_COMPLETE failed, CANNOT use FBO\n");
-
-    // Switch back to window-system-provided framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    // Update object position
+    //vec3 deltaPos = vec3(mObjectSpeed, 0.0, 0.0);
+    //updateObjectPosition(deltaPos);
+    updateObjectTransform();
 }
 
 void CelShading::loadSketch()
 {
     GLuint sketchTexture;
-    LoadTGATextureSimple((char *)"textures/sketchy.tga", &sketchTexture);
+    LoadTGATextureSimple((char *)"textures/sketchy1.tga", &sketchTexture);
     mCelObject->setTexture(sketchTexture, CEL_SCREEN_QUAD_ID, "u_SketchTexture");
 }
 
@@ -198,14 +189,53 @@ void CelShading::uploadSquareModelData(ModelObject* modelObj, GLuint shaderId)
     printError("Cloth Gen Position Buffer Coordinates ");
 }
 
-void CelShading::updateSpherePosition(vec3 deltaPos)
+void CelShading::fireObject()
 {
-    /** Update position of sphere **/
-    Sphere * s = mSphere;
+    vec3* pos = mObject->position;
+    vec3* rot = mObject->rotation;
+
+    // Reset positions and velocities
+    *pos = vec3(mObjectOffsetX, mObjectOffsetY, mObjectOffsetZ);
+    *rot = vec3(0.0, 0.5, 0.5);
+    *mObject->velocity = vec3(randFloat(0.0, 0.5), randFloat(0.3, 0.6), 0.0);
+    *mObject->angular = vec3(randFloat(0.0, 0.3), 0.0, 0.0);
+
+    // Update transform
+    mat4* transf = mCelObject->getTransform(CEL_OBJECT_SHADER_ID);
+    *transf = T(pos->x, pos->y, pos->z) * Rx(rot->x) * Ry(rot->y) * Rz(rot->z);
+}
+
+GLfloat CelShading::randFloat(GLfloat min, GLfloat max)
+{
+    float r3 = min + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(max - min)));
+}
+
+void CelShading::updateObjectTransform()
+{
+    // Add speeds
+    vec3* pos = mObject->position;
+    vec3* rot = mObject->rotation;
+    *pos = *pos + *mObject->velocity;
+    *rot = *rot + *mObject->angular;
+
+    // Change velocities due to drag and gravity
+    *mObject->velocity *= 0.97;
+    *mObject->angular *= 0.99;
+    mObject->velocity->y -= 0.0035;
+
+    // Update transform
+    mat4* transf = mCelObject->getTransform(CEL_OBJECT_SHADER_ID);
+    *transf = T(pos->x, pos->y, pos->z) * Rx(rot->x) * Ry(rot->y) * Rz(rot->z);
+}
+
+void CelShading::updateObjectPosition(vec3 deltaPos)
+{
+    /** Update position of object **/
+    Object * s = mObject;
     *s->position += deltaPos;
     s->position->y = sin(s->position->x);
     /** Update model transform **/
-    mat4 * transf = mCelObject->getTransform(CEL_SPHERE_SHADER_ID);
+    mat4 * transf = mCelObject->getTransform(CEL_OBJECT_SHADER_ID);
     GLfloat r = s->radius;
     vec3  pos = *s->position;
 
